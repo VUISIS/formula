@@ -61,17 +61,18 @@ namespace Microsoft.Jupyter.Core
             _sink.ShowOutput();
             _sink.Clear();
 
-            var res = new ExecutionResult();
-
-            if(_sink.PrintedError)
-            {
-                res.Status = ExecuteStatus.Error;
-            }
-            else
-            {
-                res.Status = ExecuteStatus.Ok;
-            }
-            return res;
+            return await Task.Run(() => {
+                var res = new ExecutionResult();
+                if(_sink.PrintedError)
+                {
+                    res.Status = ExecuteStatus.Error;
+                }
+                else
+                {
+                    res.Status = ExecuteStatus.Ok;
+                }
+                return res;
+            });
         }   
     }
 }

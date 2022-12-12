@@ -21,7 +21,7 @@ $ dotnet ./bin/<Configuration>/<OS>/<PLATFORM>/net6.0/CommandLine.dll
 ```bash
 For native ARM64 builds on Mac OS X run nuget add before restore and build:
 $ dotnet nuget add source --username USERNAME --password GITHUB_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/VUISIS/index.json"
-$ dotnet build CommandLineARM.sln /p:Configuration=Debug|Release /p:Platform=ARM64
+$ dotnet build CommandLine.sln /p:Configuration=Debug|Release /p:Platform=ARM64
 $ dotnet ./bin/<Configuration>/<OS>/<PLATFORM>/net6.0/CommandLine.dll
 ```
 
