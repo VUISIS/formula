@@ -15,22 +15,10 @@
       <OutputPath Condition="'$(OutputPath)' == '' and $([MSBuild]::IsOSPlatform('MacOS'))">$(BaseOutputPath)$(Configuration)/MacOS/$(Platform)/</OutputPath>
     </PropertyGroup>
 
-    <Choose>
-    <When Condition="'$(Platform)' == 'x64'">
-      <ItemGroup>
-        <ProjectReference Include="..\Core\Core.csproj" Configuration="$(Configuration)" Platform="x64"/>
-      </ItemGroup>
-    </When>
-    </Choose>
-
-    <Choose>
-    <When Condition="$([MSBuild]::IsOSPlatform('OSX')) and '$(Platform)' == 'ARM64'">
-      <ItemGroup>
-        <ProjectReference Include="..\Core\CoreARM.csproj" Configuration="$(Configuration)" Platform="ARM64"/>
-      </ItemGroup>
-    </When>
-    </Choose>
-
+    <ItemGroup>
+      <ProjectReference Include="..\Core\Core.csproj" Configuration="$(Configuration)" Platform="$(Platform)"/>
+    </ItemGroup>
+    
     <PropertyGroup>
       <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     </PropertyGroup>

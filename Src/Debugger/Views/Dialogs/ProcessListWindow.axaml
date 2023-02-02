@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
+        xmlns:material="using:Material.Icons.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Width="320"
+        Height="240"
+        x:Class="FormulaDebuggerGUI.ProcessListWindow"
+        xmlns:vm="using:FormulaDebuggerGUI"
+        x:DataType="vm:ProcessListWindowViewModel"
+        Title="Process List"
+        ExtendClientAreaToDecorationsHint="True">
+    <DockPanel Margin="25">
+        <ListBox Name="ProcessList" DockPanel.Dock="Top" Background="#161B22" 
+                 Margin="25" HorizontalAlignment="Center" 
+                 SelectionMode="Single" Items="{Binding Items}" VirtualizationMode="None"/>
+        <Button DockPanel.Dock="Bottom" Command="{Binding SubmitCmd}" Content="Submit"/>
+    </DockPanel>    
+</Window>

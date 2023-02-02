@@ -206,6 +206,23 @@ namespace Microsoft.Jupyter.Core
             }
         }
 
+        public void ResetPrintedError()
+        {
+            bool gotLock = false;
+            try
+            {
+                printedErrLock.Enter(ref gotLock);
+                printedErr = false;
+            }
+            finally
+            {
+                if (gotLock)
+                {
+                    printedErrLock.Exit();
+                }
+            }
+        }
+
         private void UpdateTable(Level lvl, string msg)
         {
             _rowList.Clear();

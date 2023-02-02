@@ -24,22 +24,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.3.0" />
+    <ProjectReference Include="..\..\Core\Core.csproj" Configuration="$(Configuration)" Platform="$(Platform)"/>
   </ItemGroup>
-
-  <Choose>
-    <When Condition="'$(Platform)' == 'x64'">
-      <ItemGroup>
-        <ProjectReference Include="..\..\Core\Core.csproj" Configuration="$(Configuration)" Platform="x64"/>
-      </ItemGroup>
-    </When>
-    </Choose>
-
-    <Choose>
-    <When Condition="$([MSBuild]::IsOSPlatform('OSX')) and '$(Platform)' == 'ARM64'">
-      <ItemGroup>
-        <ProjectReference Include="..\..\Core\CoreARM.csproj" Configuration="$(Configuration)" Platform="ARM64"/>
-      </ItemGroup>
-    </When>
-    </Choose>
-
 </Project>

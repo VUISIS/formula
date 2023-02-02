@@ -1,0 +1,12 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"             
+             x:Class="FormulaDebuggerGUI.App">
+    <Application.Resources>
+        <SolidColorBrush x:Key="SystemControlBackgroundAltHighBrush" Color="#161B22"/>
+    </Application.Resources>
+    <Application.Styles>
+        <FluentTheme Mode="Dark"/>
+        <material:MaterialIconStyles />
+    </Application.Styles>
+</Application>

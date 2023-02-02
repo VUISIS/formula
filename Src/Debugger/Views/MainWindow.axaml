@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
+        xmlns:material="using:Material.Icons.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="FormulaDebuggerGUI.MainWindow"
+        xmlns:vm="using:FormulaDebuggerGUI"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Formula Debugger"
+        ExtendClientAreaToDecorationsHint="True">
+    <DockPanel Margin="0,25,0,0">
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Exit" Command="{Binding ExitCmd}"/>
+            </MenuItem>
+            <MenuItem Header="Debug">
+                <MenuItem Header="Attach" Command="{Binding AttachCmd}"/>
+            </MenuItem>
+        </Menu>
+        <Button Width="25" Height="25"/>
+    </DockPanel>
+</Window>
