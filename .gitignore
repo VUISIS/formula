@@ -215,3 +215,4 @@ $RECYCLE.BIN/
 # Visual Studio Code
 .vscode/
 Src/Core/.vscode/
+Src/CommandLine/.vs
