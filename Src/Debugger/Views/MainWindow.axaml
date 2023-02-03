@@ -2,23 +2,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
-        xmlns:material="using:Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="FormulaDebuggerGUI.MainWindow"
-        xmlns:vm="using:FormulaDebuggerGUI"
+        x:Class="FormulaDebuggerGUI.Views.MainWindow"
+        xmlns:vm="using:FormulaDebuggerGUI.Views"
         x:DataType="vm:MainWindowViewModel"
         Title="Formula Debugger"
         ExtendClientAreaToDecorationsHint="True">
-    <DockPanel Margin="0,25,0,0">
+    <DockPanel Width="NaN" Margin="0,25,0,0">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
+                <MenuItem Header="Open" Command="{Binding OpenCmd}"/>
+                <MenuItem Header="Open Folder" Command="{Binding OpenFolderCmd}"/>
                 <MenuItem Header="Exit" Command="{Binding ExitCmd}"/>
             </MenuItem>
-            <MenuItem Header="Debug">
-                <MenuItem Header="Attach" Command="{Binding AttachCmd}"/>
-            </MenuItem>
         </Menu>
-        <Button Width="25" Height="25"/>
+        <TreeView DockPanel.Dock="Left" Items="{Binding Items}" SelectedItems="{Binding SelectedItems}" SelectionMode="Single" Width="350" Height="450">
+            <TreeView.ItemTemplate>
+                <TreeDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Header}"/>
+                </TreeDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
     </DockPanel>
 </Window>

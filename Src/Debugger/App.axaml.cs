@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
+using FormulaDebuggerGUI.Views;
+
 namespace FormulaDebuggerGUI;
 
 public partial class App : Application

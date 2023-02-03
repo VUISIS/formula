@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <TargetFrameworkIdentifier>.NETCOREAPP</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>6.0</TargetFrameworkVersion>
@@ -17,6 +17,12 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|ARM64' ">
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <Optimize>true</Optimize>
+  </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <None Remove=".gitignore" />
@@ -29,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CommandLine\CommandLine.csproj" Configuration="$(Configuration)" Platform="$(Platform)"/>
+    <ProjectReference Include="..\CommandLine\CommandLine.csproj" Configuration="$(Configuration)" Platform="$(Platform)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,5 +47,9 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
     <PackageReference Include="Material.Icons.Avalonia" Version="2.0.0-preview1" />
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Dialogs\ProcessListWindow.axaml" />
   </ItemGroup>
 </Project>
