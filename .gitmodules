@@ -1,3 +1,4 @@
 [submodule "Src/Kernel/jupyter-core"]
 	path = Src/Kernel/jupyter-core
 	url = git@github.com:VUISIS/jupyter-core.git
+	branch = arm
