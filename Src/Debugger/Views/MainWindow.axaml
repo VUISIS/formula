@@ -3,25 +3,82 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="FormulaDebuggerGUI.Views.MainWindow"
-        xmlns:vm="using:FormulaDebuggerGUI.Views"
+        x:Class="Debugger.Views.MainWindow"
+        xmlns:vm="using:Debugger.Views"
         x:DataType="vm:MainWindowViewModel"
         Title="Formula Debugger"
         ExtendClientAreaToDecorationsHint="True">
-    <DockPanel Width="NaN" Margin="0,25,0,0">
+    <DockPanel LastChildFill="True" Height="NaN" Width="NaN" Margin="0,25,0,0">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
                 <MenuItem Header="Open" Command="{Binding OpenCmd}"/>
                 <MenuItem Header="Open Folder" Command="{Binding OpenFolderCmd}"/>
                 <MenuItem Header="Exit" Command="{Binding ExitCmd}"/>
             </MenuItem>
+            <MenuItem Header="Help">
+            </MenuItem>
         </Menu>
-        <TreeView DockPanel.Dock="Left" Items="{Binding Items}" SelectedItems="{Binding SelectedItems}" SelectionMode="Single" Width="350" Height="450">
-            <TreeView.ItemTemplate>
-                <TreeDataTemplate ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Header}"/>
-                </TreeDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="300"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"></ColumnDefinition>
+                <ColumnDefinition Width="800"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" 
+                       TextAlignment="Center" 
+                       Text="File Manager"
+                       Margin="0,10,0,0"/>
+            <Border Grid.Column="0" Grid.Row="1" 
+                    BorderBrush="#111111"
+                    BorderThickness="1">
+                <TreeView VerticalAlignment="Top"
+                          Items="{Binding Items}" 
+                          SelectedItems="{Binding SelectedItems}"
+                          SelectionMode="Single"
+                          Background="#222222"
+                          Height="300">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Header}"/>
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Border>
+            <Button Grid.Column="0" Grid.Row="2" 
+                    Name="LoadButton"
+                    IsEnabled="False"
+                    HorizontalContentAlignment="Center" 
+                    HorizontalAlignment="Right" 
+                    Width="75"
+                    Margin="0,10,0,0"
+                    Command="{Binding LoadFormulaFileCmd}">Load</Button>
+            <TextBlock Grid.Column="0" Grid.Row="3" 
+                       TextAlignment="Center" 
+                       Text="Inference Rules"
+                       Margin="0,10,0,0"/>
+            <Border BorderBrush="#111111"
+                    BorderThickness="1"
+                    Grid.Row="4"
+                    Grid.Column="0"
+                    x:Name="HeightHelperPanel">
+                <ListBox Items="{Binding InferenceRules}" 
+                         Height="{Binding Path=ActualHeight, ElementName=HeightHelperPanel}" 
+                         Background="#222222"/>
+            </Border>
+            <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="1">
+                <TextBox Width="350" Height="30" HorizontalAlignment="Left" Margin="25,0,0,0" Grid.Row="0" Grid.Column="1" Background="#222222"/>
+                <Button Name="RunCommand"
+                        HorizontalContentAlignment="Center" 
+                        Width="75"
+                        Margin="25,0,0,0">Run</Button>
+            </StackPanel>
+            <TextBlock Padding="25" Name="ConsoleOutput" Margin="25,0,0,0" Grid.Row="1" Grid.Column="1" Background="Black"/>
+        </Grid>
     </DockPanel>
 </Window>

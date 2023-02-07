@@ -2,7 +2,7 @@
 using Avalonia;
 using System;
 
-namespace FormulaDebuggerGUI;
+namespace Debugger;
 
 class Program
 {
