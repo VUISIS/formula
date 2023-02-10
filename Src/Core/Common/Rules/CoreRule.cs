@@ -1825,6 +1825,7 @@
 
             var stack = new Stack<ConstraintNode>();
             var varNode = nodes[varTerm];
+            Map<Term, Set<Term>> partitions = new Map<Term, Set<Term>>(Term.Compare);
             if (varNode.Binding != null)
             {
                 if (varNode.Binding.Symbol.IsVariable && binding.Symbol.IsVariable)
@@ -1838,6 +1839,16 @@
                 }
                 else if (varNode.TryBind(binding, bindingLevel))
                 {
+                    return true;
+                }
+                else if (Unifier.IsUnifiable(varNode.Binding, binding, true, partitions))
+                {
+                    var bindings = facts.GetBindings(varNode.Binding, binding, partitions);
+                    foreach (var kv in bindings)
+                    {
+                        facts.PendEqualityConstraint(kv.Key, kv.Value);
+                    }
+
                     return true;
                 }
                 else
