@@ -52,4 +52,11 @@
   <ItemGroup>
     <UpToDateCheckInput Remove="Views\Dialogs\ProcessListWindow.axaml" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Windows\MainWindow.axaml.cs">
+      <DependentUpon>MainWindow.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>

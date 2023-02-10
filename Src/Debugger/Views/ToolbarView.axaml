@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="using:Debugger.ViewModels"
+             x:DataType="vm:ToolbarViewModel"
+             x:Class="Debugger.Views.ToolbarView">
+    <Menu Height="40">
+        <MenuItem Header="File">
+            <MenuItem Header="Open" Command="{Binding OpenCmd}"/>
+            <MenuItem Header="Open Folder" Command="{Binding OpenFolderCmd}"/>
+            <MenuItem Header="Exit" Command="{Binding ExitCmd}"/>
+        </MenuItem>
+        <MenuItem Header="Help">
+        </MenuItem>
+    </Menu>
+</UserControl>

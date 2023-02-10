@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="using:Debugger.ViewModels"
+             x:DataType="vm:FileManagerViewModel"
+             x:Class="Debugger.Views.FileManagerView">
+    <StackPanel Orientation="Vertical">
+        <TextBlock TextAlignment="Center" 
+                   Text="File Manager"
+                   Margin="0,10,0,10"/>
+        <TreeView VerticalAlignment="Top"
+                  Items="{Binding Items}" 
+                  SelectedItems="{Binding SelectedItems}"
+                  SelectionMode="Single"
+                  Background="#222222"
+                  Height="400"
+                  Name="FileManagerPanel">
+            <TreeView.ItemTemplate>
+                <TreeDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Header}"/>
+                </TreeDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+    </StackPanel>
+</UserControl>

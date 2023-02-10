@@ -23,6 +23,13 @@ public class FormulaProgram
 
     public string GetConsoleOutput()
     {
-        return consoleSink.Output;
+        var output = consoleSink.Output;
+        ClearConsoleOutput();
+        return output;
+    }
+    
+    public void ClearConsoleOutput()
+    {
+        consoleSink.ClearOutput();
     }
 }

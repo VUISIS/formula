@@ -1,26 +1,27 @@
-using System;
-using System.Linq;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.IO;
+//using System;
+//using System.Linq;
+//using System.Collections.ObjectModel;
+//using System.Collections.Generic;
+//using System.IO;
 
-using Avalonia;
-using ReactiveUI;
+//using Avalonia;
 using Avalonia.Markup.Xaml;
 using Avalonia.Controls;
-using Avalonia.Platform.Storage;
-using Avalonia.VisualTree;
+//using Avalonia.Input;
+//using Avalonia.Platform.Storage;
+//using Avalonia.VisualTree;
 
-namespace Debugger.Views;
+using Debugger.ViewModels;
 
-internal class MainWindowViewModel : ReactiveObject
+namespace Debugger.Windows;
+
+/*internal class MainWindowViewModel : ReactiveObject
 {
     private MainWindow win;
     private IStorageFolder? lastSelectedDirectory;
     private Node? root;
     private FormulaProgram formulaProgram;
-    private Button? loadButton;
-    
+
     public MainWindowViewModel(MainWindow mainWin)
     {
         win = mainWin;
@@ -30,28 +31,62 @@ internal class MainWindowViewModel : ReactiveObject
         Items = new ObservableCollection<Node>();
         ItemsSource = new ObservableCollection<Node>();
         SelectedItems = new ObservableCollection<Node>();
-
-        loadButton = win.Get<Button>("LoadButton");
+        
+        var fileManagerPanel = win.Get<TreeView>("FileManagerPanel");
+        fileManagerPanel.DoubleTapped += FileDoubleTap;
+        
+        var cmdInput = win.Get<AutoCompleteBox>("CommandInput");
+        cmdInput.KeyDown += InputKey;
     }
 
-    public ObservableCollection<Node>? Items { get; }
-    public ObservableCollection<Node>? ItemsSource { get; set;  }
-    public ObservableCollection<Node>? SelectedItems { get; }
+    private void InputKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            RunCmd();
+        }
+    }
+    
+    private void FileDoubleTap(object? sender, TappedEventArgs e)
+    {
+        LoadFormulaFileCmd();
+    }
+
+    public ObservableCollection<Node> Items { get; }
+    public ObservableCollection<Node> ItemsSource { get; set;  }
+    public ObservableCollection<Node> SelectedItems { get; }
 
     public void LoadFormulaFileCmd()
     {
-        if (SelectedItems != null &&
-            SelectedItems.Count > 0)
+        if (SelectedItems.Count > 0)
         {
             Uri? uri = null;
             if (lastSelectedDirectory != null &&
                 lastSelectedDirectory.TryGetUri(out uri))
             {
+                if(!formulaProgram.ExecuteCommand("unload *"))
+                {
+                    Console.WriteLine("Command Failed");
+                    return;
+                }
+                
+                formulaProgram.ClearConsoleOutput();
+                
                 if(!formulaProgram.ExecuteCommand("load " + Path.Join(uri.AbsolutePath, SelectedItems[0].Header)))
                 {
                     Console.WriteLine("Command Failed");
+                    return;
                 }
-                win.Get<TextBlock>("ConsoleOutput").Text += "[]> load " + Path.Join(uri.AbsolutePath, SelectedItems[0].Header) + "\n" + formulaProgram.GetConsoleOutput();
+                
+                var txt = win.Get<TextBlock>("ConsoleOutput").Text;
+                if(txt == null || txt.Length <= 0)
+                {
+                    win.Get<TextBlock>("ConsoleOutput").Text += "[]> ";
+                }
+                
+                win.Get<TextBlock>("ConsoleOutput").Text += "load " + Path.Join(uri.AbsolutePath, SelectedItems[0].Header);
+                win.Get<TextBlock>("ConsoleOutput").Text += "\n";
+                win.Get<TextBlock>("ConsoleOutput").Text += formulaProgram.GetConsoleOutput();
             }
         }
     }
@@ -73,9 +108,7 @@ internal class MainWindowViewModel : ReactiveObject
         });
 
         var formulaFile = file.FirstOrDefault();
-        if (formulaFile != null &&
-            Items != null &&
-            ItemsSource != null)
+        if (formulaFile != null)
         {
             lastSelectedDirectory = await formulaFile.GetParentAsync();
             root = new Node(formulaFile.Name);
@@ -91,8 +124,18 @@ internal class MainWindowViewModel : ReactiveObject
                 if(!formulaProgram.ExecuteCommand("load " + Path.Join(uri.AbsolutePath, formulaFile.Name)))
                 {
                     Console.WriteLine("Command Failed");
+                    return;
                 }
-                win.Get<TextBlock>("ConsoleOutput").Text += "[]> load " + Path.Join(uri.AbsolutePath, formulaFile.Name) + "\n" + formulaProgram.GetConsoleOutput();
+                
+                var txt = win.Get<TextBlock>("ConsoleOutput").Text;
+                if(txt == null || txt.Length <= 0)
+                {
+                    win.Get<TextBlock>("ConsoleOutput").Text += "[]> ";
+                }
+ 
+                win.Get<TextBlock>("ConsoleOutput").Text += "load " + Path.Join(uri.AbsolutePath, formulaFile.Name); 
+                win.Get<TextBlock>("ConsoleOutput").Text += "\n";
+                win.Get<TextBlock>("ConsoleOutput").Text += formulaProgram.GetConsoleOutput();
             }
         }
     }
@@ -127,21 +170,44 @@ internal class MainWindowViewModel : ReactiveObject
                 }
             }
 
-            if (root.Children.Count > 0 &&
-                Items != null &&
-                ItemsSource != null)
+            if (root.Children.Count > 0)
             {
                 Items.Clear();
                 ItemsSource.Clear();
                 
                 Items.Add(root);
                 ItemsSource = root.Children;
-                
-                if (loadButton != null)
-                {
-                    loadButton.IsEnabled = true;
-                }
             }
+        }
+    }
+
+    public void RunCmd()
+    {
+        var cmdInput = win.Get<AutoCompleteBox>("CommandInput");
+        if (cmdInput.Text != null &&
+            cmdInput.Text.Length > 0)
+        {
+            if(!formulaProgram.ExecuteCommand(cmdInput.Text))
+            {
+                Console.WriteLine("Command Failed");
+                return;
+            }
+            
+            var txt = win.Get<TextBlock>("ConsoleOutput").Text;
+            if(txt == null || txt.Length <= 0)
+            {
+                win.Get<TextBlock>("ConsoleOutput").Text += "[]> ";
+            }
+
+            win.Get<TextBlock>("ConsoleOutput").Text += cmdInput.Text;
+            if (cmdInput.Text.StartsWith("unload ") ||
+                cmdInput.Text.StartsWith("load ") ||
+                cmdInput.Text.StartsWith("l ") ||
+                cmdInput.Text.StartsWith("ul "))
+            {
+                win.Get<TextBlock>("ConsoleOutput").Text += "\n";
+            }
+            win.Get<TextBlock>("ConsoleOutput").Text += formulaProgram.GetConsoleOutput();
         }
     }
     
@@ -172,7 +238,7 @@ internal class MainWindowViewModel : ReactiveObject
         public void RemoveItem(Node child) => Children.Remove(child);
         public override string ToString() => Header;
     }
-}
+}*/
 
 public partial class MainWindow : Window
 {    
@@ -180,9 +246,7 @@ public partial class MainWindow : Window
     {
         this.InitializeComponent();
         
-        this.AttachDevTools();
-
-        this.DataContext = new MainWindowViewModel(this);
+        this.DataContext = new MainWindowViewModel();
     }
 
     private void InitializeComponent()

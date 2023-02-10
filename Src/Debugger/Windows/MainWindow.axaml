@@ -1,0 +1,45 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:v="using:Debugger.Views"
+        xmlns:vm="using:Debugger.ViewModels"
+        x:Class="Debugger.Windows.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Formula Debugger"
+        ExtendClientAreaToDecorationsHint="True">
+    <DockPanel LastChildFill="True" 
+               Height="NaN" 
+               Width="NaN" 
+               Margin="0,25,0,20">
+        <v:ToolbarView DockPanel.Dock="Top"/>
+        <Grid Margin="10" Name="MainGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="440"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350"/>
+                <ColumnDefinition MinWidth="800" Width="*"/>
+                <ColumnDefinition Width="350"/>
+            </Grid.ColumnDefinitions>
+            <v:FileManagerView Margin="25,0,25,0" 
+                               Grid.Row="0" 
+                               Grid.Column="0"/>
+            <v:InferenceRulesView Margin="25,0,25,0" 
+                                  Grid.Row="1" 
+                                  Grid.Column="0"/>
+            <v:CommandConsoleView Margin="0,0,25,0" 
+                                  Grid.Row="0" 
+                                  Grid.Column="1"/>
+            <v:TermsConstraintsView Margin="0,0,25,0"
+                                    Grid.Row="1" 
+                                    Grid.Column="1"/>
+            <v:SolverView Margin="0,0,25,0"
+                          Grid.Row="0" 
+                          Grid.RowSpan="2" 
+                          Grid.Column="2"/>
+        </Grid>
+    </DockPanel>
+</Window>

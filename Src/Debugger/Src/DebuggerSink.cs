@@ -30,6 +30,11 @@ public class DebuggerSink : IMessageSink
 
     private void AddMessage(SeverityKind severity = SeverityKind.Info, string msg = "", bool newline = false)
     {
+        if (msg.Contains("[]>"))
+        {
+            strBuilder.Append("\n");
+        }
+        
         if(newline)
         {
             strBuilder.AppendLine(msg);

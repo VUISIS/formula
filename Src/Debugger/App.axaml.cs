@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
-using Debugger.Views;
+using Debugger.Windows;
 
 namespace Debugger;
 
