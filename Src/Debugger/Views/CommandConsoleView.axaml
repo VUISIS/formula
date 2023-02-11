@@ -14,7 +14,8 @@
                          HorizontalAlignment="Left" 
                          Background="#222222"/>
         <ScrollViewer Background="Black">
-            <TextBlock Padding="25" Name="ConsoleOutput" 
+            <TextBlock Padding="25" 
+                       Name="ConsoleOutput" 
                        Height="440"/>
         </ScrollViewer>
     </StackPanel>

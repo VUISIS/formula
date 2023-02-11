@@ -3,8 +3,11 @@
 //using System.Collections.ObjectModel;
 //using System.Collections.Generic;
 //using System.IO;
+using System.Runtime.InteropServices;
 
 //using Avalonia;
+
+using Avalonia;
 using Avalonia.Markup.Xaml;
 using Avalonia.Controls;
 //using Avalonia.Input;
@@ -12,6 +15,8 @@ using Avalonia.Controls;
 //using Avalonia.VisualTree;
 
 using Debugger.ViewModels;
+using Debugger.Views;
+using ReactiveUI;
 
 namespace Debugger.Windows;
 
@@ -180,77 +185,42 @@ namespace Debugger.Windows;
             }
         }
     }
-
-    public void RunCmd()
-    {
-        var cmdInput = win.Get<AutoCompleteBox>("CommandInput");
-        if (cmdInput.Text != null &&
-            cmdInput.Text.Length > 0)
-        {
-            if(!formulaProgram.ExecuteCommand(cmdInput.Text))
-            {
-                Console.WriteLine("Command Failed");
-                return;
-            }
-            
-            var txt = win.Get<TextBlock>("ConsoleOutput").Text;
-            if(txt == null || txt.Length <= 0)
-            {
-                win.Get<TextBlock>("ConsoleOutput").Text += "[]> ";
-            }
-
-            win.Get<TextBlock>("ConsoleOutput").Text += cmdInput.Text;
-            if (cmdInput.Text.StartsWith("unload ") ||
-                cmdInput.Text.StartsWith("load ") ||
-                cmdInput.Text.StartsWith("l ") ||
-                cmdInput.Text.StartsWith("ul "))
-            {
-                win.Get<TextBlock>("ConsoleOutput").Text += "\n";
-            }
-            win.Get<TextBlock>("ConsoleOutput").Text += formulaProgram.GetConsoleOutput();
-        }
-    }
-    
-    public void ExitCmd() 
-    {
-        win.Close();
-    }
-    
-    public class Node
-    {
-        public Node(string folderName)
-        {
-            Header = folderName;
-            Children = new ObservableCollection<Node>();
-        }
-
-        public Node(Node parent, string fileName)
-        {
-            Children = new ObservableCollection<Node>();
-            Parent = parent;
-            Header = fileName;
-        }
-
-        public Node? Parent;
-        public string Header { get; }
-        public ObservableCollection<Node> Children { get; }
-        public void AddItem(Node child) => Children.Add(child);
-        public void RemoveItem(Node child) => Children.Remove(child);
-        public override string ToString() => Header;
-    }
 }*/
 
 public partial class MainWindow : Window
 {    
+    private readonly FormulaProgram formulaProgram;
     public MainWindow()
     {
-        this.InitializeComponent();
+        formulaProgram = new FormulaProgram();
         
-        this.DataContext = new MainWindowViewModel();
+        InitializeComponent();
+        
+        DataContext = new MainWindowViewModel();
+
+        var bar = this.Get<DockPanel>("TopBar");
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            bar.Margin = new Thickness(0.0,25.0,0.0,20.0);
+        }
+        else
+        {
+            bar.Margin = new Thickness(0.0,0.0,0.0,20.0);
+        }
     }
 
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
+        var tbv = this.Get<ToolbarView>("TopToolbarView");
+        SetViewWindow(tbv, new ToolbarViewModel(this));
+        
+        var civ = this.Get<CommandConsoleView>("CommandInputView");
+        SetViewWindow(civ, new CommandConsoleViewModel(this, formulaProgram));
+    }
+
+    private void SetViewWindow(UserControl uc, ReactiveObject obj)
+    {
+        uc.DataContext = obj;
     }
 }
