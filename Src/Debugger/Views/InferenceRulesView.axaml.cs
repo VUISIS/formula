@@ -11,7 +11,7 @@ public partial class InferenceRulesView : UserControl
     {
         InitializeComponent();
 
-        this.DataContext = new InferenceRulesViewModel();
+        DataContext = new InferenceRulesViewModel();
     }
 
     private void InitializeComponent()

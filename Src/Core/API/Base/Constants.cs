@@ -195,6 +195,11 @@
     public enum EnvParamKind
     {
         /// <summary>
+        /// If true, then publisher will emit data from solver (default: false).
+        /// </summary>
+        Debug_SolverPublisher,
+        
+        /// <summary>
         /// If true, then messages will not include path names, only file names (default: true).
         /// </summary>
         Msgs_SuppressPaths,

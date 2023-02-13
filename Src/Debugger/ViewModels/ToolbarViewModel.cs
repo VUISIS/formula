@@ -13,10 +13,10 @@ namespace Debugger.ViewModels;
 
 internal class ToolbarViewModel : ReactiveObject
 {
-    private FileManagerViewModel? fileManagerModel;
-    private MainWindow? mainWindow;
-    private FormulaProgram? formulaProgram;
-    private TextBlock? consoleOutput;
+    private readonly FileManagerViewModel? fileManagerModel;
+    private readonly MainWindow? mainWindow;
+    private readonly FormulaProgram? formulaProgram;
+    private readonly TextBlock? consoleOutput;
 
     public ToolbarViewModel(MainWindow win, FormulaProgram program)
     {
@@ -26,9 +26,7 @@ internal class ToolbarViewModel : ReactiveObject
 
         consoleOutput = mainWindow.Get<CommandConsoleView>("CommandInputView")
                                   .Get<TextBlock>("ConsoleOutput");
-        Console.WriteLine(consoleOutput);
         fileManagerModel = mainWindow.Get<FileManagerView>("FileTreeView").DataContext as FileManagerViewModel;
-        Console.WriteLine(fileManagerModel);
     }
     
     public async void OpenCmd()
@@ -74,8 +72,6 @@ internal class ToolbarViewModel : ReactiveObject
     
     public async void OpenFolderCmd()
     {
-        Console.WriteLine(mainWindow);
-        Console.WriteLine(fileManagerModel);
         if (mainWindow != null &&
             fileManagerModel != null)
         {

@@ -16,20 +16,20 @@ namespace Debugger.ViewModels;
 
 internal class FileManagerViewModel : ReactiveObject
 {
-    private MainWindow win;
-    private FormulaProgram formulaProgram;
-    private TextBlock consoleOutput;
+    private readonly MainWindow? mainWindow;
+    private readonly FormulaProgram? formulaProgram;
+    private readonly TextBlock? consoleOutput;
     
-    public FileManagerViewModel(MainWindow mwin, FormulaProgram program)
+    public FileManagerViewModel(MainWindow win, FormulaProgram program)
     {
-        win = mwin;
+        mainWindow = win;
         formulaProgram = program;
 
         Items = new ObservableCollection<Node>();
         ItemsSource = new ObservableCollection<Node>();
         SelectedItems = new ObservableCollection<Node>();
 
-        consoleOutput = win.Get<CommandConsoleView>("CommandInputView")
+        consoleOutput = mainWindow.Get<CommandConsoleView>("CommandInputView")
                            .Get<TextBlock>("ConsoleOutput");
     }
 
@@ -39,7 +39,9 @@ internal class FileManagerViewModel : ReactiveObject
 
     public void LoadFormulaFileCmd()
     {
-        if (SelectedItems.Count > 0)
+        if (formulaProgram != null &&
+            consoleOutput != null &&
+            SelectedItems.Count > 0)
         {
             Uri? uri = null;
             if (Utils.LastDirectory != null &&

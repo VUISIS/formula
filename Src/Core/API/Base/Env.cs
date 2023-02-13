@@ -1050,7 +1050,7 @@
             },
             TaskCreationOptions.LongRunning);
             */
-
+            
             var sr = new SolveResult(
                         redModel,
                         (FactSet)modData.FinalOutput,

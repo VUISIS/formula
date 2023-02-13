@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Formula.API
+﻿using Microsoft.Formula.API.Plugins;
+
+namespace Microsoft.Formula.API
 {
     using System;
     using System.Collections.Generic;
@@ -26,6 +28,14 @@
                     "If true, then messages will not include path names, only file names (default: true).",
                     true,
                     SetBoolParameter));
+            
+            parameters.Add(
+                EnvParamKind.Debug_SolverPublisher,
+                new ParameterData(
+                    typeof(ISolverPublisher),
+                    "Solver will publish terms and constraints (default: null).",
+                    null,
+                    SetSolverPublisherParameter));
 
             parameters.Add(
                 EnvParamKind.Printer_ReferencePrintKind,
@@ -104,6 +114,18 @@
 
             return (bool)parameters[prm].Item3;
         }
+        
+        public static ISolverPublisher GetSolverPublisherParameter(EnvParams prms, EnvParamKind prm)
+        {
+            Contract.Requires(GetParameterType(prm).Equals(typeof(ISolverPublisher)));
+            object val;
+            if (prms != null && prms.settings.TryGetValue(prm, out val))
+            {
+                return (ISolverPublisher)val;
+            }
+
+            return (ISolverPublisher)parameters[prm].Item3;
+        }
 
         /// <summary>
         /// Returns a new set of parameters with same parameters as prms, but with kind = value.
@@ -132,6 +154,19 @@
                     string.Format(
                             "Bad environment parameter; {0} must have type bool",
                             prm));
+            }
+
+            prms.settings[prm] = value;
+        }
+        
+        private static void SetSolverPublisherParameter(EnvParams prms, EnvParamKind prm, object value)
+        {
+            if (!(value is ISolverPublisher))
+            {
+                throw new BadEnvParamException(
+                    string.Format(
+                        "Bad environment parameter; {0} must have type ISolverPublisher",
+                        prm));
             }
 
             prms.settings[prm] = value;

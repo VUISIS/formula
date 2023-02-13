@@ -163,6 +163,11 @@
                 }
             }
         }
+        
+        public Set<Term> GetPositiveConstraints()
+        {
+            return PositiveConstraintTerms;
+        }
 
         public bool Exists(Term t)
         {
@@ -251,6 +256,11 @@
             }
 
             return false;
+        }
+        
+        public Set<Term> GetNegativeConstraints()
+        {
+            return NegativeConstraintTerms;
         }
 
         public bool GetSymbolicTerm(Term t, out SymElement e)

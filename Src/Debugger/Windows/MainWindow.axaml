@@ -14,7 +14,9 @@
                LastChildFill="True" 
                Height="NaN" 
                Width="NaN">
-        <v:ToolbarView Name="TopToolbarView" DockPanel.Dock="Top"/>
+        <v:ToolbarView Name="TopToolbarView" 
+                       DockPanel.Dock="Top"
+                       Margin="0.0,0.0,0.0,20.0"/>
         <Grid Margin="10" Name="MainGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="440"/>
@@ -29,7 +31,8 @@
                                Margin="25,0,25,0" 
                                Grid.Row="0" 
                                Grid.Column="0"/>
-            <v:InferenceRulesView Margin="25,0,25,0" 
+            <v:InferenceRulesView Name="SolverRulesView"
+                                  Margin="25,0,25,0" 
                                   Grid.Row="1" 
                                   Grid.Column="0"/>
             <v:CommandConsoleView Name="CommandInputView"

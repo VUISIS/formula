@@ -26,10 +26,6 @@ public partial class MainWindow : Window
         {
             bar.Margin = new Thickness(0.0,25.0,0.0,20.0);
         }
-        else
-        {
-            bar.Margin = new Thickness(0.0,0.0,0.0,20.0);
-        }
     }
 
     private void InitializeComponent()
