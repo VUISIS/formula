@@ -25,7 +25,8 @@
                 <ColumnDefinition MinWidth="800" Width="*"/>
                 <ColumnDefinition Width="350"/>
             </Grid.ColumnDefinitions>
-            <v:FileManagerView Margin="25,0,25,0" 
+            <v:FileManagerView Name="FileTreeView"
+                               Margin="25,0,25,0" 
                                Grid.Row="0" 
                                Grid.Column="0"/>
             <v:InferenceRulesView Margin="25,0,25,0" 

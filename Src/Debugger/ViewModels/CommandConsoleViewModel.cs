@@ -3,16 +3,17 @@ using Avalonia.Input;
 using ReactiveUI;
 
 using Debugger.Views;
+using Debugger.Windows;
 
 namespace Debugger.ViewModels;
 
 internal class CommandConsoleViewModel : ReactiveObject
 {
-    private readonly Window? mainWindow;
+    private readonly MainWindow? mainWindow;
     private readonly FormulaProgram? formulaProgram;
     private readonly AutoCompleteBox commandInput;
     private readonly TextBlock commandOutput;
-    public CommandConsoleViewModel(Window win, FormulaProgram program)
+    public CommandConsoleViewModel(MainWindow win, FormulaProgram program)
     {
         mainWindow = win;
         formulaProgram = program;

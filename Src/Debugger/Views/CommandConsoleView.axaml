@@ -5,7 +5,8 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="using:Debugger.ViewModels"
              x:DataType="vm:CommandConsoleViewModel"
-             x:Class="Debugger.Views.CommandConsoleView">
+             x:Class="Debugger.Views.CommandConsoleView"
+             Name="ConsoleView">
     <StackPanel Orientation="Vertical">
         <AutoCompleteBox Margin="0,0,0,7" 
                          Name="CommandInput" 
