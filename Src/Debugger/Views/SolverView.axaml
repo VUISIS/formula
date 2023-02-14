@@ -6,13 +6,12 @@
              xmlns:vm="using:Debugger.ViewModels"
              x:DataType="vm:SolverViewModel"
              x:Class="Debugger.Views.SolverView">
-    <StackPanel HorizontalAlignment="Center"
+    <StackPanel HorizontalAlignment="Stretch"
                 Orientation="Vertical">
         <TextBlock TextAlignment="Center" 
                    Text="Solver"
                    Margin="0,10,0,10"/>
         <Panel Height="{Binding $parent[StackPanel].Bounds.Height}"
-               Width="350" 
                Background="#222222"/>
     </StackPanel>
 </UserControl>
