@@ -19,13 +19,13 @@
                        Margin="0.0,0.0,0.0,20.0"/>
         <Grid Margin="10" Name="MainGrid">
             <Grid.RowDefinitions>
-                <RowDefinition Height="440"/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="350"/>
-                <ColumnDefinition MinWidth="800" Width="*"/>
-                <ColumnDefinition Width="350"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <v:FileManagerView Name="FileTreeView"
                                Margin="25,0,25,0" 
