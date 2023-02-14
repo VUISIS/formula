@@ -16,7 +16,7 @@
                Width="NaN">
         <v:ToolbarView Name="TopToolbarView" 
                        DockPanel.Dock="Top"
-                       Margin="0.0,0.0,0.0,20.0"/>
+                       Margin="0.0,0.0,0.0,10.0"/>
         <Grid Margin="10" Name="MainGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -28,21 +28,21 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <v:FileManagerView Name="FileTreeView"
-                               Margin="25,0,25,0" 
+                               Margin="10,0,10,0" 
                                Grid.Row="0" 
                                Grid.Column="0"/>
             <v:InferenceRulesView Name="SolverRulesView"
-                                  Margin="25,0,25,0" 
+                                  Margin="10,0,10,0" 
                                   Grid.Row="1" 
                                   Grid.Column="0"/>
             <v:CommandConsoleView Name="CommandInputView"
-                                  Margin="0,0,25,0" 
+                                  Margin="0,0,10,0" 
                                   Grid.Row="0" 
                                   Grid.Column="1"/>
-            <v:TermsConstraintsView Margin="0,0,25,0"
+            <v:TermsConstraintsView Margin="0,0,10,0"
                                     Grid.Row="1" 
                                     Grid.Column="1"/>
-            <v:SolverView Margin="0,0,25,0"
+            <v:SolverView Margin="0,0,10,0"
                           Grid.Row="0" 
                           Grid.RowSpan="2" 
                           Grid.Column="2"/>

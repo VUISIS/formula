@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Formula.API
+﻿using Microsoft.Formula.API.Plugins;
+
+namespace Microsoft.Formula.API
 {
     using System;
     using System.Collections.Generic;
@@ -39,6 +41,8 @@
         {
             get { return programs; }
         }
+
+        public ISolverPublisher SolverPublisher { get; set; }
 
         public EnvParams Parameters
         {
@@ -145,6 +149,7 @@
             fileRoot = new ASTConcr<Folder>(new Folder("/"));
             envRoot = new ASTConcr<Folder>(new Folder("/"));
             Parameters = envParams == null ? new EnvParams() : envParams;
+            SolverPublisher = EnvParams.GetSolverPublisherParameter(Parameters, EnvParamKind.Debug_SolverPublisher);
         }
 
         public void Cancel()
@@ -1195,6 +1200,9 @@
                 return sr;
             },
             TaskCreationOptions.LongRunning);
+
+            SolverPublisher.SetStartTime(DateTime.Now);
+            SolverPublisher.SetSolverResult(new List<Task<SolveResult>>(1){task});
 
         Unlock:
             ReleaseEnvLock();

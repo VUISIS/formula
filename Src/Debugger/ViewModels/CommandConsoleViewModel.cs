@@ -1,11 +1,19 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Debugger.ViewModels.Types;
 using ReactiveUI;
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
+
+using Debugger.ViewModels.Helpers;
 using Debugger.Views;
 using Debugger.Windows;
+using Microsoft.Formula.Common.Terms;
 
 namespace Debugger.ViewModels;
 
@@ -52,59 +60,82 @@ internal class CommandConsoleViewModel : ReactiveObject
             if (commandInput.Text != null &&
                 commandInput.Text.Length > 0)
             {
-                if(!formulaProgram.ExecuteCommand(commandInput.Text))
+                if (!formulaProgram.ExecuteCommand(commandInput.Text))
                 {
                     System.Console.WriteLine("Command Failed");
                     return;
                 }
-            
-                var txt = commandOutput.Text;
-                if(txt == null || txt.Length <= 0)
+
+                if (commandOutput.Text == null ||
+                    commandOutput.Text.Length <= 0)
                 {
                     commandOutput.Text += "[]> ";
                 }
 
                 commandOutput.Text += commandInput.Text;
-                if (commandInput.Text.StartsWith("unload ") ||
-                    commandInput.Text.StartsWith("load ") ||
-                    commandInput.Text.StartsWith("l ") ||
-                    commandInput.Text.StartsWith("ul ") ||
-                    commandInput.Text.StartsWith("help") ||
-                    commandInput.Text.StartsWith("h") ||
-                    commandInput.Text.StartsWith("solve ") ||
-                    commandInput.Text.StartsWith("sl "))
+
+                var reg = new Regex(@"^[a-z]+");
+                MatchCollection matches = reg.Matches(commandInput.Text);
+                if (Utils.InputCommands.Contains(matches[0].Value))
                 {
                     commandOutput.Text += "\n";
                 }
-                commandOutput.Text += formulaProgram.GetConsoleOutput();
 
-                if ((commandInput.Text.StartsWith("solve ") ||
-                    commandInput.Text.StartsWith("sl ")) &&
+                var output = formulaProgram.GetConsoleOutput();
+                var solveResult = formulaProgram.FormulaPublisher.WaitForCompletion();
+                if ((matches[0].Value.Equals("solve") ||
+                    matches[0].Value.Equals("sl")) &&
                     inferenceRulesViewModel != null)
                 {
-                    inferenceRulesViewModel.Items.Clear();
+                    if (solveResult != null)
+                    {
+                        inferenceRulesViewModel.Items.Clear();
 
-                    var pc = formulaProgram.GetPositiveConstraints();
-                    var nc = formulaProgram.GetNegativeConstraints();
-                    
-                    Console.WriteLine("Pos Constraints");
-                    Console.WriteLine(nc);
-                    
-                    Console.WriteLine("Neg Constraints");
-                    Console.WriteLine(nc);
-                    
-                    foreach (var term in pc)
-                    {
-                        var node = new Node(term.ToString());
-                        inferenceRulesViewModel.Items.Add(node);
+                        var constraintTerms = formulaProgram.FormulaPublisher.GetConstraintTerms();
+                        foreach (var term in constraintTerms)
+                        {
+                            var sym = term.Symbol as UserSymbol;
+                            if (sym != null &&
+                                sym.IsAutoGen)
+                            {
+                                var cancelToken = new CancellationToken();
+                                var tw = new StringWriter();
+                                foreach (var n in sym.Definitions)
+                                {
+                                    n.Print(tw, cancelToken, formulaProgram.GetParameters());
+                                    Console.WriteLine("Defs");
+                                    Console.WriteLine(tw.ToString());
+                                }
+                                tw.Flush();
+                                term.PrintTerm(tw, cancelToken, formulaProgram.GetParameters());
+                                Console.WriteLine("Node");
+                                Console.WriteLine(tw.ToString());
+                                var node = new Node(sym.PrintableName);
+                                inferenceRulesViewModel.Items.Add(node);
+                            }
+                        }
+
+                        var withoutEnd = output.Replace("[]> ", "");
+                        commandOutput.Text += withoutEnd;
+                        commandOutput.Text += "Solve result task completed.";
+                        commandOutput.Text += "\n";
+                        commandOutput.Text += formulaProgram.FormulaPublisher.GetResultTimeString();
+                        commandOutput.Text += "\n\n";
+                        commandOutput.Text += "[]>";
+                        return;
                     }
-                    
-                    foreach (var term in nc)
-                    {
-                        var node = new Node(term.ToString());
-                        inferenceRulesViewModel.Items.Add(node);
-                    }
+
+                    var removeCursor = output.Replace("[]>", "");
+                    commandOutput.Text += removeCursor;
+                    commandOutput.Text += "Solve result task timed out.";
+                    commandOutput.Text += "\n";
+                    commandOutput.Text += "30s";
+                    commandOutput.Text += "\n\n";
+                    commandOutput.Text += "[]>";
+                    return;
                 }
+
+                commandOutput.Text += output;
             }
         }
     }

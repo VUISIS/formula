@@ -18,6 +18,7 @@ public class Node
     }
 
     public Node? Parent;
+    
     public string Header { get; }
     public ObservableCollection<Node> Children { get; }
     public void AddItem(Node child) => Children.Add(child);

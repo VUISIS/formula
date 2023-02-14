@@ -125,9 +125,7 @@
             get;
             set;
         }
-
-        private ISolverPublisher SolverPublisher { get; set; }
-
+        
         private BuilderRef MkModelDecl(string modelName, string modelRefName, string modelLocName, Builder bldr)
         {
             BuilderRef result;
@@ -274,9 +272,7 @@
             Source = source;
             PartialModel = partialModel;
             Env = env;
-
-            SolverPublisher = EnvParams.GetSolverPublisherParameter(Env.Parameters, EnvParamKind.Debug_SolverPublisher);
-
+            
             // TODO: reintroduce cardinality system with search heuristics
             //// Step 0. Create cardinality system.
             //Cardinalities = new CardSystem(partialModel);
@@ -306,10 +302,10 @@
             SetRecursionBound();
 
             executer = new SymExecuter(this);
-            if (SolverPublisher != null)
+            if (Env.SolverPublisher != null)
             {
-                SolverPublisher.PositiveConstraintTerms = executer.GetPositiveConstraints();
-                SolverPublisher.NegativeConstraintTerms = executer.GetNegativeConstraints();
+                Env.SolverPublisher.SetPosConstraintTerms(executer.GetPositiveConstraints());
+                Env.SolverPublisher.SetNegConstraintTerms(executer.GetNegativeConstraints());
             }
         }
 

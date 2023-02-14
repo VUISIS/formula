@@ -7,8 +7,9 @@
              x:DataType="vm:CommandConsoleViewModel"
              x:Class="Debugger.Views.CommandConsoleView"
              Name="ConsoleView">
-    <StackPanel Orientation="Vertical">
-        <AutoCompleteBox Margin="0,0,0,7" 
+    <StackPanel Margin="10,0,10,0"
+                Orientation="Vertical">
+        <AutoCompleteBox Margin="10,0,0,7" 
                          Name="CommandInput" 
                          Width="350" 
                          Height="30" 

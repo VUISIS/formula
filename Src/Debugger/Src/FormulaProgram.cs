@@ -1,7 +1,7 @@
 using Microsoft.Formula.CommandLine;
 using Microsoft.Formula.API;
-using Microsoft.Formula.Common;
-using Microsoft.Formula.Common.Terms;
+
+using System;
 
 namespace Debugger;
 
@@ -9,16 +9,21 @@ public class FormulaProgram
 {
     private CommandInterface ci;
     private DebuggerSink consoleSink;
-    private FormulaPublisher formulaPublisher;
+    private EnvParams parameters;
+    
+    public FormulaPublisher FormulaPublisher { get; }
+
     
     public FormulaProgram()
     {
         consoleSink = new DebuggerSink();
-        formulaPublisher = new FormulaPublisher();
+        FormulaPublisher = new FormulaPublisher();
         var consoleChooser = new CommandLineProgram.ConsoleChooser();
-        var envParams = new EnvParams();
-        EnvParams.SetParameter(envParams, EnvParamKind.Debug_SolverPublisher, formulaPublisher);
-        ci = new CommandInterface(consoleSink, consoleChooser, envParams);
+        var tuple = new Tuple<EnvParamKind, object>[1];
+        var value = new Tuple<EnvParamKind, object>(EnvParamKind.Debug_SolverPublisher, FormulaPublisher);
+        tuple.SetValue(value,0);
+        parameters = new EnvParams(tuple);
+        ci = new CommandInterface(consoleSink, consoleChooser, parameters);
     }
 
     public bool ExecuteCommand(string command)
@@ -37,14 +42,9 @@ public class FormulaProgram
     {
         consoleSink.ClearOutput();
     }
-    
-    public Set<Term> GetPositiveConstraints()
+
+    public EnvParams GetParameters()
     {
-        return formulaPublisher.PositiveConstraintTerms;
-    }
-    
-    public Set<Term> GetNegativeConstraints()
-    {
-        return formulaPublisher.NegativeConstraintTerms;
+        return parameters;
     }
 }

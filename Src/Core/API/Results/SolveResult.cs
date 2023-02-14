@@ -76,7 +76,6 @@
             this.maxSols = maxSols;
             this.srcPartialModel = srcPartialModel;
             this.Env = env;
-            
         }
 
         internal void Start()
