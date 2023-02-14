@@ -16,7 +16,7 @@
                   SelectedItems="{Binding SelectedItems}"
                   SelectionMode="Single"
                   Background="#222222"
-                  Height="400"
+                  Height="{Binding $parent[StackPanel].Bounds.Height}"
                   Name="FileManagerPanel">
             <TreeView.ItemTemplate>
                 <TreeDataTemplate ItemsSource="{Binding Children}">

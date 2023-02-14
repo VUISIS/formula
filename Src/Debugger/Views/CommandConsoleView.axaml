@@ -17,7 +17,7 @@
         <ScrollViewer Background="Black">
             <TextBlock Padding="25" 
                        Name="ConsoleOutput" 
-                       Height="440"/>
+                       Height="{Binding $parent[StackPanel].Bounds.Height}"/>
         </ScrollViewer>
     </StackPanel>
 </UserControl>
