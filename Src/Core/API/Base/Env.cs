@@ -42,7 +42,7 @@ namespace Microsoft.Formula.API
             get { return programs; }
         }
 
-        public ISolverPublisher SolverPublisher { get; set; }
+        public ISolverPublisher? SolverPublisher { get; set; }
 
         public EnvParams Parameters
         {
@@ -1201,8 +1201,11 @@ namespace Microsoft.Formula.API
             },
             TaskCreationOptions.LongRunning);
 
-            SolverPublisher.SetStartTime(DateTime.Now);
-            SolverPublisher.SetSolverResult(new List<Task<SolveResult>>(1){task});
+            if (SolverPublisher != null)
+            {
+                SolverPublisher.SetStartTime(DateTime.Now);
+                SolverPublisher.SetSolverResult(new List<Task<SolveResult>>(1){task});
+            }
 
         Unlock:
             ReleaseEnvLock();
