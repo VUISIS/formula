@@ -515,7 +515,10 @@
                 var negated = new List<Z3BoolExpr>();
                 foreach (var sol in prevSolution)
                 {
-                    negated.Add(Solver.Context.MkNot(Solver.Context.MkEq(sol.Key, sol.Value)));
+                    if (sol.Value != null)
+                    {
+                        negated.Add(Solver.Context.MkNot(Solver.Context.MkEq(sol.Key, sol.Value)));
+                    }
                 }
 
                 Solver.Z3Solver.Assert(Solver.Context.MkOr(negated));
