@@ -24,7 +24,7 @@ public partial class MainWindow : Window
         var bar = this.Get<DockPanel>("TopBar");
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            bar.Margin = new Thickness(0.0,22.0,0.0,5.0);
+            bar.Margin = new Thickness(0.0,24.0,0.0,5.0);
         }
     }
 

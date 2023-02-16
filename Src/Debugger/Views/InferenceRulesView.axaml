@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:material="using:Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="using:Debugger.ViewModels"
              x:DataType="vm:InferenceRulesViewModel"
@@ -12,18 +13,33 @@
                    Text="Inference Rules"
                    Height="30"
                    Margin="0,5,0,0"/>
-        <ListBox Items="{Binding Items}" 
-                 Height="{Binding $parent[StackPanel].Bounds.Height}"
-                 Background="#222222">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox/>
-                        <TextBlock Text="{Binding Header}"
-                                   Margin="0,8,0,0"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <StackPanel Height="{Binding $parent[StackPanel].Bounds.Height}"
+                    Width="{Binding $parent[StackPanel].Bounds.Width}"
+                    Orientation="Horizontal">
+            <StackPanel Orientation="Vertical">
+                <Button>
+                    <material:MaterialIcon Kind="Plus"></material:MaterialIcon>
+                </Button>
+                <Button>
+                    <material:MaterialIcon Kind="Minus"></material:MaterialIcon>
+                </Button>
+            </StackPanel>
+            <ListBox Items="{Binding Items}" 
+                     Height="{Binding $parent[StackPanel].Bounds.Height}"
+                     Width="{Binding $parent[StackPanel].Bounds.Width}"
+                     Background="#222222">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox/>
+                            <ScrollViewer>
+                                <TextBlock Text="{Binding Header}"
+                                           Margin="0,8,0,0"/>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
     </StackPanel>
 </UserControl>

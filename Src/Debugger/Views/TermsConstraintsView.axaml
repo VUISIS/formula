@@ -22,8 +22,19 @@
                        Text="Current Terms"
                        Margin="0,10,0,10"/>
             <ListBox Height="{Binding $parent[StackPanel].Bounds.Height}"
-                     Items="{Binding CurrentTerms}" 
-                     Background="#222222"/>
+                     Items="{Binding CurrentTermItems}"
+                     Background="#222222">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <ScrollViewer>
+                                <TextBlock Text="{Binding Header}"
+                                           Margin="0,8,0,0"/>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
         <StackPanel Grid.Row="0" Grid.Column="2"
                     HorizontalAlignment="Stretch"
@@ -32,8 +43,18 @@
                        Text="Constraints"
                        Margin="0,10,0,10"/>
             <ListBox Height="{Binding $parent[StackPanel].Bounds.Height}"
-                     Items="{Binding Constraints}" 
-                     Background="#222222"/>
+                     Background="#222222">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <ScrollViewer>
+                                <TextBlock Text="{Binding Header}"
+                                           Margin="0,8,0,0"/>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
     </Grid>
 </UserControl>

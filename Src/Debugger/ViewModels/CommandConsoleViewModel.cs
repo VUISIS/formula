@@ -1,18 +1,17 @@
 using Avalonia.Controls;
 using Avalonia.Input;
-using Debugger.ViewModels.Types;
 using ReactiveUI;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 
 using Debugger.ViewModels.Helpers;
 using Debugger.Views;
 using Debugger.Windows;
+using Debugger.ViewModels.Types;
+
 using Microsoft.Formula.Common.Terms;
 
 namespace Debugger.ViewModels;
@@ -24,6 +23,7 @@ internal class CommandConsoleViewModel : ReactiveObject
     private readonly AutoCompleteBox? commandInput;
     private readonly TextBlock? commandOutput;
     private readonly InferenceRulesViewModel? inferenceRulesViewModel;
+    private readonly TermsConstraintsViewModel? termsConstraintsViewModel;
     
     public CommandConsoleViewModel(MainWindow win, FormulaProgram program)
     {
@@ -39,6 +39,7 @@ internal class CommandConsoleViewModel : ReactiveObject
             commandInput.KeyDown += InputKey;
         }
         
+        termsConstraintsViewModel = mainWindow.Get<TermsConstraintsView>("TermsAndConstraintsView").DataContext as TermsConstraintsViewModel;
         inferenceRulesViewModel = mainWindow.Get<InferenceRulesView>("SolverRulesView").DataContext as InferenceRulesViewModel;
     }
 
@@ -85,7 +86,8 @@ internal class CommandConsoleViewModel : ReactiveObject
                 var solveResult = formulaProgram.FormulaPublisher.WaitForCompletion();
                 if ((matches[0].Value.Equals("solve") ||
                     matches[0].Value.Equals("sl")) &&
-                    inferenceRulesViewModel != null)
+                    inferenceRulesViewModel != null &&
+                    termsConstraintsViewModel != null)
                 {
                     if (solveResult != null)
                     {
@@ -108,11 +110,19 @@ internal class CommandConsoleViewModel : ReactiveObject
                                 }
                                 tw.Flush();
                                 term.PrintTerm(tw, cancelToken, formulaProgram.GetParameters());
-                                Console.WriteLine("Node");
-                                Console.WriteLine(tw.ToString());
                                 var node = new Node(sym.PrintableName);
                                 inferenceRulesViewModel.Items.Add(node);
                             }
+                        }
+
+                        var varFacts = formulaProgram.FormulaPublisher.GetVarFacts();
+                        foreach (var term in varFacts)
+                        {
+                            var cancelToken = new CancellationToken();
+                            var tw = new StringWriter();
+                            term.PrintTerm(tw, cancelToken, formulaProgram.GetParameters());
+                            var node = new Node(tw.ToString());
+                            termsConstraintsViewModel.CurrentTermItems.Add(node);
                         }
 
                         var withoutEnd = output.Replace("[]> ", "");

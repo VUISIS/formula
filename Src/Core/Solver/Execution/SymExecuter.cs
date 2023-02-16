@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Formula.Solver
+﻿using System.IO;
+
+namespace Microsoft.Formula.Solver
 {
     using System;
     using System.Collections.Generic;
@@ -167,6 +169,21 @@
         public Set<Term> GetPositiveConstraints()
         {
             return PositiveConstraintTerms;
+        }
+
+        public Set<Term> GetFactSet()
+        {
+            return varFacts;
+        }
+        
+        public Map<Term, Term> GetLeastFixedPoint()
+        {
+            Map<Term, Term> newlfp = new Map<Term, Term>(Term.Compare);
+            foreach (var el in lfp)
+            {
+                newlfp.Add(el.Key, el.Value.Term);
+            }
+            return newlfp;
         }
 
         public bool Exists(Term t)

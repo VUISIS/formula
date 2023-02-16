@@ -11,7 +11,7 @@ public partial class TermsConstraintsView : UserControl
     {
         InitializeComponent();
 
-        this.DataContext = new TermsConstraintsViewModel();
+        DataContext = new TermsConstraintsViewModel();
     }
 
     private void InitializeComponent()

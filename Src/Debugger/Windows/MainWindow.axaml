@@ -39,7 +39,8 @@
                                   Margin="0,0,10,0" 
                                   Grid.Row="0" 
                                   Grid.Column="1"/>
-            <v:TermsConstraintsView Margin="0,0,10,0"
+            <v:TermsConstraintsView Name="TermsAndConstraintsView"
+                                    Margin="0,0,10,0"
                                     Grid.Row="1" 
                                     Grid.Column="1"/>
             <v:SolverView Margin="0,0,10,0"
