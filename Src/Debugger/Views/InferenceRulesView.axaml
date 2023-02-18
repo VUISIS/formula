@@ -16,30 +16,36 @@
         <StackPanel Height="{Binding $parent[StackPanel].Bounds.Height}"
                     Width="{Binding $parent[StackPanel].Bounds.Width}"
                     Orientation="Horizontal">
-            <StackPanel Orientation="Vertical">
-                <Button>
-                    <material:MaterialIcon Kind="Plus"></material:MaterialIcon>
+            <StackPanel Spacing="4"
+                        Margin="0,0,4,0"
+                        Orientation="Vertical">
+                <Button Width="25"
+                        Height="25">
+                    <material:MaterialIcon Kind="Plus"/>
                 </Button>
-                <Button>
-                    <material:MaterialIcon Kind="Minus"></material:MaterialIcon>
+                <Button Width="25"
+                        Height="25">
+                    <material:MaterialIcon Kind="Minus"/>
+                </Button>
+                <Button Width="25"
+                        Height="25">
+                    <material:MaterialIcon Kind="Refresh"/>
                 </Button>
             </StackPanel>
-            <ListBox Items="{Binding Items}" 
-                     Height="{Binding $parent[StackPanel].Bounds.Height}"
-                     Width="{Binding $parent[StackPanel].Bounds.Width}"
-                     Background="#222222">
-                <ListBox.ItemTemplate>
+            <ItemsRepeater Items="{Binding Items}" 
+                           Height="{Binding $parent[StackPanel].Bounds.Height}"
+                           Width="{Binding $parent[StackPanel].Bounds.Width}"
+                           Background="#222222">
+                <ItemsRepeater.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
                             <CheckBox/>
-                            <ScrollViewer>
-                                <TextBlock Text="{Binding Header}"
-                                           Margin="0,8,0,0"/>
-                            </ScrollViewer>
+                            <TextBlock Text="{Binding Header}"
+                                       Margin="0,8,0,0"/>
                         </StackPanel>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
         </StackPanel>
     </StackPanel>
 </UserControl>

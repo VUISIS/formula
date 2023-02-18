@@ -23,14 +23,15 @@
                        Margin="0,10,0,10"/>
             <ListBox Height="{Binding $parent[StackPanel].Bounds.Height}"
                      Items="{Binding CurrentTermItems}"
-                     Background="#222222">
+                     SelectedItems="{Binding CurrentTermSelectedItems}"
+                     Background="#222222"
+                     SelectionMode="Single"
+                     Name="CurrentTerms">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <ScrollViewer>
-                                <TextBlock Text="{Binding Header}"
-                                           Margin="0,8,0,0"/>
-                            </ScrollViewer>
+                            <TextBlock TextAlignment="Center"
+                                       Text="{Binding Header}"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -40,16 +41,54 @@
                     HorizontalAlignment="Stretch"
                     Orientation="Vertical">
             <TextBlock TextAlignment="Center" 
-                       Text="Constraints"
+                       Text="Direct Constraints"
                        Margin="0,10,0,10"/>
-            <ListBox Height="{Binding $parent[StackPanel].Bounds.Height}"
-                     Background="#222222">
+            <ListBox Background="#222222"
+                     Items="{Binding DirectConstraintsItems}"
+                     Height="100"
+                     SelectionMode="Single">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
                             <ScrollViewer>
-                                <TextBlock Text="{Binding Header}"
-                                           Margin="0,8,0,0"/>
+                                <TextBlock TextAlignment="Center"
+                                           Text="{Binding Header}"/>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <TextBlock TextAlignment="Center" 
+                       Text="Positive Constraints"
+                       Margin="0,10,0,10"/>
+            <ListBox Background="#222222"
+                     Items="{Binding PosConstraintsItems}"
+                     Height="100"
+                     SelectionMode="Single">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <ScrollViewer>
+                                <TextBlock TextAlignment="Center"
+                                           Text="{Binding Header}"/>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <TextBlock TextAlignment="Center" 
+                       Text="Negative Constraints"
+                       Margin="0,10,0,10"/>
+            <ListBox Background="#222222"
+                     Items="{Binding NegConstraintsItems}"
+                     Height="100"
+                     SelectionMode="Single">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <ScrollViewer>
+                                <TextBlock TextAlignment="Center"
+                                           Text="{Binding Header}"/>
                             </ScrollViewer>
                         </StackPanel>
                     </DataTemplate>

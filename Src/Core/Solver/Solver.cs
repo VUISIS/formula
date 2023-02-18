@@ -302,19 +302,17 @@
             SetRecursionBound();
 
             executer = new SymExecuter(this);
-            var solverPublisher = EnvParams.GetSolverPublisherParameter(Env.Parameters, EnvParamKind.Debug_SolverPublisher);
-            if (solverPublisher != null)
-            {
-                solverPublisher.SetVarFacts(executer.GetFactSet());
-                solverPublisher.SetLeastFixedPointMap(executer.GetLeastFixedPoint());
-                solverPublisher.SetPosConstraintTerms(executer.GetPositiveConstraints());
-                solverPublisher.SetNegConstraintTerms(executer.GetNegativeConstraints());
-            }
         }
 
         public bool Solve()
         {
             solvable = executer.Solve();
+            var solverPublisher = EnvParams.GetSolverPublisherParameter(Env.Parameters, EnvParamKind.Debug_SolverPublisher);
+            if (solverPublisher != null)
+            {
+                solverPublisher.SetLeastFixedPointTerms(executer.GetLeastFixedPointTerms());
+                solverPublisher.SetLeastFixedPointConstraints(executer.GetLeastFixedPointConstraints());
+            }
             return solvable;
         }
 

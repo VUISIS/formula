@@ -50,18 +50,18 @@ internal class ToolbarViewModel : ReactiveObject
                 if (Utils.LastDirectory != null &&
                     Utils.LastDirectory.TryGetUri(out uri))
                 {
-                    if(!formulaProgram.ExecuteCommand("load " + Path.Join(uri.AbsolutePath, file.Name)))
-                    {
-                        Console.WriteLine("Command Failed");
-                        return;
-                    }
-                
                     var txt = consoleOutput.Text;
                     if(txt == null || txt.Length <= 0)
                     {
                         consoleOutput.Text += "[]> ";
                     }
- 
+                    
+                    if(!formulaProgram.ExecuteCommand("load " + Path.Join(uri.AbsolutePath, file.Name)))
+                    {
+                        consoleOutput.Text += "ERROR: Command failed.";
+                        return;
+                    }
+                    
                     consoleOutput.Text += "load " + Path.Join(uri.AbsolutePath, file.Name); 
                     consoleOutput.Text += "\n";
                     consoleOutput.Text += formulaProgram.GetConsoleOutput();

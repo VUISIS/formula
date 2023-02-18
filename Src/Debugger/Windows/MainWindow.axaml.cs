@@ -24,7 +24,7 @@ public partial class MainWindow : Window
         var bar = this.Get<DockPanel>("TopBar");
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            bar.Margin = new Thickness(0.0,24.0,0.0,5.0);
+            bar.Margin = new Thickness(0.0,30.0,0.0,5.0);
         }
     }
 
@@ -32,14 +32,26 @@ public partial class MainWindow : Window
     {
         AvaloniaXamlLoader.Load(this);
 
+        var termsConstraintsViewModel = new TermsConstraintsViewModel(this, formulaProgram.FormulaPublisher);
+        var inferenceViewModel = new InferenceRulesViewModel();
+        
         var civ = this.Get<CommandConsoleView>("CommandInputView");
-        SetViewWindow(civ, new CommandConsoleViewModel(this, formulaProgram));
+        SetViewWindow(civ, new CommandConsoleViewModel(this, 
+                                                              formulaProgram, 
+                                                              termsConstraintsViewModel, 
+                                                              inferenceViewModel));
         
         var fmv = this.Get<FileManagerView>("FileTreeView");
         SetViewWindow(fmv, new FileManagerViewModel(this, formulaProgram));
         
         var tbv = this.Get<ToolbarView>("TopToolbarView");
         SetViewWindow(tbv, new ToolbarViewModel(this, formulaProgram));
+        
+        var tcv = this.Get<TermsConstraintsView>("TermsAndConstraintsView");
+        SetViewWindow(tcv, termsConstraintsViewModel);
+        
+        var iv = this.Get<InferenceRulesView>("SolverRulesView");
+        SetViewWindow(iv, inferenceViewModel);
     }
 
     private void SetViewWindow(UserControl uc, ReactiveObject obj)

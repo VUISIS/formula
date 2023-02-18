@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using Microsoft.Formula.API.Plugins;
+using Microsoft.Z3;
 
 namespace Microsoft.Formula.Solver
 {
@@ -165,23 +167,61 @@ namespace Microsoft.Formula.Solver
                 }
             }
         }
-        
-        public Set<Term> GetPositiveConstraints()
+
+        public IEnumerable<Term> GetLeastFixedPointTerms()
         {
-            return PositiveConstraintTerms;
+            return lfp.Keys;
         }
 
-        public Set<Term> GetFactSet()
+        public Dictionary<int, Dictionary<ConstraintKind, List<string>>> GetLeastFixedPointConstraints()
         {
-            return varFacts;
-        }
-        
-        public Map<Term, Term> GetLeastFixedPoint()
-        {
-            Map<Term, Term> newlfp = new Map<Term, Term>(Term.Compare);
+            Dictionary<int, Dictionary<ConstraintKind, List<string>>> newlfp = new Dictionary<int, Dictionary<ConstraintKind, List<string>>>();
             foreach (var el in lfp)
             {
-                newlfp.Add(el.Key, el.Value.Term);
+                Dictionary<ConstraintKind, List<string>> termConstraints = new Dictionary<ConstraintKind, List<string>>();
+                List<string> dirConstStrings = new List<string>();
+                List<string> posConstStrings = new List<string>();
+                List<string> negConstStrings = new List<string>();
+                foreach (var data in el.Value.GetConstraintData())
+                {
+                    foreach (var dirConst in data.DirConstraints)
+                    {
+                        dirConstStrings.Add(dirConst.ToString());
+                    }
+
+                    foreach (var posConst in data.PosConstraints)
+                    {
+                        SymElement next = null;
+                        if(GetSymbolicTerm(posConst, out next))
+                        {
+                            var cancelToken = new CancellationToken();
+                            var tw = new StringWriter();
+                            var envParams = new EnvParams();
+                            next.Term.PrintTerm(tw, cancelToken, envParams);
+                            posConstStrings.Add(tw.ToString());
+                        }
+                    }
+                    
+                    foreach (var negConst in data.NegConstraints)
+                    {
+                        SymElement next = null;
+                        if (GetSymbolicTerm(negConst, out next))
+                        {
+                            var cancelToken = new CancellationToken();
+                            var tw = new StringWriter();
+                            var envParams = new EnvParams();
+                            next.Term.PrintTerm(tw, cancelToken, envParams);
+                            negConstStrings.Add(tw.ToString());
+                        }
+                    }
+                }
+                termConstraints.Add(ConstraintKind.Direct, dirConstStrings);
+                termConstraints.Add(ConstraintKind.Positive, posConstStrings);
+                termConstraints.Add(ConstraintKind.Negative, negConstStrings);
+                if (el.Key.Symbol != null)
+                {
+                    newlfp.Add(el.Key.Symbol.Id, termConstraints);
+                }
             }
             return newlfp;
         }
@@ -273,11 +313,6 @@ namespace Microsoft.Formula.Solver
             }
 
             return false;
-        }
-        
-        public Set<Term> GetNegativeConstraints()
-        {
-            return NegativeConstraintTerms;
         }
 
         public bool GetSymbolicTerm(Term t, out SymElement e)

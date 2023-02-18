@@ -9,13 +9,13 @@ namespace Microsoft.Formula.API.Plugins;
 
 public interface ISolverPublisher
 {
-    public void SetVarFacts(Set<Term> facts);
-    public void SetPosConstraintTerms(Set<Term> terms);
-    public void SetNegConstraintTerms(Set<Term> terms);
     public void SetSolverResult(List<Task<SolveResult>> tasks);
     public void SetStartTime(DateTime time);
-
-    public void SetLeastFixedPointMap(Map<Term, Term> lfp);
-    public Set<Term> GetConstraintTerms();
+    public int GetResultTime();
+    public string GetResultTimeString();
+    public void SetLeastFixedPointTerms(IEnumerable<Term> terms);
+    public IEnumerable<Term> GetLeastFixedPointTerms();
+    public Dictionary<int, Dictionary<ConstraintKind, List<string>>> GetLeastFixedPointConstraints();
+    public void SetLeastFixedPointConstraints(Dictionary<int, Dictionary<ConstraintKind, List<string>>> constraints);
     public SolveResult WaitForCompletion();
 }

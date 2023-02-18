@@ -14,5 +14,10 @@ internal class InferenceRulesViewModel : ReactiveObject
         Items = new ObservableCollection<Node>();
     }
     
+    public void ClearAll()
+    {
+        Items.Clear();
+    }
+    
     public ObservableCollection<Node> Items { get; }
 }

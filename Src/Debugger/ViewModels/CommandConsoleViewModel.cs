@@ -11,7 +11,7 @@ using Debugger.ViewModels.Helpers;
 using Debugger.Views;
 using Debugger.Windows;
 using Debugger.ViewModels.Types;
-
+using Microsoft.Formula.API;
 using Microsoft.Formula.Common.Terms;
 
 namespace Debugger.ViewModels;
@@ -25,22 +25,25 @@ internal class CommandConsoleViewModel : ReactiveObject
     private readonly InferenceRulesViewModel? inferenceRulesViewModel;
     private readonly TermsConstraintsViewModel? termsConstraintsViewModel;
     
-    public CommandConsoleViewModel(MainWindow win, FormulaProgram program)
+    public CommandConsoleViewModel(MainWindow win, 
+                                   FormulaProgram program, 
+                                   TermsConstraintsViewModel termsConstraintsModel,
+                                   InferenceRulesViewModel inferenceModel)
     {
         mainWindow = win;
         formulaProgram = program;
 
         var commandInputView = mainWindow.Get<CommandConsoleView>("CommandInputView");
         commandInput = commandInputView.Get<AutoCompleteBox>("CommandInput");
-        commandOutput = commandInputView.Get<TextBlock>("ConsoleOutput");
-
         if (commandInput != null)
         {
             commandInput.KeyDown += InputKey;
         }
         
-        termsConstraintsViewModel = mainWindow.Get<TermsConstraintsView>("TermsAndConstraintsView").DataContext as TermsConstraintsViewModel;
-        inferenceRulesViewModel = mainWindow.Get<InferenceRulesView>("SolverRulesView").DataContext as InferenceRulesViewModel;
+        commandOutput = commandInputView.Get<TextBlock>("ConsoleOutput");
+
+        termsConstraintsViewModel = termsConstraintsModel;
+        inferenceRulesViewModel = inferenceModel;
     }
 
     private void InputKey(object? sender, KeyEventArgs e)
@@ -61,16 +64,16 @@ internal class CommandConsoleViewModel : ReactiveObject
             if (commandInput.Text != null &&
                 commandInput.Text.Length > 0)
             {
-                if (!formulaProgram.ExecuteCommand(commandInput.Text))
-                {
-                    System.Console.WriteLine("Command Failed");
-                    return;
-                }
-
                 if (commandOutput.Text == null ||
                     commandOutput.Text.Length <= 0)
                 {
                     commandOutput.Text += "[]> ";
+                }
+                
+                if (!formulaProgram.ExecuteCommand(commandInput.Text))
+                {
+                    commandOutput.Text += "ERROR: Command failed.";
+                    return;
                 }
 
                 commandOutput.Text += commandInput.Text;
@@ -93,36 +96,52 @@ internal class CommandConsoleViewModel : ReactiveObject
                     {
                         inferenceRulesViewModel.Items.Clear();
 
-                        var constraintTerms = formulaProgram.FormulaPublisher.GetConstraintTerms();
-                        foreach (var term in constraintTerms)
+                        var rules = formulaProgram.FormulaPublisher.GetLeastFixedPointTerms();
+                        var firstTermSet = false;
+                        foreach (var term in rules)
                         {
-                            var sym = term.Symbol as UserSymbol;
-                            if (sym != null &&
-                                sym.IsAutoGen)
-                            {
-                                var cancelToken = new CancellationToken();
-                                var tw = new StringWriter();
-                                foreach (var n in sym.Definitions)
-                                {
-                                    n.Print(tw, cancelToken, formulaProgram.GetParameters());
-                                    Console.WriteLine("Defs");
-                                    Console.WriteLine(tw.ToString());
-                                }
-                                tw.Flush();
-                                term.PrintTerm(tw, cancelToken, formulaProgram.GetParameters());
-                                var node = new Node(sym.PrintableName);
-                                inferenceRulesViewModel.Items.Add(node);
-                            }
-                        }
-
-                        var varFacts = formulaProgram.FormulaPublisher.GetVarFacts();
-                        foreach (var term in varFacts)
-                        {
-                            var cancelToken = new CancellationToken();
                             var tw = new StringWriter();
-                            term.PrintTerm(tw, cancelToken, formulaProgram.GetParameters());
-                            var node = new Node(tw.ToString());
-                            termsConstraintsViewModel.CurrentTermItems.Add(node);
+                            var cancelToken = new CancellationToken();
+                            var envParams = new EnvParams();
+                            term.PrintTerm(tw,cancelToken,envParams);
+                            var keyId = 0;
+                            if (term.Symbol != null)
+                            {
+                                keyId = term.Symbol.Id;
+                                var node = new Node(tw.ToString(), keyId);
+                                termsConstraintsViewModel.CurrentTermItems.Add(node);
+                            }
+                            
+                            var constraints = formulaProgram.FormulaPublisher.GetLeastFixedPointConstraints();
+                            foreach (var val in constraints[keyId])
+                            {
+                                foreach (var data in val.Value)
+                                {
+                                    var n = new Node(data);
+                                    inferenceRulesViewModel.Items.Add(n);
+                                    
+                                    if (!firstTermSet)
+                                    {
+                                        switch (val.Key)
+                                        {
+                                            case ConstraintKind.Direct:
+                                                var dirn = new Node(data);
+                                                termsConstraintsViewModel.DirectConstraintsItems.Add(dirn);
+                                                break;
+                                            case ConstraintKind.Positive:
+                                                var posn = new Node(data);
+                                                termsConstraintsViewModel.PosConstraintsItems.Add(posn);
+                                                break;
+                                            case ConstraintKind.Negative:
+                                                var negn = new Node(data);
+                                                termsConstraintsViewModel.NegConstraintsItems.Add(negn);
+                                                break;
+                                        }
+
+                                        firstTermSet = true;
+                                    }
+                                }
+                            }
                         }
 
                         var withoutEnd = output.Replace("[]> ", "");

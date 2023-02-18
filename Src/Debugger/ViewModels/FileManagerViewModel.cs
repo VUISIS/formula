@@ -47,9 +47,15 @@ internal class FileManagerViewModel : ReactiveObject
             if (Utils.LastDirectory != null &&
                 Utils.LastDirectory.TryGetUri(out uri))
             {
+                var txt = consoleOutput.Text;
+                if(txt == null || txt.Length <= 0)
+                {
+                    consoleOutput.Text += "[]> ";
+                }
+                
                 if(!formulaProgram.ExecuteCommand("unload *"))
                 {
-                    Console.WriteLine("Command Failed");
+                    consoleOutput.Text += "ERROR: Command failed.";
                     return;
                 }
             
@@ -57,16 +63,10 @@ internal class FileManagerViewModel : ReactiveObject
             
                 if(!formulaProgram.ExecuteCommand("load " + Path.Join(uri.AbsolutePath, SelectedItems[0].Header)))
                 {
-                    Console.WriteLine("Command Failed");
+                    consoleOutput.Text += "ERROR: Command failed.";
                     return;
                 }
-            
-                var txt = consoleOutput.Text;
-                if(txt == null || txt.Length <= 0)
-                {
-                    consoleOutput.Text += "[]> ";
-                }
-            
+
                 consoleOutput.Text += "load " + Path.Join(uri.AbsolutePath, SelectedItems[0].Header);
                 consoleOutput.Text += "\n";
                 consoleOutput.Text += formulaProgram.GetConsoleOutput();

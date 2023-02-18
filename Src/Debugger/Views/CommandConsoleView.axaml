@@ -15,10 +15,10 @@
                          Height="30" 
                          HorizontalAlignment="Left" 
                          Background="#222222"/>
-        <ScrollViewer Background="Black">
-            <TextBlock Padding="25" 
-                       Name="ConsoleOutput" 
-                       Height="{Binding $parent[StackPanel].Bounds.Height}"/>
-        </ScrollViewer>
+        <TextBlock Padding="25" 
+                   Name="ConsoleOutput" 
+                   Background="Black"
+                   TextWrapping="NoWrap"
+                   Height="{Binding $parent[StackPanel].Bounds.Height}"/>
     </StackPanel>
 </UserControl>

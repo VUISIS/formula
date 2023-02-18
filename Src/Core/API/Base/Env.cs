@@ -1201,7 +1201,6 @@ namespace Microsoft.Formula.API
             var solverPublisher = EnvParams.GetSolverPublisherParameter(Parameters, EnvParamKind.Debug_SolverPublisher);
             if (solverPublisher != null)
             {
-                
                 solverPublisher.SetStartTime(DateTime.Now);
                 solverPublisher.SetSolverResult(new List<Task<SolveResult>>(1){task});
             }
