@@ -32,7 +32,7 @@
                     <material:MaterialIcon Kind="Refresh"/>
                 </Button>
             </StackPanel>
-			<ScrollViewer HorizontalScrollBarVisibility="Visible"
+			<ScrollViewer HorizontalScrollBarVisibility="Hidden"
 					      DockPanel.Dock="Right">
                 <ItemsRepeater Items="{Binding Items}" 
                                Height="{Binding $parent[StackPanel].Bounds.Height}"
