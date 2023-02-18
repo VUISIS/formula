@@ -7,18 +7,18 @@
              xmlns:vm="using:Debugger.ViewModels"
              x:DataType="vm:InferenceRulesViewModel"
              x:Class="Debugger.Views.InferenceRulesView">
-    <StackPanel Height="NaN"
-                Orientation="Vertical">
+    <DockPanel>
         <TextBlock TextAlignment="Center" 
                    Text="Inference Rules"
                    Height="30"
-                   Margin="0,5,0,0"/>
-        <StackPanel Height="{Binding $parent[StackPanel].Bounds.Height}"
-                    Width="{Binding $parent[StackPanel].Bounds.Width}"
-                    Orientation="Horizontal">
+                   Margin="0,5,0,0"
+				   DockPanel.Dock="Top"/>
+        <DockPanel Height="{Binding $parent[StackPanel].Bounds.Height}"
+                    Width="{Binding $parent[StackPanel].Bounds.Width}">
             <StackPanel Spacing="4"
                         Margin="0,0,4,0"
-                        Orientation="Vertical">
+                        Orientation="Vertical"
+						DockPanel.Dock="Left">
                 <Button Width="25"
                         Height="25">
                     <material:MaterialIcon Kind="Plus"/>
@@ -32,20 +32,23 @@
                     <material:MaterialIcon Kind="Refresh"/>
                 </Button>
             </StackPanel>
-            <ItemsRepeater Items="{Binding Items}" 
-                           Height="{Binding $parent[StackPanel].Bounds.Height}"
-                           Width="{Binding $parent[StackPanel].Bounds.Width}"
-                           Background="#222222">
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <CheckBox/>
-                            <TextBlock Text="{Binding Header}"
-                                       Margin="0,8,0,0"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
-        </StackPanel>
-    </StackPanel>
+			<ScrollViewer HorizontalScrollBarVisibility="Visible"
+					      DockPanel.Dock="Right">
+                <ItemsRepeater Items="{Binding Items}" 
+                               Height="{Binding $parent[StackPanel].Bounds.Height}"
+                               Width="{Binding $parent[StackPanel].Bounds.Width}"
+                               Background="#222222">
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox/>
+                                <TextBlock Text="{Binding Header}"
+                                           Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+			</ScrollViewer>
+        </DockPanel>
+    </DockPanel>
 </UserControl>
