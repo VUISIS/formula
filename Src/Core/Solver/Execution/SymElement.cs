@@ -129,7 +129,10 @@
                         executer.GetSymbolicTerm(posTerm, out next))
                     {
                         var nextConstraint = next.GetSideConstraints(executer, localProcessed);
-                        currConstraint = CreateAndCacheConstraint(executer, currConstraint, nextConstraint);
+                        if (nextConstraint != null)
+                        {
+                            currConstraint = CreateAndCacheConstraint(executer, currConstraint, nextConstraint);
+                        }
                     }
                 }
 
