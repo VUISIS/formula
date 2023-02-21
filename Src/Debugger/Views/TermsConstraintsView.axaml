@@ -6,94 +6,140 @@
              xmlns:vm="using:Debugger.ViewModels"
              x:DataType="vm:TermsConstraintsViewModel"
              x:Class="Debugger.Views.TermsConstraintsView">
-    <Grid Name="TermsConstraintsGrid">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="10"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0"
-                    HorizontalAlignment="Stretch"
-                    Orientation="Vertical">
-            <TextBlock TextAlignment="Center" 
+	<Grid Name="TermsConstraintsGrid">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="10"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<DockPanel  Grid.RowSpan="4" Grid.Column="0"
+                    HorizontalAlignment="Stretch">
+			<TextBlock TextAlignment="Center"
                        Text="Current Terms"
-                       Margin="0,10,0,10"/>
-            <ListBox Height="{Binding $parent[StackPanel].Bounds.Height}"
-                     Items="{Binding CurrentTermItems}"
-                     SelectedItems="{Binding CurrentTermSelectedItems}"
-                     Background="#222222"
-                     SelectionMode="Single"
-                     Name="CurrentTerms">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock TextAlignment="Center"
-                                       Text="{Binding Header}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="2"
-                    HorizontalAlignment="Stretch"
-                    Orientation="Vertical">
-            <TextBlock TextAlignment="Center" 
-                       Text="Direct Constraints"
-                       Margin="0,10,0,10"/>
-            <ListBox Background="#222222"
-                     Items="{Binding DirectConstraintsItems}"
-                     Height="100"
-                     SelectionMode="Single">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <ScrollViewer>
-                                <TextBlock TextAlignment="Center"
+                       Margin="0,10,0,10"
+					   DockPanel.Dock="Top"/>
+			<ScrollViewer HorizontalScrollBarVisibility="Hidden">
+				<ListBox Height="{Binding $parent[StackPanel].Bounds.Height}"
+                         Items="{Binding CurrentTermItems}"
+                         SelectedItems="{Binding CurrentTermSelectedItems}"
+                         Background="#222222"
+                         SelectionMode="Single"
+                         Name="CurrentTerms">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal">
+								<TextBlock TextAlignment="Center"
                                            Text="{Binding Header}"/>
-                            </ScrollViewer>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <TextBlock TextAlignment="Center" 
-                       Text="Positive Constraints"
-                       Margin="0,10,0,10"/>
-            <ListBox Background="#222222"
-                     Items="{Binding PosConstraintsItems}"
-                     Height="100"
-                     SelectionMode="Single">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <ScrollViewer>
-                                <TextBlock TextAlignment="Center"
-                                           Text="{Binding Header}"/>
-                            </ScrollViewer>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <TextBlock TextAlignment="Center" 
-                       Text="Negative Constraints"
-                       Margin="0,10,0,10"/>
-            <ListBox Background="#222222"
-                     Items="{Binding NegConstraintsItems}"
-                     Height="100"
-                     SelectionMode="Single">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <ScrollViewer>
-                                <TextBlock TextAlignment="Center"
-                                           Text="{Binding Header}"/>
-                            </ScrollViewer>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </StackPanel>
+							</StackPanel>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</ScrollViewer>
+		</DockPanel>
+		<DockPanel  Grid.Row="0" Grid.Column="2"
+                    HorizontalAlignment="Stretch">
+			<TextBlock TextAlignment="Center"
+					   Text="Direct Constraints"
+					   Margin="0,10,0,10"
+					   DockPanel.Dock="Top"/>
+			<ScrollViewer HorizontalScrollBarVisibility="Hidden">
+				<ListBox Background="#222222"
+						 Items="{Binding DirectConstraintsItems}"
+						 SelectionMode="Single"
+						 VerticalAlignment="Stretch"
+						 DockPanel.Dock="Top">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal">
+								<ScrollViewer>
+									<TextBlock TextAlignment="Center"
+											   Text="{Binding Header}"/>
+								</ScrollViewer>
+							</StackPanel>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</ScrollViewer>
+		</DockPanel>
+		<DockPanel  Grid.Row="1" Grid.Column="2"
+			        HorizontalAlignment="Stretch">
+			<TextBlock TextAlignment="Center"
+					   Text="Positive Constraints"
+					   Margin="0,10,0,10"
+					   VerticalAlignment="Stretch"
+					   DockPanel.Dock="Top"/>
+			<ScrollViewer HorizontalScrollBarVisibility="Hidden">
+				<ListBox Background="#222222"
+						 Items="{Binding PosConstraintsItems}"
+						 SelectionMode="Single"
+						 VerticalAlignment="Stretch"
+						 DockPanel.Dock="Top">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal">
+								<ScrollViewer>
+									<TextBlock TextAlignment="Center"
+											   Text="{Binding Header}"/>
+								</ScrollViewer>
+							</StackPanel>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</ScrollViewer>
+		</DockPanel>
+		<DockPanel  Grid.Row="2" Grid.Column="2"
+					HorizontalAlignment="Stretch">
+			<TextBlock TextAlignment="Center"
+					   Text="Negative Constraints"
+					   Margin="0,10,0,10"
+					   DockPanel.Dock="Top"/>
+			<ScrollViewer HorizontalScrollBarVisibility="Hidden">
+				<ListBox Background="#222222"
+						 Items="{Binding NegConstraintsItems}"
+						 SelectionMode="Single"
+						 DockPanel.Dock="Top">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal">
+								<ScrollViewer>
+									<TextBlock TextAlignment="Center"
+											   Text="{Binding Header}"/>
+								</ScrollViewer>
+							</StackPanel>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</ScrollViewer>
+		</DockPanel>
+		<DockPanel  Grid.Row="3" Grid.Column="2"
+					HorizontalAlignment="Stretch">
+			<TextBlock TextAlignment="Center"
+					   Text="Flattened Constraints"
+					   Margin="0,10,0,10"
+					   DockPanel.Dock="Top"/>
+			<ScrollViewer HorizontalScrollBarVisibility="Hidden">
+				<ListBox Background="#222222"
+						 Items="{Binding FlatConstraintsItems}"
+						 SelectionMode="Single"
+						 DockPanel.Dock="Top">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal">
+								<ScrollViewer>
+									<TextBlock TextAlignment="Center"
+											   Text="{Binding Header}"/>
+								</ScrollViewer>
+							</StackPanel>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</ScrollViewer>
+		</DockPanel>
     </Grid>
 </UserControl>

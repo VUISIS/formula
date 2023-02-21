@@ -7,18 +7,21 @@
              x:DataType="vm:CommandConsoleViewModel"
              x:Class="Debugger.Views.CommandConsoleView"
              Name="ConsoleView">
-    <StackPanel Margin="10,0,10,0"
-                Orientation="Vertical">
+    <DockPanel Margin="10,0,10,0">
         <AutoCompleteBox Margin="10,0,0,7" 
                          Name="CommandInput" 
                          Width="350" 
                          Height="30" 
                          HorizontalAlignment="Left" 
-                         Background="#222222"/>
-        <TextBlock Padding="25" 
-                   Name="ConsoleOutput" 
-                   Background="Black"
-                   TextWrapping="NoWrap"
-                   Height="{Binding $parent[StackPanel].Bounds.Height}"/>
-    </StackPanel>
+                         Background="#222222"
+						 DockPanel.Dock="Top"/>
+		<ScrollViewer Background="Black"
+					  Height="{Binding $parent[StackPanel].Bounds.Height}">
+		    <TextBlock Padding="25" 
+                       Name="ConsoleOutput" 
+                       Background="Black"
+                       TextWrapping="NoWrap"
+                       Height="{Binding $parent[StackPanel].Bounds.Height}"/>
+		</ScrollViewer>
+    </DockPanel>
 </UserControl>
