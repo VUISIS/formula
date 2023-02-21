@@ -23,6 +23,7 @@ internal class TermsConstraintsViewModel : ReactiveObject
         DirectConstraintsItems = new ObservableCollection<Node>();
         PosConstraintsItems = new ObservableCollection<Node>();
         NegConstraintsItems = new ObservableCollection<Node>();
+        FlatConstraintsItems = new ObservableCollection<Node>();
         CurrentTermSelectedItems = new ObservableCollection<Node>();
         
         var currentTermsBox = window.Get<TermsConstraintsView>("TermsAndConstraintsView").Get<ListBox>("CurrentTerms");
@@ -39,8 +40,9 @@ internal class TermsConstraintsViewModel : ReactiveObject
             DirectConstraintsItems.Clear();
             PosConstraintsItems.Clear();
             NegConstraintsItems.Clear();
-            
-            foreach(var constraints in terms[CurrentTermSelectedItems[0].Id][ConstraintKind.Direct])
+            FlatConstraintsItems.Clear();
+
+            foreach (var constraints in terms[CurrentTermSelectedItems[0].Id][ConstraintKind.Direct])
             {
                 var node = new Node(constraints);
                 DirectConstraintsItems.Add(node);
@@ -66,6 +68,7 @@ internal class TermsConstraintsViewModel : ReactiveObject
         DirectConstraintsItems.Clear();
         PosConstraintsItems.Clear();
         NegConstraintsItems.Clear();
+        FlatConstraintsItems.Clear();
         CurrentTermSelectedItems.Clear();
     }
     
@@ -73,5 +76,6 @@ internal class TermsConstraintsViewModel : ReactiveObject
     public ObservableCollection<Node> DirectConstraintsItems { get; }
     public ObservableCollection<Node> PosConstraintsItems { get; }
     public ObservableCollection<Node> NegConstraintsItems { get; }
+    public ObservableCollection<Node> FlatConstraintsItems { get; }
     public ObservableCollection<Node> CurrentTermSelectedItems { get; }
 }
