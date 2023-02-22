@@ -9,11 +9,11 @@ To build and run the command line interpreter with Nix flakes, run
 $ nix run github:VUISIS/formula-dotnet
 ```
 
-### With .NET on x64
+### With .NET on x64 or Apple Silicon ARM64
 To build the command line interpreter, run the following commands from Src/CommandLine.
 
 ```bash
-$ dotnet build CommandLine.sln /p:Configuration=Debug|Release /p:Platform=x64
+$ dotnet build CommandLine.sln /p:Configuration=Debug|Release /p:Platform=x64|ARM64
 $ dotnet ./bin/<Configuration>/<OS>/<PLATFORM>/net6.0/CommandLine.dll
 ```
 
@@ -21,10 +21,10 @@ To run unit tests with Formula, run the following command from
 Src/Tests.
 
 ```bash
-$  dotnet test Tests.csproj /p:Configuration=Debug|Release /p:Platform=x64
+$ dotnet test Tests.csproj /p:Configuration=Debug|Release /p:Platform=x64|ARM64
 
 For specific tests
-$ dotnet test Tests.csproj /p:Configuration=Debug|Release /p:Platform=x64 --filter "FullyQualifiedName=<NAMESPACE>.<CLASS>.<METHOD>"
+$ dotnet test Tests.csproj /p:Configuration=Debug|Release /p:Platform=x64|ARM64 --filter "FullyQualifiedName=<NAMESPACE>.<CLASS>.<METHOD>"
 ```
 
 You can exit the command line interpreter with the "exit" command.

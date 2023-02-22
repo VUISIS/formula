@@ -21,15 +21,15 @@
 						DockPanel.Dock="Left">
                 <Button Width="25"
                         Height="25">
-                    <material:MaterialIcon Kind="Plus"/>
+                    <material:MaterialIcon Kind="BugPlay"/>
                 </Button>
                 <Button Width="25"
                         Height="25">
-                    <material:MaterialIcon Kind="Minus"/>
+                    <material:MaterialIcon Kind="BugPause"/>
                 </Button>
                 <Button Width="25"
                         Height="25">
-                    <material:MaterialIcon Kind="Refresh"/>
+                    <material:MaterialIcon Kind="BugStop"/>
                 </Button>
             </StackPanel>
 			<ScrollViewer HorizontalScrollBarVisibility="Hidden"

@@ -1,6 +1,4 @@
 ﻿using System.IO;
-using Microsoft.Formula.API.Plugins;
-using Microsoft.Z3;
 
 namespace Microsoft.Formula.Solver
 {
@@ -8,20 +6,17 @@ namespace Microsoft.Formula.Solver
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
-    using System.Text;
     using System.Threading;
 
     using API;
-    using API.ASTQueries;
     using API.Nodes;
     using Common;
     using Common.Extras;
     using Common.Rules;
     using Common.Terms;
-    using Compiler;
 
-    using Z3Expr = Microsoft.Z3.Expr;
-    using Z3BoolExpr = Microsoft.Z3.BoolExpr;
+    using Z3Expr = Z3.Expr;
+    using Z3BoolExpr = Z3.BoolExpr;
     using System.Numerics;
     using System.Text.RegularExpressions;
 
@@ -178,11 +173,16 @@ namespace Microsoft.Formula.Solver
             List<string> rules = new List<string>(Rules.Rules.Count());
             foreach (var coreRule in Rules.Rules)
             {
-                var tw = new StringWriter();
-                var ct = new CancellationToken();
-                var ep = new EnvParams();
-                coreRule.Head.PrintTerm(tw,ct,ep);
-                rules.Add(tw.ToString());
+                var t = coreRule.Head;
+                if ((t.Symbol is ConSymb conSym && !conSym.IsAutoGen) || 
+                    (t.Symbol is UserCnstSymb userConSym && !userConSym.IsAutoGen))
+                {
+                    var tw = new StringWriter();
+                    var ct = new CancellationToken();
+                    var ep = new EnvParams();
+                    t.PrintTerm(tw,ct,ep);
+                    rules.Add(tw.ToString());
+                }
             }
 
             return rules;
@@ -212,7 +212,7 @@ namespace Microsoft.Formula.Solver
 
                     foreach (var posConst in data.PosConstraints)
                     {
-                        SymElement next = null;
+                        SymElement next;
                         if(GetSymbolicTerm(posConst, out next))
                         {
                             var cancelToken = new CancellationToken();
@@ -225,7 +225,7 @@ namespace Microsoft.Formula.Solver
                     
                     foreach (var negConst in data.NegConstraints)
                     {
-                        SymElement next = null;
+                        SymElement next;
                         if (GetSymbolicTerm(negConst, out next))
                         {
                             var cancelToken = new CancellationToken();
@@ -348,9 +348,9 @@ namespace Microsoft.Formula.Solver
         public void PendEqualityConstraint(Term t1, Term t2)
         {
             Term normalized;
-            var expr1 = this.Encoder.GetTerm(t1, out normalized);
-            var expr2 = this.Encoder.GetTerm(t2, out normalized);
-            this.PendEqualityConstraint(expr1, expr2);
+            var expr1 = Encoder.GetTerm(t1, out normalized);
+            var expr2 = Encoder.GetTerm(t2, out normalized);
+            PendEqualityConstraint(expr1, expr2);
         }
 
         public void PendEqualityConstraint(Z3Expr expr1, Z3Expr expr2)
@@ -393,7 +393,7 @@ namespace Microsoft.Formula.Solver
 
         public void PrintRecursionConflict(Z3BoolExpr expr)
         {
-            Console.WriteLine("Conflict detected in recursion constraint: " + expr.ToString() + "\n\n");
+            Console.WriteLine("Conflict detected in recursion constraint: " + expr + "\n\n");
         }
 
         public SymExecuter(Solver solver)
@@ -407,7 +407,7 @@ namespace Microsoft.Formula.Solver
 
             solver.PartialModel.ConvertSymbCnstsToVars(out varFacts, out aliasMap);
 
-            Map<ConSymb, List<Term>> cardTerms = new Map<ConSymb, List<Term>>(ConSymb.Compare);
+            Map<ConSymb, List<Term>> cardTerms = new Map<ConSymb, List<Term>>(Symbol.Compare);
             foreach (var fact in varFacts)
             {
                 if (solver.PartialModel.CheckIfCardTerm(fact))
@@ -569,7 +569,7 @@ namespace Microsoft.Formula.Solver
                                     if (!(t.Symbol is UserCnstSymb &&
                                           ((UserCnstSymb)t.Symbol).IsAutoGen))
                                     {
-                                        Console.WriteLine("  " + item.Key.ToString());
+                                        Console.WriteLine("  " + item.Key);
                                     }
                                 }
                             }
@@ -585,12 +585,12 @@ namespace Microsoft.Formula.Solver
         {
             if (num < solutionStrings.Count)
             {
-                System.Console.WriteLine("Solution number " + num);
+                Console.WriteLine("Solution number " + num);
                 foreach (var str in solutionStrings[num])
                 {
-                    System.Console.WriteLine(str);
+                    Console.WriteLine(str);
                 }
-                System.Console.WriteLine();
+                Console.WriteLine();
                 return;
             }
 
@@ -636,16 +636,16 @@ namespace Microsoft.Formula.Solver
 
             if (num < solutionStrings.Count)
             {
-                System.Console.WriteLine("Solution number " + num);
+                Console.WriteLine("Solution number " + num);
                 foreach (var str in solutionStrings[num])
                 {
-                    System.Console.WriteLine(str);
+                    Console.WriteLine(str);
                 }
-                System.Console.WriteLine();
+                Console.WriteLine();
             }
             else
             {
-                System.Console.WriteLine("Could not find solution " + num);
+                Console.WriteLine("Could not find solution " + num);
             }
         }
 
