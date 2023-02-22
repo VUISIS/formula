@@ -6,12 +6,115 @@
              xmlns:vm="using:Debugger.ViewModels"
              x:DataType="vm:SolverViewModel"
              x:Class="Debugger.Views.SolverView">
-    <StackPanel HorizontalAlignment="Stretch"
-                Orientation="Vertical">
-        <TextBlock TextAlignment="Center" 
-                   Text="Solver"
-                   Margin="0,5,0,5"/>
-        <Panel Height="{Binding $parent[StackPanel].Bounds.Height}"
-               Background="#222222"/>
-    </StackPanel>
+	<Grid Name="SolverGrid">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="80"/>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="2*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="10"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<TextBlock Grid.Row="0" Grid.ColumnSpan="3"
+				   TextAlignment="Center"
+				   Text="Solver"
+				   Margin="0,5,0,5"/>
+		<TextBlock Grid.Row="1" Grid.Column="0"
+				   TextAlignment="Left"
+				   Text="Symbolic variables"
+				   Margin="0,5,0,5"/>
+		<ScrollViewer Grid.Row="2" Grid.Column="0"
+			          HorizontalScrollBarVisibility="Hidden">
+			<ListBox Background="#222222"
+					 Items="{Binding SymbolicVariablesItems}"
+					 SelectionMode="Single"
+					 DockPanel.Dock="Top">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal">
+							<ScrollViewer>
+								<TextBlock TextAlignment="Center"
+										   Text="{Binding Header}"/>
+							</ScrollViewer>
+						</StackPanel>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</ScrollViewer>
+		<TextBox Grid.Row="2" Grid.Column="2"
+				 Text="{Binding AddedConstraint}"
+				 Margin="0,5,0,5"
+				 AcceptsReturn="True" TextWrapping="Wrap"/>
+		<Button Grid.Row="3" Grid.Column="0"
+				Click="AddConstraintClick"
+				Foreground="White" Background="Black">
+			    Add constraint button
+		</Button>
+		<TextBlock Grid.Row="4" Grid.ColumnSpan="3"
+		   TextAlignment="Left"
+		   Text="All constraints"
+		   Margin="0,5,0,5"/>
+		<ScrollViewer Grid.Row="5" Grid.ColumnSpan="3"
+			  HorizontalScrollBarVisibility="Hidden">
+			<ListBox Background="#222222"
+					 Items="{Binding AllConstraintsItems}"
+					 SelectionMode="Single"
+					 DockPanel.Dock="Top">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal">
+							<ScrollViewer>
+								<TextBlock TextAlignment="Center"
+										   Text="{Binding Header}"/>
+							</ScrollViewer>
+						</StackPanel>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</ScrollViewer>
+		<Button Grid.Row="6" Grid.Column="0"
+				Click="SolveConstraintsClick"
+				Foreground="White" Background="Black">
+			<TextBlock>
+				Solve constraints <LineBreak/> button
+			</TextBlock>
+		</Button>
+		<Button Grid.Row="6" Grid.Column="2"
+				Click="GenerateNextSolutionClick"
+				Foreground="White" Background="Black">
+			<TextBlock>
+				Generate next <LineBreak/> solution button
+			</TextBlock>
+		</Button>
+		<TextBlock Grid.Row="7" Grid.ColumnSpan="3"
+		   TextAlignment="Left"
+		   Text="Solution / Unsat core + counterexample"
+		   Margin="0,5,0,5"/>
+		<ScrollViewer Grid.Row="8" Grid.ColumnSpan="3"
+			 HorizontalScrollBarVisibility="Hidden">
+			<ListBox Background="#222222"
+					 Items="{Binding SolutionItems}"
+					 SelectionMode="Single"
+					 DockPanel.Dock="Top">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal">
+							<ScrollViewer>
+								<TextBlock TextAlignment="Center"
+										   Text="{Binding Header}"/>
+							</ScrollViewer>
+						</StackPanel>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</ScrollViewer>
+	</Grid>
 </UserControl>
