@@ -67,7 +67,19 @@ internal class CommandConsoleViewModel : ReactiveObject
                 {
                     commandOutput.Text += "[]> ";
                 }
-                
+
+                if (commandInput.Text.StartsWith("load") ||
+                    commandInput.Text.StartsWith("l"))
+                {
+                    if (!formulaProgram.ExecuteCommand("unload *"))
+                    {
+                        commandOutput.Text += "ERROR: Command failed.";
+                        return;
+                    }
+
+                    formulaProgram.ClearConsoleOutput();
+                }
+
                 if (!formulaProgram.ExecuteCommand(commandInput.Text))
                 {
                     commandOutput.Text += "ERROR: Command failed.";
@@ -76,19 +88,18 @@ internal class CommandConsoleViewModel : ReactiveObject
 
                 commandOutput.Text += commandInput.Text;
 
-                var reg = new Regex(@"^[a-z]+");
-                MatchCollection matches = reg.Matches(commandInput.Text);
-                if (matches.Count > 0 &&
-                    Utils.InputCommands.Contains(matches[0].Value))
+                foreach (var cmd in Utils.InputCommands)
                 {
-                    commandOutput.Text += "\n";
+                    if (commandInput.Text.StartsWith(cmd))
+                    {
+                        commandOutput.Text += "\n";
+                    }
                 }
 
                 var output = formulaProgram.GetConsoleOutput();
                 var solveResult = formulaProgram.FormulaPublisher.WaitForCompletion();
-                if ((matches.Count > 0 &&
-                     matches[0].Value.Equals("solve") ||
-                     matches[0].Value.Equals("sl")) &&
+                if ((commandInput.Text.StartsWith("solve") ||
+                     commandInput.Text.StartsWith("sl")) &&
                     inferenceRulesViewModel != null &&
                     termsConstraintsViewModel != null)
                 {
@@ -105,6 +116,7 @@ internal class CommandConsoleViewModel : ReactiveObject
 
                         var rules = formulaProgram.FormulaPublisher.GetLeastFixedPointTerms();
                         var constraints = formulaProgram.FormulaPublisher.GetLeastFixedPointConstraints();
+                        var flag = true;
                         foreach (var term in rules)
                         {
                             var tw = new StringWriter();
@@ -118,33 +130,38 @@ internal class CommandConsoleViewModel : ReactiveObject
                                 var node = new Node(tw.ToString(), keyId);
                                 termsConstraintsViewModel.CurrentTermItems.Add(node);
                             }
-                            
-                            foreach (var val in constraints[keyId])
+
+                            if (flag)
                             {
-                                if (val.Value.Count() < 1)
+                                var directConsts = constraints[keyId][ConstraintKind.Direct];
+                                foreach (var v in directConsts)
                                 {
-                                    continue;
+                                    var dirn = new Node(v);
+                                    termsConstraintsViewModel.DirectConstraintsItems.Add(dirn);
                                 }
-                                
-                                switch (val.Key)
+                            
+                                var posConsts = constraints[keyId][ConstraintKind.Positive];
+                                foreach (var v in posConsts)
                                 {
-                                    case ConstraintKind.Direct:
-                                        var dirn = new Node(val.Value[0]);
-                                        termsConstraintsViewModel.DirectConstraintsItems.Add(dirn);
-                                        break;
-                                    case ConstraintKind.Positive:
-                                        var posn = new Node(val.Value[0]);
-                                        termsConstraintsViewModel.PosConstraintsItems.Add(posn);
-                                        break;
-                                    case ConstraintKind.Negative:
-                                        var negn = new Node(val.Value[0]);
-                                        termsConstraintsViewModel.NegConstraintsItems.Add(negn);
-                                        break;
-                                    case ConstraintKind.Flattened:
-                                        var flatn = new Node(val.Value[0]);
-                                        termsConstraintsViewModel.FlatConstraintsItems.Add(flatn);
-                                        break;
+                                    var posn = new Node(v);
+                                    termsConstraintsViewModel.PosConstraintsItems.Add(posn);
                                 }
+                            
+                                var negConsts = constraints[keyId][ConstraintKind.Negative];
+                                foreach (var v in negConsts)
+                                {
+                                    var negn = new Node(v);
+                                    termsConstraintsViewModel.NegConstraintsItems.Add(negn);
+                                }
+                            
+                                var flatConsts = constraints[keyId][ConstraintKind.Flattened];
+                                foreach (var v in flatConsts)
+                                {
+                                    var flatn = new Node(v);
+                                    termsConstraintsViewModel.FlatConstraintsItems.Add(flatn);
+                                }
+
+                                flag = false;
                             }
                         }
 

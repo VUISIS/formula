@@ -56,6 +56,14 @@ internal class ToolbarViewModel : ReactiveObject
                         consoleOutput.Text += "[]> ";
                     }
                     
+                    if(!formulaProgram.ExecuteCommand("unload *"))
+                    {
+                        consoleOutput.Text += "ERROR: Command failed.";
+                        return;
+                    }
+            
+                    formulaProgram.ClearConsoleOutput();
+                    
                     if(!formulaProgram.ExecuteCommand("load " + Path.Join(uri.AbsolutePath, file.Name)))
                     {
                         consoleOutput.Text += "ERROR: Command failed.";
