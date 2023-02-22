@@ -172,16 +172,37 @@ namespace Microsoft.Formula.Solver
         {
             return lfp.Keys;
         }
+        
+        public List<string> GetCoreRules()
+        {
+            List<string> rules = new List<string>(Rules.Rules.Count());
+            foreach (var coreRule in Rules.Rules)
+            {
+                var tw = new StringWriter();
+                var ct = new CancellationToken();
+                var ep = new EnvParams();
+                coreRule.Head.PrintTerm(tw,ct,ep);
+                rules.Add(tw.ToString());
+            }
+
+            return rules;
+        }
 
         public Dictionary<int, Dictionary<ConstraintKind, List<string>>> GetLeastFixedPointConstraints()
         {
             Dictionary<int, Dictionary<ConstraintKind, List<string>>> newlfp = new Dictionary<int, Dictionary<ConstraintKind, List<string>>>();
             foreach (var el in lfp)
             {
+                if (newlfp.ContainsKey(el.Key.Symbol.Id))
+                {
+                    continue;
+                }
+                
                 Dictionary<ConstraintKind, List<string>> termConstraints = new Dictionary<ConstraintKind, List<string>>();
                 List<string> dirConstStrings = new List<string>();
                 List<string> posConstStrings = new List<string>();
                 List<string> negConstStrings = new List<string>();
+                List<string> sideConstStrings = new List<string>();
                 foreach (var data in el.Value.GetConstraintData())
                 {
                     foreach (var dirConst in data.DirConstraints)
@@ -215,9 +236,13 @@ namespace Microsoft.Formula.Solver
                         }
                     }
                 }
+
+                var sideConstraints = el.Value.GetSideConstraints(this);
+                sideConstStrings.Add(sideConstraints.ToString());
                 termConstraints.Add(ConstraintKind.Direct, dirConstStrings);
                 termConstraints.Add(ConstraintKind.Positive, posConstStrings);
                 termConstraints.Add(ConstraintKind.Negative, negConstStrings);
+                termConstraints.Add(ConstraintKind.Flattened, sideConstStrings);
                 if (el.Key.Symbol != null)
                 {
                     newlfp.Add(el.Key.Symbol.Id, termConstraints);

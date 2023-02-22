@@ -31,27 +31,21 @@ public partial class MainWindow : Window
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
-
-        var termsConstraintsViewModel = new TermsConstraintsViewModel(this, formulaProgram.FormulaPublisher);
-        var inferenceViewModel = new InferenceRulesViewModel();
         
+        var tcv = this.Get<TermsConstraintsView>("TermsAndConstraintsView");
+        SetViewWindow(tcv, new TermsConstraintsViewModel(this, formulaProgram));
+        
+        var iv = this.Get<InferenceRulesView>("SolverRulesView");
+        SetViewWindow(iv, new InferenceRulesViewModel());
+
         var civ = this.Get<CommandConsoleView>("CommandInputView");
-        SetViewWindow(civ, new CommandConsoleViewModel(this, 
-                                                              formulaProgram, 
-                                                              termsConstraintsViewModel, 
-                                                              inferenceViewModel));
+        SetViewWindow(civ, new CommandConsoleViewModel(this, formulaProgram));
         
         var fmv = this.Get<FileManagerView>("FileTreeView");
         SetViewWindow(fmv, new FileManagerViewModel(this, formulaProgram));
         
         var tbv = this.Get<ToolbarView>("TopToolbarView");
         SetViewWindow(tbv, new ToolbarViewModel(this, formulaProgram));
-        
-        var tcv = this.Get<TermsConstraintsView>("TermsAndConstraintsView");
-        SetViewWindow(tcv, termsConstraintsViewModel);
-        
-        var iv = this.Get<InferenceRulesView>("SolverRulesView");
-        SetViewWindow(iv, inferenceViewModel);
     }
 
     private void SetViewWindow(UserControl uc, ReactiveObject obj)

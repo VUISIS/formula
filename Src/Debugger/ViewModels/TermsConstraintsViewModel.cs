@@ -14,10 +14,10 @@ namespace Debugger.ViewModels;
 
 internal class TermsConstraintsViewModel : ReactiveObject
 {
-    private FormulaPublisher formulaPublisher;
-    public TermsConstraintsViewModel(MainWindow window, FormulaPublisher publisher)
+    private FormulaProgram formulaProgram;
+    public TermsConstraintsViewModel(MainWindow window, FormulaProgram program)
     {
-        formulaPublisher = publisher;
+        formulaProgram = program;
         
         CurrentTermItems = new ObservableCollection<Node>();
         DirectConstraintsItems = new ObservableCollection<Node>();
@@ -35,7 +35,7 @@ internal class TermsConstraintsViewModel : ReactiveObject
         if (CurrentTermSelectedItems.Count > 0 &&
             CurrentTermSelectedItems[0].Id > -1)
         {
-            var terms = formulaPublisher.GetLeastFixedPointConstraints();
+            var terms = formulaProgram.FormulaPublisher.GetLeastFixedPointConstraints();
             
             DirectConstraintsItems.Clear();
             PosConstraintsItems.Clear();
@@ -58,6 +58,12 @@ internal class TermsConstraintsViewModel : ReactiveObject
             {
                 var node = new Node(constraints);
                 NegConstraintsItems.Add(node);
+            }
+            
+            foreach(var constraints in terms[CurrentTermSelectedItems[0].Id][ConstraintKind.Flattened])
+            {
+                var node = new Node(constraints);
+                FlatConstraintsItems.Add(node);
             }
         }
     }

@@ -4,6 +4,7 @@ using ReactiveUI;
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -25,10 +26,7 @@ internal class CommandConsoleViewModel : ReactiveObject
     private readonly InferenceRulesViewModel? inferenceRulesViewModel;
     private readonly TermsConstraintsViewModel? termsConstraintsViewModel;
     
-    public CommandConsoleViewModel(MainWindow win, 
-                                   FormulaProgram program, 
-                                   TermsConstraintsViewModel termsConstraintsModel,
-                                   InferenceRulesViewModel inferenceModel)
+    public CommandConsoleViewModel(MainWindow win, FormulaProgram program)
     {
         mainWindow = win;
         formulaProgram = program;
@@ -42,8 +40,8 @@ internal class CommandConsoleViewModel : ReactiveObject
         
         commandOutput = commandInputView.Get<TextBlock>("ConsoleOutput");
 
-        termsConstraintsViewModel = termsConstraintsModel;
-        inferenceRulesViewModel = inferenceModel;
+        termsConstraintsViewModel = mainWindow.Get<TermsConstraintsView>("TermsAndConstraintsView").DataContext as TermsConstraintsViewModel;
+        inferenceRulesViewModel = mainWindow.Get<InferenceRulesView>("SolverRulesView").DataContext as InferenceRulesViewModel;
     }
 
     private void InputKey(object? sender, KeyEventArgs e)
@@ -80,15 +78,17 @@ internal class CommandConsoleViewModel : ReactiveObject
 
                 var reg = new Regex(@"^[a-z]+");
                 MatchCollection matches = reg.Matches(commandInput.Text);
-                if (Utils.InputCommands.Contains(matches[0].Value))
+                if (matches.Count > 0 &&
+                    Utils.InputCommands.Contains(matches[0].Value))
                 {
                     commandOutput.Text += "\n";
                 }
 
                 var output = formulaProgram.GetConsoleOutput();
                 var solveResult = formulaProgram.FormulaPublisher.WaitForCompletion();
-                if ((matches[0].Value.Equals("solve") ||
-                    matches[0].Value.Equals("sl")) &&
+                if ((matches.Count > 0 &&
+                     matches[0].Value.Equals("solve") ||
+                     matches[0].Value.Equals("sl")) &&
                     inferenceRulesViewModel != null &&
                     termsConstraintsViewModel != null)
                 {
@@ -96,8 +96,15 @@ internal class CommandConsoleViewModel : ReactiveObject
                     {
                         inferenceRulesViewModel.Items.Clear();
 
+                        var coreRules = formulaProgram.FormulaPublisher.GetCoreRules();
+                        foreach (var rule in coreRules)
+                        {
+                            var rn = new Node(rule);
+                            inferenceRulesViewModel.Items.Add(rn);
+                        }
+
                         var rules = formulaProgram.FormulaPublisher.GetLeastFixedPointTerms();
-                        var firstTermSet = false;
+                        var constraints = formulaProgram.FormulaPublisher.GetLeastFixedPointConstraints();
                         foreach (var term in rules)
                         {
                             var tw = new StringWriter();
@@ -112,34 +119,31 @@ internal class CommandConsoleViewModel : ReactiveObject
                                 termsConstraintsViewModel.CurrentTermItems.Add(node);
                             }
                             
-                            var constraints = formulaProgram.FormulaPublisher.GetLeastFixedPointConstraints();
                             foreach (var val in constraints[keyId])
                             {
-                                foreach (var data in val.Value)
+                                if (val.Value.Count() < 1)
                                 {
-                                    var n = new Node(data);
-                                    inferenceRulesViewModel.Items.Add(n);
-                                    
-                                    if (!firstTermSet)
-                                    {
-                                        switch (val.Key)
-                                        {
-                                            case ConstraintKind.Direct:
-                                                var dirn = new Node(data);
-                                                termsConstraintsViewModel.DirectConstraintsItems.Add(dirn);
-                                                break;
-                                            case ConstraintKind.Positive:
-                                                var posn = new Node(data);
-                                                termsConstraintsViewModel.PosConstraintsItems.Add(posn);
-                                                break;
-                                            case ConstraintKind.Negative:
-                                                var negn = new Node(data);
-                                                termsConstraintsViewModel.NegConstraintsItems.Add(negn);
-                                                break;
-                                        }
-
-                                        firstTermSet = true;
-                                    }
+                                    continue;
+                                }
+                                
+                                switch (val.Key)
+                                {
+                                    case ConstraintKind.Direct:
+                                        var dirn = new Node(val.Value[0]);
+                                        termsConstraintsViewModel.DirectConstraintsItems.Add(dirn);
+                                        break;
+                                    case ConstraintKind.Positive:
+                                        var posn = new Node(val.Value[0]);
+                                        termsConstraintsViewModel.PosConstraintsItems.Add(posn);
+                                        break;
+                                    case ConstraintKind.Negative:
+                                        var negn = new Node(val.Value[0]);
+                                        termsConstraintsViewModel.NegConstraintsItems.Add(negn);
+                                        break;
+                                    case ConstraintKind.Flattened:
+                                        var flatn = new Node(val.Value[0]);
+                                        termsConstraintsViewModel.FlatConstraintsItems.Add(flatn);
+                                        break;
                                 }
                             }
                         }

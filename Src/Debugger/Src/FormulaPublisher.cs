@@ -12,6 +12,7 @@ public class FormulaPublisher : ISolverPublisher
 {
     private Dictionary<int, Dictionary<ConstraintKind, List<string>>> lfpConstraints  = new Dictionary<int, Dictionary<ConstraintKind, List<string>>>();
     private IEnumerable<Term> lfpTerms = new List<Term>();
+    private List<string> coreRules = new List<string>();
     private List<Task<SolveResult>> SolveResults = new List<Task<SolveResult>>();
     private DateTime? startTime;
     private int resultTime;
@@ -40,7 +41,17 @@ public class FormulaPublisher : ISolverPublisher
     {
         lfpTerms = terms;
     }
-    
+
+    public void SetCoreRules(List<string> rules)
+    {
+        coreRules = rules;
+    }
+
+    public List<string> GetCoreRules()
+    {
+        return coreRules;
+    }
+
     public IEnumerable<Term> GetLeastFixedPointTerms()
     {
         return lfpTerms;

@@ -310,6 +310,7 @@
             var solverPublisher = EnvParams.GetSolverPublisherParameter(Env.Parameters, EnvParamKind.Debug_SolverPublisher);
             if (solverPublisher != null)
             {
+                solverPublisher.SetCoreRules(executer.GetCoreRules());
                 solverPublisher.SetLeastFixedPointTerms(executer.GetLeastFixedPointTerms());
                 solverPublisher.SetLeastFixedPointConstraints(executer.GetLeastFixedPointConstraints());
             }

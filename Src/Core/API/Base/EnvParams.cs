@@ -126,6 +126,11 @@ namespace Microsoft.Formula.API
 
             return (ISolverPublisher)parameters[prm].Item3;
         }
+        
+        public static bool IsSolverPublisherSet()
+        {
+            return (parameters[EnvParamKind.Debug_SolverPublisher].Item3 != null);
+        }
 
         /// <summary>
         /// Returns a new set of parameters with same parameters as prms, but with kind = value.
