@@ -27,24 +27,24 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10"/>
-                <ColumnDefinition MinWidth="150" MaxWidth="275"/>
-                <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="10"/>
-                <ColumnDefinition MinWidth="150" MaxWidth="275"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="10"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Row="0" 
                        Grid.Column="1"
                        TextAlignment="Center" 
-                       VerticalAlignment="Center"
+                       VerticalAlignment="Bottom"
                        Text="File Manager"/>
             <TextBlock Grid.Row="0" 
                        Grid.Column="7"
                        TextAlignment="Center" 
-                       VerticalAlignment="Center"
+                       VerticalAlignment="Bottom"
                        Text="Solver"/>
             <TextBlock Grid.Row="4" 
                        Grid.Column="1"
@@ -67,7 +67,8 @@
                              Width="350" 
                              Height="30" 
                              HorizontalAlignment="Left" 
-                             Background="#222222"/>
+                             Background="#222222"
+                             ToolTip.Tip="Press enter key to input commands."/>
             <v:FileManagerView Name="FileTreeView"
                                Grid.Row="2" 
                                Grid.Column="1"/>

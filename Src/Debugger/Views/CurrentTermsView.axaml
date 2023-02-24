@@ -6,7 +6,9 @@
              xmlns:vm="using:Debugger.ViewModels"
              x:DataType="vm:CurrentTermsViewModel"
              x:Class="Debugger.Views.CurrentTermsView">
-    <ScrollViewer>
+    <ScrollViewer AllowAutoHide="True"
+                  HorizontalScrollBarVisibility="Visible"
+                  VerticalScrollBarVisibility="Visible">
         <ListBox Items="{Binding CurrentTermItems}"
                  SelectedItems="{Binding CurrentTermSelectedItems}"
                  Background="#222222"

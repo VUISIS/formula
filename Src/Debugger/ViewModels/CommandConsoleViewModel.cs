@@ -2,10 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using ReactiveUI;
 
-using System;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 using Debugger.ViewModels.Helpers;
@@ -13,7 +10,6 @@ using Debugger.Views;
 using Debugger.Windows;
 using Debugger.ViewModels.Types;
 using Microsoft.Formula.API;
-using Microsoft.Formula.Common.Terms;
 
 namespace Debugger.ViewModels;
 

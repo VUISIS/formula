@@ -26,7 +26,10 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<ScrollViewer Grid.Row="0" 
-		              Grid.Column="0">
+		              Grid.Column="0"
+		              AllowAutoHide="True"
+		              HorizontalScrollBarVisibility="Visible"
+		              VerticalScrollBarVisibility="Visible">
 			<ListBox Background="#222222"
 					 Items="{Binding DirectConstraintsItems}"
 					 SelectionMode="Single"
@@ -51,7 +54,9 @@
 		           Text="Positive Constraints"/>
 		<ScrollViewer Grid.Row="4" 
 		              Grid.Column="0" 
-		              HorizontalScrollBarVisibility="Hidden">
+		              AllowAutoHide="True"
+		              HorizontalScrollBarVisibility="Visible"
+		              VerticalScrollBarVisibility="Visible">
 			<ListBox Background="#222222"
 					 Items="{Binding PosConstraintsItems}"
 					 SelectionMode="Single"
@@ -76,7 +81,9 @@
 		           Text="Negative Constraints"/>
 		<ScrollViewer Grid.Row="8" 
 		              Grid.Column="0" 
-		              HorizontalScrollBarVisibility="Hidden">
+		              AllowAutoHide="True"
+		              HorizontalScrollBarVisibility="Visible"
+		              VerticalScrollBarVisibility="Visible">
 			<ListBox Background="#222222"
 					 Items="{Binding NegConstraintsItems}"
 					 SelectionMode="Single">
@@ -100,7 +107,9 @@
 		           Text="Flattened Constraints"/>
 		<ScrollViewer Grid.Row="12" 
 		              Grid.Column="0" 
-		              HorizontalScrollBarVisibility="Hidden">
+		              AllowAutoHide="True"
+		              HorizontalScrollBarVisibility="Visible"
+		              VerticalScrollBarVisibility="Visible">
 			<ListBox Background="#222222"
 					 Items="{Binding FlatConstraintsItems}"
 					 SelectionMode="Single">

@@ -16,7 +16,9 @@ internal class SolverViewModel : ReactiveObject
         SymbolicVariablesItems = new ObservableCollection<Node>();
         AllConstraintsItems = new ObservableCollection<Node>();
         SolutionItems = new ObservableCollection<Node>();
+        CounterExampleItems = new ObservableCollection<Node>();
 
+        AddedConstraint = new string("");
     }
 
     public void ClearAll()
@@ -29,5 +31,6 @@ internal class SolverViewModel : ReactiveObject
     public ObservableCollection<Node> SymbolicVariablesItems { get; }
     public ObservableCollection<Node> AllConstraintsItems { get; }
     public ObservableCollection<Node> SolutionItems { get; }
+    public ObservableCollection<Node> CounterExampleItems { get; }
     public string AddedConstraint { get; }
 }

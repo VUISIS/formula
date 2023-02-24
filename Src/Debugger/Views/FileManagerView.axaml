@@ -7,7 +7,9 @@
              x:DataType="vm:FileManagerViewModel"
              x:Class="Debugger.Views.FileManagerView"
              Name="FileView">
-    <ScrollViewer>
+    <ScrollViewer AllowAutoHide="True"
+                  HorizontalScrollBarVisibility="Visible"
+                  VerticalScrollBarVisibility="Visible">
         <TreeView Items="{Binding Items}" 
                   SelectedItems="{Binding SelectedItems}"
                   SelectionMode="Single"
@@ -15,7 +17,9 @@
                   Name="FileManagerPanel">
             <TreeView.ItemTemplate>
                 <TreeDataTemplate ItemsSource="{Binding Children}">
-                    <ScrollViewer>
+                    <ScrollViewer AllowAutoHide="True"
+                                  HorizontalScrollBarVisibility="Visible"
+                                  VerticalScrollBarVisibility="Visible">
                         <TextBlock Text="{Binding Header}"/>
                     </ScrollViewer>
                 </TreeDataTemplate>
