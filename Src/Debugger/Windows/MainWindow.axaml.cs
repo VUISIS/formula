@@ -32,8 +32,11 @@ public partial class MainWindow : Window
     {
         AvaloniaXamlLoader.Load(this);
         
-        var tcv = this.Get<TermsConstraintsView>("TermsAndConstraintsView");
-        SetViewWindow(tcv, new TermsConstraintsViewModel(this, formulaProgram));
+        var ctv = this.Get<CurrentTermsView>("TermsView");
+        SetViewWindow(ctv, new CurrentTermsViewModel(this, formulaProgram));
+        
+        var cv = this.Get<ConstraintsView>("ConstrView");
+        SetViewWindow(cv, new ConstraintsViewModel());
         
         var iv = this.Get<InferenceRulesView>("SolverRulesView");
         SetViewWindow(iv, new InferenceRulesViewModel());

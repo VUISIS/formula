@@ -4,13 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="using:Debugger.ViewModels"
-             x:DataType="vm:CommandConsoleViewModel"
-             x:Class="Debugger.Views.CommandConsoleView"
-             Name="ConsoleView">
-	<ScrollViewer Background="Black">
-		    <TextBlock Padding="25" 
-                       Name="ConsoleOutput" 
-                       Background="Black"
-                       TextWrapping="NoWrap"/>
-	</ScrollViewer>
+             x:DataType="vm:Domain4MLViewModel"
+             x:Class="Debugger.Views.Domain4MLView">
+    <ScrollViewer Background="Black">
+        <TextBlock Padding="25" 
+                   Name="FileOutput" 
+                   Background="Black"
+                   TextWrapping="NoWrap"/>
+    </ScrollViewer>
 </UserControl>

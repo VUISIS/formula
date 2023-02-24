@@ -8,47 +8,36 @@
              x:DataType="vm:InferenceRulesViewModel"
              x:Class="Debugger.Views.InferenceRulesView">
     <DockPanel>
-        <TextBlock TextAlignment="Center" 
-                   Text="Inference Rules"
-                   Height="30"
-                   Margin="0,5,0,0"
-				   DockPanel.Dock="Top"/>
-        <DockPanel Height="{Binding $parent[StackPanel].Bounds.Height}"
-                    Width="{Binding $parent[StackPanel].Bounds.Width}">
-            <StackPanel Spacing="4"
-                        Margin="0,0,4,0"
-                        Orientation="Vertical"
-						DockPanel.Dock="Left">
-                <Button Width="25"
-                        Height="25">
-                    <material:MaterialIcon Kind="BugPlay"/>
-                </Button>
-                <Button Width="25"
-                        Height="25">
-                    <material:MaterialIcon Kind="BugPause"/>
-                </Button>
-                <Button Width="25"
-                        Height="25">
-                    <material:MaterialIcon Kind="BugStop"/>
-                </Button>
-            </StackPanel>
-			<ScrollViewer HorizontalScrollBarVisibility="Hidden"
-					      DockPanel.Dock="Right">
-                <ItemsRepeater Items="{Binding Items}" 
-                               Height="{Binding $parent[StackPanel].Bounds.Height}"
-                               Width="{Binding $parent[StackPanel].Bounds.Width}"
-                               Background="#222222">
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <CheckBox/>
-                                <TextBlock Text="{Binding Header}"
-                                           Margin="0,8,0,0"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-			</ScrollViewer>
-        </DockPanel>
+        <StackPanel Spacing="4"
+                    Margin="0,0,4,0"
+                    Orientation="Vertical"
+					DockPanel.Dock="Left">
+            <Button Width="25"
+                    Height="25">
+                <material:MaterialIcon Kind="BugPlay"/>
+            </Button>
+            <Button Width="25"
+                    Height="25">
+                <material:MaterialIcon Kind="BugPause"/>
+            </Button>
+            <Button Width="25"
+                    Height="25">
+                <material:MaterialIcon Kind="BugStop"/>
+            </Button>
+        </StackPanel>
+		<ScrollViewer>
+            <ItemsRepeater Items="{Binding Items}" 
+                           Background="#222222">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox/>
+                            <TextBlock Text="{Binding Header}"
+                                       Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+		</ScrollViewer>
     </DockPanel>
 </UserControl>

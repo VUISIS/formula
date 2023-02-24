@@ -17,6 +17,7 @@ internal class ToolbarViewModel : ReactiveObject
     private readonly MainWindow? mainWindow;
     private readonly FormulaProgram? formulaProgram;
     private readonly TextBlock? consoleOutput;
+    private readonly TextBlock? fileOutput;
 
     public ToolbarViewModel(MainWindow win, FormulaProgram program)
     {
@@ -24,6 +25,8 @@ internal class ToolbarViewModel : ReactiveObject
 
         formulaProgram = program;
 
+        fileOutput = mainWindow.Get<Domain4MLView>("DomainView")
+                              .Get<TextBlock>("FileOutput");
         consoleOutput = mainWindow.Get<CommandConsoleView>("CommandInputView")
                                   .Get<TextBlock>("ConsoleOutput");
         fileManagerModel = mainWindow.Get<FileManagerView>("FileTreeView").DataContext as FileManagerViewModel;
@@ -63,14 +66,21 @@ internal class ToolbarViewModel : ReactiveObject
                     }
             
                     formulaProgram.ClearConsoleOutput();
+
+                    var fileP = Path.Join(uri.AbsolutePath, file.Name);
                     
-                    if(!formulaProgram.ExecuteCommand("load " + Path.Join(uri.AbsolutePath, file.Name)))
+                    if(!formulaProgram.ExecuteCommand("load " + fileP))
                     {
                         consoleOutput.Text += "ERROR: Command failed.";
                         return;
                     }
                     
-                    consoleOutput.Text += "load " + Path.Join(uri.AbsolutePath, file.Name); 
+                    if (fileOutput != null)
+                    {
+                        fileOutput.Text = Utils.OpenFileText(fileP);
+                    }
+                    
+                    consoleOutput.Text += "load " + fileP; 
                     consoleOutput.Text += "\n";
                     consoleOutput.Text += formulaProgram.GetConsoleOutput();
                 }

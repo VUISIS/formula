@@ -1,13 +1,12 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-using Debugger.ViewModels;
-
 namespace Debugger.Views;
 
-public partial class TermsConstraintsView : UserControl
+public partial class Domain4MLView : UserControl
 {
-    public TermsConstraintsView()
+    public Domain4MLView()
     {
         InitializeComponent();
     }

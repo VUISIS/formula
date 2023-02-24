@@ -7,16 +7,11 @@
              x:DataType="vm:FileManagerViewModel"
              x:Class="Debugger.Views.FileManagerView"
              Name="FileView">
-    <StackPanel Orientation="Vertical">
-        <TextBlock TextAlignment="Center" 
-                   Text="File Manager"
-                   Margin="0,5,0,5"/>
-        <TreeView VerticalAlignment="Top"
-                  Items="{Binding Items}" 
+    <ScrollViewer>
+        <TreeView Items="{Binding Items}" 
                   SelectedItems="{Binding SelectedItems}"
                   SelectionMode="Single"
                   Background="#222222"
-                  Height="{Binding $parent[StackPanel].Bounds.Height}"
                   Name="FileManagerPanel">
             <TreeView.ItemTemplate>
                 <TreeDataTemplate ItemsSource="{Binding Children}">
@@ -26,5 +21,5 @@
                 </TreeDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
-    </StackPanel>
+    </ScrollViewer>
 </UserControl>

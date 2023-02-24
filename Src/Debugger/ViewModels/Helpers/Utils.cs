@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using System.IO;
+using System.Text;
 
 using Debugger.Windows;
 
@@ -67,5 +69,22 @@ public static class Utils
             }
         });
         return file.FirstOrDefault();
+    }
+
+    public static string OpenFileText(string filepath)
+    {
+        StringBuilder sb = new StringBuilder();
+        using (FileStream fs = File.Open(filepath, FileMode.Open))
+        {
+            byte[] b = new byte[1024];
+            UTF8Encoding temp = new UTF8Encoding(true);
+
+            while (fs.Read(b,0,b.Length) > 0)
+            {
+                sb.Append(temp.GetString(b));
+            }
+        }
+
+        return sb.ToString();
     }
 }

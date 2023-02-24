@@ -19,6 +19,7 @@ internal class FileManagerViewModel : ReactiveObject
     private readonly MainWindow? mainWindow;
     private readonly FormulaProgram? formulaProgram;
     private readonly TextBlock? consoleOutput;
+    private readonly TextBlock? fileOutput;
     
     public FileManagerViewModel(MainWindow win, FormulaProgram program)
     {
@@ -28,9 +29,12 @@ internal class FileManagerViewModel : ReactiveObject
         Items = new ObservableCollection<Node>();
         ItemsSource = new ObservableCollection<Node>();
         SelectedItems = new ObservableCollection<Node>();
+        
+        fileOutput = mainWindow.Get<Domain4MLView>("DomainView")
+                              .Get<TextBlock>("FileOutput");
 
         consoleOutput = mainWindow.Get<CommandConsoleView>("CommandInputView")
-                           .Get<TextBlock>("ConsoleOutput");
+                                  .Get<TextBlock>("ConsoleOutput");
     }
 
     public ObservableCollection<Node> Items { get; }
@@ -60,14 +64,21 @@ internal class FileManagerViewModel : ReactiveObject
                 }
             
                 formulaProgram.ClearConsoleOutput();
+
+                var file = Path.Join(uri.AbsolutePath, SelectedItems[0].Header);
             
-                if(!formulaProgram.ExecuteCommand("load " + Path.Join(uri.AbsolutePath, SelectedItems[0].Header)))
+                if(!formulaProgram.ExecuteCommand("load " + file))
                 {
                     consoleOutput.Text += "ERROR: Command failed.";
                     return;
                 }
 
-                consoleOutput.Text += "load " + Path.Join(uri.AbsolutePath, SelectedItems[0].Header);
+                if (fileOutput != null)
+                {
+                    fileOutput.Text = Utils.OpenFileText(file);
+                }
+
+                consoleOutput.Text += "load " + file;
                 consoleOutput.Text += "\n";
                 consoleOutput.Text += formulaProgram.GetConsoleOutput();
             }

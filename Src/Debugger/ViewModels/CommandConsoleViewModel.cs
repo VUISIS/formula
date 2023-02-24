@@ -24,23 +24,29 @@ internal class CommandConsoleViewModel : ReactiveObject
     private readonly AutoCompleteBox? commandInput;
     private readonly TextBlock? commandOutput;
     private readonly InferenceRulesViewModel? inferenceRulesViewModel;
-    private readonly TermsConstraintsViewModel? termsConstraintsViewModel;
+    private readonly CurrentTermsViewModel? termsViewModel;
+    private readonly ConstraintsViewModel? constraintsViewModel;
+    private readonly TextBlock? fileOutput;
     
     public CommandConsoleViewModel(MainWindow win, FormulaProgram program)
     {
         mainWindow = win;
         formulaProgram = program;
 
-        var commandInputView = mainWindow.Get<CommandConsoleView>("CommandInputView");
-        commandInput = commandInputView.Get<AutoCompleteBox>("CommandInput");
+        commandInput = mainWindow.Get<AutoCompleteBox>("CommandInput");
         if (commandInput != null)
         {
             commandInput.KeyDown += InputKey;
         }
         
+        fileOutput = mainWindow.Get<Domain4MLView>("DomainView")
+                              .Get<TextBlock>("FileOutput");
+        
+        var commandInputView = mainWindow.Get<CommandConsoleView>("CommandInputView");
         commandOutput = commandInputView.Get<TextBlock>("ConsoleOutput");
 
-        termsConstraintsViewModel = mainWindow.Get<TermsConstraintsView>("TermsAndConstraintsView").DataContext as TermsConstraintsViewModel;
+        termsViewModel = mainWindow.Get<CurrentTermsView>("TermsView").DataContext as CurrentTermsViewModel;
+        constraintsViewModel = mainWindow.Get<ConstraintsView>("ConstrView").DataContext as ConstraintsViewModel;
         inferenceRulesViewModel = mainWindow.Get<InferenceRulesView>("SolverRulesView").DataContext as InferenceRulesViewModel;
     }
 
@@ -78,6 +84,21 @@ internal class CommandConsoleViewModel : ReactiveObject
                     }
 
                     formulaProgram.ClearConsoleOutput();
+
+                    var outP = "";
+                    if (commandInput.Text.StartsWith("load"))
+                    {
+                        outP = commandInput.Text.Replace("load ", "");
+                    }
+                    else if (commandInput.Text.StartsWith("l"))
+                    {
+                        outP = commandInput.Text.Replace("l ", "");
+                    }
+
+                    if (fileOutput != null)
+                    {
+                        fileOutput.Text = Utils.OpenFileText(outP);
+                    }
                 }
 
                 if (!formulaProgram.ExecuteCommand(commandInput.Text))
@@ -101,7 +122,8 @@ internal class CommandConsoleViewModel : ReactiveObject
                 if ((commandInput.Text.StartsWith("solve") ||
                      commandInput.Text.StartsWith("sl")) &&
                     inferenceRulesViewModel != null &&
-                    termsConstraintsViewModel != null)
+                    termsViewModel != null &&
+                    constraintsViewModel != null)
                 {
                     if (solveResult != null)
                     {
@@ -128,7 +150,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                             {
                                 keyId = term.Symbol.Id;
                                 var node = new Node(tw.ToString(), keyId);
-                                termsConstraintsViewModel.CurrentTermItems.Add(node);
+                                termsViewModel.CurrentTermItems.Add(node);
                             }
 
                             if (flag)
@@ -137,28 +159,28 @@ internal class CommandConsoleViewModel : ReactiveObject
                                 foreach (var v in directConsts)
                                 {
                                     var dirn = new Node(v);
-                                    termsConstraintsViewModel.DirectConstraintsItems.Add(dirn);
+                                    constraintsViewModel.DirectConstraintsItems.Add(dirn);
                                 }
                             
                                 var posConsts = constraints[keyId][ConstraintKind.Positive];
                                 foreach (var v in posConsts)
                                 {
                                     var posn = new Node(v);
-                                    termsConstraintsViewModel.PosConstraintsItems.Add(posn);
+                                    constraintsViewModel.PosConstraintsItems.Add(posn);
                                 }
                             
                                 var negConsts = constraints[keyId][ConstraintKind.Negative];
                                 foreach (var v in negConsts)
                                 {
                                     var negn = new Node(v);
-                                    termsConstraintsViewModel.NegConstraintsItems.Add(negn);
+                                    constraintsViewModel.NegConstraintsItems.Add(negn);
                                 }
                             
                                 var flatConsts = constraints[keyId][ConstraintKind.Flattened];
                                 foreach (var v in flatConsts)
                                 {
                                     var flatn = new Node(v);
-                                    termsConstraintsViewModel.FlatConstraintsItems.Add(flatn);
+                                    constraintsViewModel.FlatConstraintsItems.Add(flatn);
                                 }
 
                                 flag = false;
