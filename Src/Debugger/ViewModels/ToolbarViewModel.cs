@@ -98,22 +98,25 @@ internal class ToolbarViewModel : ReactiveObject
             {
                 var root = new Node(folder.Name);
                 var items = await folder.GetItemsAsync();
-                foreach (var file in items)
+                if (items.Count > 0)
                 {
-                    if (file.Name.EndsWith(".4ml"))
+                    foreach (var file in items)
                     {
-                        var child = new Node(root, file.Name);
-                        root.AddItem(child);
+                        if (file.Name.EndsWith(".4ml"))
+                        {
+                            var child = new Node(root, file.Name);
+                            root.AddItem(child);
+                        }
                     }
-                }
 
-                if (root.Children.Count > 0)
-                {
-                    fileManagerModel.Items.Clear();
-                    fileManagerModel.ItemsSource.Clear();
+                    if (root.Children.Count > 0)
+                    {
+                        fileManagerModel.Items.Clear();
+                        fileManagerModel.ItemsSource.Clear();
                 
-                    fileManagerModel.Items.Add(root);
-                    fileManagerModel.ItemsSource = root.Children;
+                        fileManagerModel.Items.Add(root);
+                        fileManagerModel.ItemsSource = root.Children;
+                    }
                 }
             }
         }

@@ -70,6 +70,29 @@ internal class CommandConsoleViewModel : ReactiveObject
                     commandOutput.Text += "[]> ";
                 }
 
+                if (commandInput.Text.StartsWith("solve start") ||
+                     commandInput.Text.StartsWith("sl start"))
+                {
+                    var solveRes = formulaProgram.FormulaPublisher.SolveStart();
+                    if (solveRes != null)
+                    {
+                        commandOutput.Text += "\n";
+                        commandOutput.Text += "Solve start task completed. Solveable: " + solveRes.Solvable;
+                        commandOutput.Text += "\n";
+                        commandOutput.Text += formulaProgram.FormulaPublisher.GetResultTimeString();
+                        commandOutput.Text += "\n\n";
+                        commandOutput.Text += "[]>";
+                        return;
+                    }
+                    commandOutput.Text += "\n";
+                    commandOutput.Text += "Solve start task timed out.";
+                    commandOutput.Text += "\n";
+                    commandOutput.Text += "30s";
+                    commandOutput.Text += "\n\n";
+                    commandOutput.Text += "[]>";
+                    return;
+                }
+
                 if (commandInput.Text.StartsWith("load") ||
                     commandInput.Text.StartsWith("l"))
                 {
@@ -114,92 +137,74 @@ internal class CommandConsoleViewModel : ReactiveObject
                 }
 
                 var output = formulaProgram.GetConsoleOutput();
-                var solveResult = formulaProgram.FormulaPublisher.WaitForCompletion();
+                formulaProgram.FormulaPublisher.SolveInit();
                 if ((commandInput.Text.StartsWith("solve") ||
                      commandInput.Text.StartsWith("sl")) &&
                     inferenceRulesViewModel != null &&
                     termsViewModel != null &&
                     constraintsViewModel != null)
                 {
-                    if (solveResult != null)
+                    inferenceRulesViewModel.Items.Clear();
+
+                    var coreRules = formulaProgram.FormulaPublisher.GetCoreRules();
+                    foreach (var rule in coreRules)
                     {
-                        inferenceRulesViewModel.Items.Clear();
-
-                        var coreRules = formulaProgram.FormulaPublisher.GetCoreRules();
-                        foreach (var rule in coreRules)
-                        {
-                            var rn = new Node(rule);
-                            inferenceRulesViewModel.Items.Add(rn);
-                        }
-
-                        var rules = formulaProgram.FormulaPublisher.GetLeastFixedPointTerms();
-                        var constraints = formulaProgram.FormulaPublisher.GetLeastFixedPointConstraints();
-                        var flag = true;
-                        foreach (var term in rules)
-                        {
-                            var tw = new StringWriter();
-                            var cancelToken = new CancellationToken();
-                            var envParams = new EnvParams();
-                            term.PrintTerm(tw,cancelToken,envParams);
-                            var keyId = 0;
-                            if (term.Symbol != null)
-                            {
-                                keyId = term.Symbol.Id;
-                                var node = new Node(tw.ToString(), keyId);
-                                termsViewModel.CurrentTermItems.Add(node);
-                            }
-
-                            if (flag)
-                            {
-                                var directConsts = constraints[keyId][ConstraintKind.Direct];
-                                foreach (var v in directConsts)
-                                {
-                                    var dirn = new Node(v);
-                                    constraintsViewModel.DirectConstraintsItems.Add(dirn);
-                                }
-                            
-                                var posConsts = constraints[keyId][ConstraintKind.Positive];
-                                foreach (var v in posConsts)
-                                {
-                                    var posn = new Node(v);
-                                    constraintsViewModel.PosConstraintsItems.Add(posn);
-                                }
-                            
-                                var negConsts = constraints[keyId][ConstraintKind.Negative];
-                                foreach (var v in negConsts)
-                                {
-                                    var negn = new Node(v);
-                                    constraintsViewModel.NegConstraintsItems.Add(negn);
-                                }
-                            
-                                var flatConsts = constraints[keyId][ConstraintKind.Flattened];
-                                foreach (var v in flatConsts)
-                                {
-                                    var flatn = new Node(v);
-                                    constraintsViewModel.FlatConstraintsItems.Add(flatn);
-                                }
-
-                                flag = false;
-                            }
-                        }
-
-                        var withoutEnd = output.Replace("[]> ", "");
-                        commandOutput.Text += withoutEnd;
-                        commandOutput.Text += "Solve result task completed.";
-                        commandOutput.Text += "\n";
-                        commandOutput.Text += formulaProgram.FormulaPublisher.GetResultTimeString();
-                        commandOutput.Text += "\n\n";
-                        commandOutput.Text += "[]>";
-                        return;
+                        var rn = new Node(rule);
+                        inferenceRulesViewModel.Items.Add(rn);
                     }
 
-                    var removeCursor = output.Replace("[]>", "");
-                    commandOutput.Text += removeCursor;
-                    commandOutput.Text += "Solve result task timed out.";
-                    commandOutput.Text += "\n";
-                    commandOutput.Text += "30s";
-                    commandOutput.Text += "\n\n";
-                    commandOutput.Text += "[]>";
+                    var rules = formulaProgram.FormulaPublisher.GetLeastFixedPointTerms();
+                    var constraints = formulaProgram.FormulaPublisher.GetLeastFixedPointConstraints();
+                    var flag = true;
+                    foreach (var term in rules)
+                    {
+                        var tw = new StringWriter();
+                        var cancelToken = new CancellationToken();
+                        var envParams = new EnvParams();
+                        term.PrintTerm(tw,cancelToken,envParams);
+                        var keyId = 0;
+                        if (term.Symbol != null)
+                        {
+                            keyId = term.Symbol.Id;
+                            var node = new Node(tw.ToString(), keyId);
+                            termsViewModel.CurrentTermItems.Add(node);
+                        }
+
+                        if (flag)
+                        {
+                            var directConsts = constraints[keyId][ConstraintKind.Direct];
+                            foreach (var v in directConsts)
+                            {
+                                var dirn = new Node(v);
+                                constraintsViewModel.DirectConstraintsItems.Add(dirn);
+                            }
+                        
+                            var posConsts = constraints[keyId][ConstraintKind.Positive];
+                            foreach (var v in posConsts)
+                            {
+                                var posn = new Node(v);
+                                constraintsViewModel.PosConstraintsItems.Add(posn);
+                            }
+                        
+                            var negConsts = constraints[keyId][ConstraintKind.Negative];
+                            foreach (var v in negConsts)
+                            {
+                                var negn = new Node(v);
+                                constraintsViewModel.NegConstraintsItems.Add(negn);
+                            }
+                        
+                            var flatConsts = constraints[keyId][ConstraintKind.Flattened];
+                            foreach (var v in flatConsts)
+                            {
+                                var flatn = new Node(v);
+                                constraintsViewModel.FlatConstraintsItems.Add(flatn);
+                            }
+
+                            flag = false;
+                        }
+                    }
+
+                    commandOutput.Text += output;
                     return;
                 }
 

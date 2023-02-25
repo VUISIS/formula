@@ -10,7 +10,7 @@ namespace Microsoft.Formula.API.Plugins;
 
 public interface ISolverPublisher
 {
-    public void SetSolverResult(List<Task<SolveResult>> tasks);
+    public void SetSolverTask(SolveResult solveResultTask);
     public void SetStartTime(DateTime time);
     public int GetResultTime();
     public string GetResultTimeString();
@@ -20,5 +20,6 @@ public interface ISolverPublisher
     public IEnumerable<Term> GetLeastFixedPointTerms();
     public Dictionary<int, Dictionary<ConstraintKind, List<string>>> GetLeastFixedPointConstraints();
     public void SetLeastFixedPointConstraints(Dictionary<int, Dictionary<ConstraintKind, List<string>>> constraints);
-    public SolveResult WaitForCompletion();
+    public SolveResult SolveStart();
+    public void SolveInit();
 }

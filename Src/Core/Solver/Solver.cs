@@ -5,16 +5,13 @@
     using System.Diagnostics.Contracts;
     using System.Numerics;
     using System.Threading;
-    using System.Threading.Tasks;
 
     using API;
     using API.Nodes;
     using API.Plugins;
     using Compiler;
     using Common;
-    using Common.Rules;
     using Common.Terms;
-    using Common.Extras;
 
     //// Aliases for Z3 types to avoid clashes
     using Z3Context = Microsoft.Z3.Context;
@@ -302,11 +299,7 @@
             SetRecursionBound();
 
             executer = new SymExecuter(this);
-        }
-
-        public bool Solve()
-        {
-            solvable = executer.Solve();
+            executer.Execute();
             var solverPublisher = EnvParams.GetSolverPublisherParameter(Env.Parameters, EnvParamKind.Debug_SolverPublisher);
             if (solverPublisher != null)
             {
@@ -314,6 +307,11 @@
                 solverPublisher.SetLeastFixedPointTerms(executer.GetLeastFixedPointTerms());
                 solverPublisher.SetLeastFixedPointConstraints(executer.GetLeastFixedPointConstraints());
             }
+        }
+
+        public bool Solve()
+        {
+            solvable = executer.Solve();
             return solvable;
         }
 

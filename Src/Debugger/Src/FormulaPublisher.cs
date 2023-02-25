@@ -13,7 +13,7 @@ public class FormulaPublisher : ISolverPublisher
     private Dictionary<int, Dictionary<ConstraintKind, List<string>>> lfpConstraints  = new Dictionary<int, Dictionary<ConstraintKind, List<string>>>();
     private IEnumerable<Term> lfpTerms = new List<Term>();
     private List<string> coreRules = new List<string>();
-    private List<Task<SolveResult>> SolveResults = new List<Task<SolveResult>>();
+    private SolveResult? SolverResult;
     private DateTime? startTime;
     private int resultTime;
 
@@ -27,9 +27,9 @@ public class FormulaPublisher : ISolverPublisher
         return resultTime;
     }
 
-    public void SetSolverResult(List<Task<SolveResult>> tasks)
+    public void SetSolverTask(SolveResult solverResult)
     {
-        SolveResults = tasks;
+        SolverResult = solverResult;
     }
 
     public void SetStartTime(DateTime time)
@@ -61,28 +61,32 @@ public class FormulaPublisher : ISolverPublisher
     {
         lfpConstraints = constraints;
     }
-    
+
     public Dictionary<int, Dictionary<ConstraintKind, List<string>>> GetLeastFixedPointConstraints()
     {
         return lfpConstraints;
     }
-    
-    public SolveResult? WaitForCompletion()
-    {
-        if (SolveResults.Count < 1)
-        {
-            return null;
-        }
 
-        if (Task.WhenAll(SolveResults).Wait(30000))
+    public void SolveInit()
+    {
+        if (SolverResult != null)
         {
-            var solveResult = SolveResults[0].Result;
+            SolverResult.Init();
+        }
+    }
+    
+    public SolveResult? SolveStart()
+    {
+        SetStartTime(DateTime.Now);
+        if (SolverResult != null)
+        {
+            SolverResult.Start();
             if (startTime != null)
             {
-                var endTime = solveResult.StopTime;
+                var endTime = SolverResult.StopTime;
                 resultTime = (endTime - startTime).Value.Milliseconds;
             }
-            return solveResult;
+            return SolverResult;
         }
         return null;
     }

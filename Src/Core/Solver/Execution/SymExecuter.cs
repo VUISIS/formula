@@ -471,8 +471,6 @@ namespace Microsoft.Formula.Solver
 
         public bool Solve()
         {
-            Execute();
-
             bool solvable = false;
             bool hasConforms = false;
             bool hasRequires = false;

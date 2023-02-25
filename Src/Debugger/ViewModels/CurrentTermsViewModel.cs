@@ -1,3 +1,4 @@
+using System;
 using ReactiveUI;
 using Avalonia.Controls;
 using Avalonia.Input;

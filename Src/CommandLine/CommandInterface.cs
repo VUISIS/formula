@@ -1283,16 +1283,21 @@ namespace Microsoft.Formula.CommandLine
                 sink.WriteMessageLine("Could not start operation; environment is busy", SeverityKind.Warning);
                 return;
             }
-
+            
             WriteFlags(cmdLineName, flags);
-            if (task != null)
+            
+            var solverPublisher = EnvParams.GetSolverPublisherParameter(env.Parameters, EnvParamKind.Debug_SolverPublisher);
+            if (solverPublisher == null)
             {
-                var id = taskManager.StartTask(task, new Common.Rules.ExecuterStatistics(null), solveCancel);
-                sink.WriteMessageLine(string.Format("Started solve task with Id {0}.", id), SeverityKind.Info);
-            }
-            else
-            {
-                sink.WriteMessageLine("Failed to start solved task.", SeverityKind.Warning);
+                if (task != null)
+                {
+                    var id = taskManager.StartTask(task, new Common.Rules.ExecuterStatistics(null), solveCancel);
+                    sink.WriteMessageLine(string.Format("Started solve task with Id {0}.", id), SeverityKind.Info);
+                }
+                else
+                {
+                    sink.WriteMessageLine("Failed to start solved task.", SeverityKind.Warning);
+                }
             }
         }
 

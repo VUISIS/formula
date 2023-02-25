@@ -17,11 +17,7 @@
                   Name="FileManagerPanel">
             <TreeView.ItemTemplate>
                 <TreeDataTemplate ItemsSource="{Binding Children}">
-                    <ScrollViewer AllowAutoHide="True"
-                                  HorizontalScrollBarVisibility="Visible"
-                                  VerticalScrollBarVisibility="Visible">
-                        <TextBlock Text="{Binding Header}"/>
-                    </ScrollViewer>
+                    <TextBlock Text="{Binding Header}"/>
                 </TreeDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
