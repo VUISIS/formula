@@ -1736,6 +1736,25 @@
             }
         }
 
+        internal static Term SymEvaluator_Min(SymExecuter facts, Bindable[] values)
+        {
+            Contract.Requires(values.Length == 2);
+            Term x = values[0].Binding;
+            Term y = values[1].Binding;
+
+            if (Term.IsSymbolicTerm(x, y))
+            {
+                bool wasAdded;
+                BaseOpSymb bos = facts.Index.SymbolTable.GetOpSymbol(OpKind.SymMin);
+                return facts.Index.MkApply(bos, new Term[] { x, y }, out wasAdded);
+            }
+            else
+            {
+                var cmp = facts.Index.LexicographicCompare(x, y);
+                return cmp <= 0 ? x : y;
+            }
+        }
+        
         internal static Term Evaluator_And(Executer facts, Bindable[] values)
         {
             Contract.Requires(values.Length == 2);

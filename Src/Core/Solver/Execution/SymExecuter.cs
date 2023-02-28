@@ -860,6 +860,10 @@
                                 r1 = MakeRational(ch.ElementAt(0));
                                 r2 = MakeRational(ch.ElementAt(1));
                                 return r1 > r2 ? r1.ToString() : r2.ToString();
+                            case OpKind.SymMin:
+                                r1 = MakeRational(ch.ElementAt(0));
+                                r2 = MakeRational(ch.ElementAt(1));
+                                return r1 < r2 ? r1.ToString() : r2.ToString();
                             default:
                                 throw new NotImplementedException();
                         }
