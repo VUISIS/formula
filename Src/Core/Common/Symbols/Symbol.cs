@@ -79,6 +79,12 @@
         {
             get { return false; }
         }
+        
+        public virtual bool IsSymMin
+        {
+            get { return false; }
+        }
+
 
         public bool IsDataConstructor
         {

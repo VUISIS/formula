@@ -2648,8 +2648,7 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.TypeApprox_Max_Down,
                 OpLibrary.Evaluator_Max,
                 null,
-                OpLibrary.SymEvaluator_Max
-                ));
+                OpLibrary.SymEvaluator_Max));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.SymMax,
@@ -2675,8 +2674,20 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.ValidateUse_Min,
                 OpLibrary.TypeApprox_Min_Up,
                 OpLibrary.TypeApprox_Min_Down,
-                OpLibrary.Evaluator_Min));
+                OpLibrary.Evaluator_Min,
+                null,
+                OpLibrary.SymEvaluator_Min));
 
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymMin,
+                2,
+                OpLibrary.ValidateUse_Min,
+                OpLibrary.TypeApprox_Min_Up,
+                OpLibrary.TypeApprox_Min_Down,
+                OpLibrary.Evaluator_Min,
+                null,
+                OpLibrary.SymEvaluator_Min));
+            
             AddBaseOp(new BaseOpSymb(
                 OpKind.MinAll, 
                 2, 
