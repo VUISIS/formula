@@ -228,14 +228,6 @@
         /// </summary>
         Absolute
     }
-    
-    public enum ConstraintKind
-    {
-        Direct = 0,
-        Positive = 1,
-        Negative = 2,
-        Flattened = 3
-    }
 
     public static class Constants
     {

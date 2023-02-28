@@ -1193,7 +1193,7 @@ namespace Microsoft.Formula.API
                     maxSols,
                     this,
                     cancel);
-                solverPublisher.SetSolverTask(sr);
+                solverPublisher.SetSolverResult(sr);
                 task = null;
             }
             else

@@ -137,7 +137,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                 }
 
                 var output = formulaProgram.GetConsoleOutput();
-                formulaProgram.FormulaPublisher.SolveInit();
+                /*formulaProgram.FormulaPublisher.SolveInit();
                 if ((commandInput.Text.StartsWith("solve") ||
                      commandInput.Text.StartsWith("sl")) &&
                     inferenceRulesViewModel != null &&
@@ -206,7 +206,7 @@ internal class CommandConsoleViewModel : ReactiveObject
 
                     commandOutput.Text += output;
                     return;
-                }
+                }*/
 
                 commandOutput.Text += output;
             }

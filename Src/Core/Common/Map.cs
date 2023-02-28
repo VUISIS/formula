@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Formula.Common
+﻿using System.Collections.ObjectModel;
+
+namespace Microsoft.Formula.Common
 {
     using System;
     using System.Collections;
@@ -9,7 +11,7 @@
     /// <summary>
     /// A map backed by a red-black tree. Thread-safe only for reads.
     /// </summary>
-    public class Map<S, T> : IEnumerable<KeyValuePair<S, T>>
+    public class Map<S, T> : ObservableCollection<KeyValuePair<S, T>>
     {
         private SpinLock lastFoundLock = new SpinLock();
         private Node lastFoundNode = null;
@@ -179,14 +181,9 @@
             }
         }
 
-        #region IEnumerable<KeyValuePair<S,T>> Members
+        #region ObservableCollection<KeyValuePair<S,T>> Members
 
-        IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
-        public IEnumerator<KeyValuePair<S, T>> GetEnumerator()
+        public new IEnumerator<KeyValuePair<S, T>> GetEnumerator()
         {
             if (this.root == null)
             {

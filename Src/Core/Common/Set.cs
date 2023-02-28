@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Formula.Common
+﻿using System.Collections.ObjectModel;
+
+namespace Microsoft.Formula.Common
 {
     using System;
     using System.Collections;
@@ -10,7 +12,7 @@
     /// Elements are enumerated in sorted order.
     /// </summary>
     /// <typeparam name="T">The type of elements in the set</typeparam>
-    public class Set<T> : IEnumerable<T>
+    public class Set<T> : ObservableCollection<T>
     {
         private Map<T, T> setMap;
 
@@ -76,18 +78,13 @@
 
         #region IEnumerable<T> Members
 
-        public IEnumerator<T> GetEnumerator()
+        public new IEnumerator<T> GetEnumerator()
         {
             var it = setMap.GetEnumerator();
             while (it.MoveNext())
             {
                 yield return it.Current.Key;
             }
-        }
-
-        IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
         }
 
         #endregion

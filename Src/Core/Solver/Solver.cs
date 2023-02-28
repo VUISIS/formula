@@ -299,18 +299,16 @@
             SetRecursionBound();
 
             executer = new SymExecuter(this);
+        }
+        
+        public void Execute()
+        {
             executer.Execute();
-            var solverPublisher = EnvParams.GetSolverPublisherParameter(Env.Parameters, EnvParamKind.Debug_SolverPublisher);
-            if (solverPublisher != null)
-            {
-                solverPublisher.SetCoreRules(executer.GetCoreRules());
-                solverPublisher.SetLeastFixedPointTerms(executer.GetLeastFixedPointTerms());
-                solverPublisher.SetLeastFixedPointConstraints(executer.GetLeastFixedPointConstraints());
-            }
         }
 
         public bool Solve()
         {
+            executer.Execute();
             solvable = executer.Solve();
             return solvable;
         }

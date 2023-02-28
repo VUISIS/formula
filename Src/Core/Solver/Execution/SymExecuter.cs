@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Specialized;
+using System.IO;
+using Microsoft.Formula.API.Plugins;
 
 namespace Microsoft.Formula.Solver
 {
@@ -53,7 +55,8 @@ namespace Microsoft.Formula.Solver
         /// <summary>
         /// Maps a symbol to a set of indices with patterns beginning with this symbol. 
         /// </summary>
-        private Map<Symbol, LinkedList<SymSubIndex>> symbToIndexMap = new Map<Symbol, LinkedList<SymSubIndex>>(Symbol.Compare);
+        private Map<Symbol, LinkedList<SymSubIndex>> symbToIndexMap =
+            new Map<Symbol, LinkedList<SymSubIndex>>(Symbol.Compare);
 
         /// <summary>
         /// A map from strata to rules that are not triggered.
@@ -64,7 +67,7 @@ namespace Microsoft.Formula.Solver
         /// <summary>
         /// The current least fixed point.
         /// </summary>
-        private Map<Term, SymElement> lfp = 
+        private Map<Term, SymElement> lfp =
             new Map<Term, SymElement>(Term.Compare);
 
         private Map<Term, Set<Derivation>> facts = new Map<Term, Set<Derivation>>(Term.Compare);
@@ -83,35 +86,15 @@ namespace Microsoft.Formula.Solver
 
         private List<List<string>> solutionStrings = new List<List<string>>();
 
-        public RuleTable Rules
-        {
-            get;
-            private set;
-        }
+        public RuleTable Rules { get; private set; }
 
-        public Solver Solver
-        {
-            get;
-            private set;
-        }
+        public Solver Solver { get; private set; }
 
-        public bool KeepDerivations
-        {
-            get;
-            private set;
-        }
+        public bool KeepDerivations { get; private set; }
 
-        public TermIndex Index
-        {
-            get;
-            private set;
-        }
+        public TermIndex Index { get; private set; }
 
-        public TermEncIndex Encoder
-        {
-            get;
-            private set;
-        }
+        public TermEncIndex Encoder { get; private set; }
 
         public Map<Term, Term> varToTypeMap =
             new Map<Term, Term>(Term.Compare);
@@ -122,6 +105,7 @@ namespace Microsoft.Formula.Solver
         private Map<Term, List<Term>> symCountMap =
             new Map<Term, List<Term>>(Term.Compare);
 
+        private ISolverPublisher Publisher { get; set; }
         public int GetSymbolicCountIndex(Term t)
         {
             List<Term> terms;
@@ -163,14 +147,72 @@ namespace Microsoft.Formula.Solver
             }
         }
 
-        public IEnumerable<Term> GetLeastFixedPointTerms()
+        private void LFPChanged(object? obj, NotifyCollectionChangedEventArgs args)
         {
-            return lfp.Keys;
+            if (Publisher != null &&
+                args.NewItems != null)
+            {
+                var newLFPItems = args.NewItems as Map<Term, SymElement>;
+                if (newLFPItems != null)
+                {
+                    foreach (var lfpItemKey in newLFPItems.Keys)
+                    {
+                        var cancelToken = new CancellationToken();
+                        var tw = new StringWriter();
+                        var envParams = new EnvParams();
+                        lfpItemKey.PrintTerm(tw, cancelToken, envParams);
+                        Publisher.AddCurrentTerm(lfpItemKey.Symbol.Id, tw.ToString());    
+                    }
+                    
+                    foreach (var newItem in newLFPItems)
+                    {
+                        foreach (var data in newItem.Value.GetConstraintData())
+                        {
+                            foreach (var dirConst in data.DirConstraints)
+                            {
+                                Publisher.AddDirConstraint(newItem.Key.Symbol.Id, dirConst.ToString());
+                            }
+
+                            foreach (var posConst in data.PosConstraints)
+                            {
+                                SymElement next;
+                                if(GetSymbolicTerm(posConst, out next))
+                                {
+                                    var cancelToken = new CancellationToken();
+                                    var tw = new StringWriter();
+                                    var envParams = new EnvParams();
+                                    next.Term.PrintTerm(tw, cancelToken, envParams);
+                                    Publisher.AddPosConstraint(newItem.Key.Symbol.Id, tw.ToString());
+                                }
+                            }
+                    
+                            foreach (var negConst in data.NegConstraints)
+                            {
+                                SymElement next;
+                                if (GetSymbolicTerm(negConst, out next))
+                                {
+                                    var cancelToken = new CancellationToken();
+                                    var tw = new StringWriter();
+                                    var envParams = new EnvParams();
+                                    next.Term.PrintTerm(tw, cancelToken, envParams);
+                                    Publisher.AddNegConstraint(newItem.Key.Symbol.Id, tw.ToString());
+                                }
+                            }
+                            
+                            var sideConstraints = newItem.Value.GetSideConstraints(this);
+                            Publisher.AddFlatConstraint(newItem.Key.Symbol.Id, sideConstraints.ToString());
+                        }
+                    }
+                }
+            }
         }
-        
-        public List<string> GetCoreRules()
+
+        public void SetPublisherCoreRules()
         {
-            List<string> rules = new List<string>(Rules.Rules.Count());
+            if (Publisher == null)
+                return;
+            
+            var rules = new Dictionary<int, List<string>>();
             foreach (var coreRule in Rules.Rules)
             {
                 var t = coreRule.Head;
@@ -181,74 +223,18 @@ namespace Microsoft.Formula.Solver
                     var ct = new CancellationToken();
                     var ep = new EnvParams();
                     t.PrintTerm(tw,ct,ep);
-                    rules.Add(tw.ToString());
+                    if (rules.ContainsKey(t.Symbol.Id))
+                    {
+                        rules[t.Symbol.Id].Add(tw.ToString());
+                    }
+                    else
+                    {
+                        rules.Add(t.Symbol.Id, new List<string>{tw.ToString()});
+                    }
                 }
             }
 
-            return rules;
-        }
-
-        public Dictionary<int, Dictionary<ConstraintKind, List<string>>> GetLeastFixedPointConstraints()
-        {
-            Dictionary<int, Dictionary<ConstraintKind, List<string>>> newlfp = new Dictionary<int, Dictionary<ConstraintKind, List<string>>>();
-            foreach (var el in lfp)
-            {
-                if (newlfp.ContainsKey(el.Key.Symbol.Id))
-                {
-                    continue;
-                }
-                
-                Dictionary<ConstraintKind, List<string>> termConstraints = new Dictionary<ConstraintKind, List<string>>();
-                List<string> dirConstStrings = new List<string>();
-                List<string> posConstStrings = new List<string>();
-                List<string> negConstStrings = new List<string>();
-                List<string> sideConstStrings = new List<string>();
-                foreach (var data in el.Value.GetConstraintData())
-                {
-                    foreach (var dirConst in data.DirConstraints)
-                    {
-                        dirConstStrings.Add(dirConst.ToString());
-                    }
-
-                    foreach (var posConst in data.PosConstraints)
-                    {
-                        SymElement next;
-                        if(GetSymbolicTerm(posConst, out next))
-                        {
-                            var cancelToken = new CancellationToken();
-                            var tw = new StringWriter();
-                            var envParams = new EnvParams();
-                            next.Term.PrintTerm(tw, cancelToken, envParams);
-                            posConstStrings.Add(tw.ToString());
-                        }
-                    }
-                    
-                    foreach (var negConst in data.NegConstraints)
-                    {
-                        SymElement next;
-                        if (GetSymbolicTerm(negConst, out next))
-                        {
-                            var cancelToken = new CancellationToken();
-                            var tw = new StringWriter();
-                            var envParams = new EnvParams();
-                            next.Term.PrintTerm(tw, cancelToken, envParams);
-                            negConstStrings.Add(tw.ToString());
-                        }
-                    }
-                }
-
-                var sideConstraints = el.Value.GetSideConstraints(this);
-                sideConstStrings.Add(sideConstraints.ToString());
-                termConstraints.Add(ConstraintKind.Direct, dirConstStrings);
-                termConstraints.Add(ConstraintKind.Positive, posConstStrings);
-                termConstraints.Add(ConstraintKind.Negative, negConstStrings);
-                termConstraints.Add(ConstraintKind.Flattened, sideConstStrings);
-                if (el.Key.Symbol != null)
-                {
-                    newlfp.Add(el.Key.Symbol.Id, termConstraints);
-                }
-            }
-            return newlfp;
+            Publisher.SetCoreRules(rules);
         }
 
         public bool Exists(Term t)
@@ -403,7 +389,11 @@ namespace Microsoft.Formula.Solver
             Rules = solver.PartialModel.Rules;
             Index = solver.PartialModel.Index;
             Encoder = new TermEncIndex(solver);
-            KeepDerivations = true;
+            Publisher = EnvParams.GetSolverPublisherParameter(new EnvParams(), EnvParamKind.Debug_SolverPublisher);
+            
+            SetPublisherCoreRules();
+
+            lfp.CollectionChanged += LFPChanged;
 
             solver.PartialModel.ConvertSymbCnstsToVars(out varFacts, out aliasMap);
 

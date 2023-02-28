@@ -9,8 +9,6 @@ using Debugger.ViewModels.Types;
 using Debugger.Windows;
 using Debugger.Views;
 
-using Microsoft.Formula.API;
-
 namespace Debugger.ViewModels;
 
 public class CurrentTermsViewModel : ReactiveObject
@@ -32,7 +30,7 @@ public class CurrentTermsViewModel : ReactiveObject
 
     private void CurrentTermsDoubleTap(object? sender, TappedEventArgs e)
     {
-        if (CurrentTermSelectedItems.Count > 0 &&
+       /* if (CurrentTermSelectedItems.Count > 0 &&
             CurrentTermSelectedItems[0].Id > -1 &&
             constraintsViewModel != null)
         {
@@ -66,7 +64,7 @@ public class CurrentTermsViewModel : ReactiveObject
                 var node = new Node(constraints);
                 constraintsViewModel.FlatConstraintsItems.Add(node);
             }
-        }
+        }*/
     }
 
     public void ClearAll()
