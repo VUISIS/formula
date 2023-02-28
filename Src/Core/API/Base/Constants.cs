@@ -119,7 +119,6 @@
         SymCount,
         SymMax,
         SymMin,
-        SymMinAll,
         Sub,
         Sum,
         ToNatural,
