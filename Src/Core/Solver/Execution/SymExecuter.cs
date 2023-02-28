@@ -600,6 +600,13 @@
             return strs;
         }
 
+        protected Set<Term> GetDerivationElements(Term t, Set<Term> processed)
+        {
+            Set<Term> terms = new Set<Term>(Term.Compare);
+
+            return terms;
+        }
+
         public void Execute()
         {
             Activation act;
@@ -653,7 +660,7 @@
                         {
                             if (IsConstraintSatisfiable(kv.Key))
                             {
-                                IndexFact(ExtendLFP(kv.Key), pendingAct, i);
+                                IndexFact(ExtendLFP(kv.Key), kv.Value, pendingAct, i);
                             }
                         }
                         else
@@ -912,9 +919,10 @@
                 }
             }
 
+            var factDerv = KeepDerivations ? new Derivation[] { new Derivation(Index) } : null;
             foreach (var f in varFacts)
             {
-                IndexFact(ExtendLFP(f), null, -1);
+                IndexFact(ExtendLFP(f), factDerv, null, -1);
             }
 
             Term scTerm;
@@ -926,7 +934,7 @@
                     new Term[] { sc, aliasMap[(UserCnstSymb)sc.Symbol]  },
                     out wasAdded);
 
-                IndexFact(ExtendLFP(scTerm), null, -1);
+                IndexFact(ExtendLFP(scTerm), factDerv, null, -1);
             }
         }
 
@@ -966,9 +974,28 @@
 
             return e;
         }
-        
-        private void IndexFact(SymElement t, Set<Activation> pending, int stratum)
+
+        private void IndexFact(SymElement t, IEnumerable<Derivation> drs, Set<Activation> pending, int stratum)
         {
+            Set<Derivation> dervs;
+            if (KeepDerivations)
+            {
+                if (!facts.TryFindValue(t.Term, out dervs))
+                {
+                    dervs = new Set<Derivation>(Derivation.Compare);
+                    facts.Add(t.Term, dervs);
+                }
+
+                foreach (var d in drs)
+                {
+                    dervs.Add(d);
+                }
+            }
+            else if (!facts.TryFindValue(t.Term, out dervs))
+            {
+                facts.Add(t.Term, null);
+            }
+
             LinkedList<SymSubIndex> subindices;
             if (!symbToIndexMap.TryFindValue(t.Term.Symbol, out subindices))
             {
