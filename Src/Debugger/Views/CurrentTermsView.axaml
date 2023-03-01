@@ -6,9 +6,7 @@
              xmlns:vm="using:Debugger.ViewModels"
              x:DataType="vm:CurrentTermsViewModel"
              x:Class="Debugger.Views.CurrentTermsView">
-    <ScrollViewer AllowAutoHide="True"
-                  HorizontalScrollBarVisibility="Visible"
-                  VerticalScrollBarVisibility="Visible">
+    <ScrollViewer AllowAutoHide="True">
         <ListBox Items="{Binding CurrentTermItems}"
                  SelectedItems="{Binding CurrentTermSelectedItems}"
                  Background="#222222"
@@ -16,10 +14,8 @@
                  Name="CurrentTerms">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock TextAlignment="Center"
-                                   Text="{Binding Header}"/>
-                    </StackPanel>
+                    <TextBlock TextAlignment="Left"
+                               Text="{Binding Header}"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

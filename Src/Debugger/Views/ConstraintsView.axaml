@@ -27,21 +27,15 @@
 		</Grid.ColumnDefinitions>
 		<ScrollViewer Grid.Row="0" 
 		              Grid.Column="0"
-		              AllowAutoHide="True"
-		              HorizontalScrollBarVisibility="Visible"
-		              VerticalScrollBarVisibility="Visible">
+		              AllowAutoHide="True">
 			<ListBox Background="#222222"
 					 Items="{Binding DirectConstraintsItems}"
 					 SelectionMode="Single"
 					 VerticalAlignment="Stretch">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<ScrollViewer>
-								<TextBlock TextAlignment="Center"
-										   Text="{Binding Header}"/>
-							</ScrollViewer>
-						</StackPanel>
+						<TextBlock TextAlignment="Center"
+						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
@@ -54,21 +48,15 @@
 		           Text="Positive Constraints"/>
 		<ScrollViewer Grid.Row="4" 
 		              Grid.Column="0" 
-		              AllowAutoHide="True"
-		              HorizontalScrollBarVisibility="Visible"
-		              VerticalScrollBarVisibility="Visible">
+		              AllowAutoHide="True">
 			<ListBox Background="#222222"
 					 Items="{Binding PosConstraintsItems}"
 					 SelectionMode="Single"
 					 VerticalAlignment="Stretch">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<ScrollViewer>
-								<TextBlock TextAlignment="Center"
-										   Text="{Binding Header}"/>
-							</ScrollViewer>
-						</StackPanel>
+						<TextBlock TextAlignment="Center"
+						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
@@ -81,20 +69,14 @@
 		           Text="Negative Constraints"/>
 		<ScrollViewer Grid.Row="8" 
 		              Grid.Column="0" 
-		              AllowAutoHide="True"
-		              HorizontalScrollBarVisibility="Visible"
-		              VerticalScrollBarVisibility="Visible">
+		              AllowAutoHide="True">
 			<ListBox Background="#222222"
 					 Items="{Binding NegConstraintsItems}"
 					 SelectionMode="Single">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<ScrollViewer>
-								<TextBlock TextAlignment="Center"
-										   Text="{Binding Header}"/>
-							</ScrollViewer>
-						</StackPanel>
+						<TextBlock TextAlignment="Center"
+						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
@@ -105,25 +87,20 @@
 		           HorizontalAlignment="Center"
 		           VerticalAlignment="Center"
 		           Text="Flattened Constraints"/>
-		<ScrollViewer Grid.Row="12" 
-		              Grid.Column="0" 
-		              AllowAutoHide="True"
-		              HorizontalScrollBarVisibility="Visible"
-		              VerticalScrollBarVisibility="Visible">
-			<ListBox Background="#222222"
-					 Items="{Binding FlatConstraintsItems}"
-					 SelectionMode="Single">
-				<ListBox.ItemTemplate>
-					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<ScrollViewer>
-								<TextBlock TextAlignment="Center"
-										   Text="{Binding Header}"/>
-							</ScrollViewer>
-						</StackPanel>
-					</DataTemplate>
-				</ListBox.ItemTemplate>
-			</ListBox>
-		</ScrollViewer>
+		<ListBox Grid.Row="12" 
+		         Grid.Column="0" 
+		         Background="#222222"
+		         Items="{Binding FlatConstraintsItems}"
+		         SelectionMode="Single">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<ScrollViewer HorizontalScrollBarVisibility="Hidden"
+					              VerticalScrollBarVisibility="Hidden">
+						<TextBlock TextAlignment="Left"
+						           Text="{Binding Header}"/>
+					</ScrollViewer>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
     </Grid>
 </UserControl>

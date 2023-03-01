@@ -68,7 +68,7 @@
                              Height="30" 
                              HorizontalAlignment="Left" 
                              Background="#222222"
-                             ToolTip.Tip="Press enter key to input commands."/>
+                             Watermark="Press enter key to input commands."/>
             <v:FileManagerView Name="FileTreeView"
                                Grid.Row="2" 
                                Grid.Column="1"/>

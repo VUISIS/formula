@@ -30,41 +30,53 @@ public class CurrentTermsViewModel : ReactiveObject
 
     private void CurrentTermsDoubleTap(object? sender, TappedEventArgs e)
     {
-       /* if (CurrentTermSelectedItems.Count > 0 &&
-            CurrentTermSelectedItems[0].Id > -1 &&
-            constraintsViewModel != null)
+       if(CurrentTermSelectedItems.Count > 0 &&
+          CurrentTermSelectedItems[0].Id > -1 &&
+          constraintsViewModel != null)
         {
-            var terms = formulaProgram.FormulaPublisher.GetLeastFixedPointConstraints();
+            var posConstraints = formulaProgram.FormulaPublisher.GetPosConstraints();
+            var negConstraints = formulaProgram.FormulaPublisher.GetNegConstraints();
+            var dirConstraints = formulaProgram.FormulaPublisher.GetDirConstraints();
+            var flatConstraints = formulaProgram.FormulaPublisher.GetFlatConstraints();
             
-            constraintsViewModel.DirectConstraintsItems.Clear();
-            constraintsViewModel.PosConstraintsItems.Clear();
-            constraintsViewModel.NegConstraintsItems.Clear();
-            constraintsViewModel.FlatConstraintsItems.Clear();
+            constraintsViewModel.ClearAll();
 
-            foreach (var constraints in terms[CurrentTermSelectedItems[0].Id][ConstraintKind.Direct])
+            if (dirConstraints.ContainsKey(CurrentTermSelectedItems[0].Id))
             {
-                var node = new Node(constraints);
-                constraintsViewModel.DirectConstraintsItems.Add(node);
+                foreach (var constraints in dirConstraints[CurrentTermSelectedItems[0].Id])
+                {
+                    var node = new Node(constraints);
+                    constraintsViewModel.DirectConstraintsItems.Add(node);
+                }
             }
-            
-            foreach(var constraints in terms[CurrentTermSelectedItems[0].Id][ConstraintKind.Positive])
+
+            if (posConstraints.ContainsKey(CurrentTermSelectedItems[0].Id))
             {
-                var node = new Node(constraints);
-                constraintsViewModel.PosConstraintsItems.Add(node);
+                foreach (var constraints in posConstraints[CurrentTermSelectedItems[0].Id])
+                {
+                    var node = new Node(constraints);
+                    constraintsViewModel.PosConstraintsItems.Add(node);
+                }
             }
-            
-            foreach(var constraints in terms[CurrentTermSelectedItems[0].Id][ConstraintKind.Negative])
+
+            if (negConstraints.ContainsKey(CurrentTermSelectedItems[0].Id))
             {
-                var node = new Node(constraints);
-                constraintsViewModel.NegConstraintsItems.Add(node);
+                foreach (var constraints in negConstraints[CurrentTermSelectedItems[0].Id])
+                {
+                    var node = new Node(constraints);
+                    constraintsViewModel.NegConstraintsItems.Add(node);
+                }
             }
-            
-            foreach(var constraints in terms[CurrentTermSelectedItems[0].Id][ConstraintKind.Flattened])
+
+            if (flatConstraints.ContainsKey(CurrentTermSelectedItems[0].Id))
             {
-                var node = new Node(constraints);
-                constraintsViewModel.FlatConstraintsItems.Add(node);
+                foreach (var constraints in flatConstraints[CurrentTermSelectedItems[0].Id])
+                {
+                    var node = new Node(constraints);
+                    constraintsViewModel.FlatConstraintsItems.Add(node);
+                }
             }
-        }*/
+        }
     }
 
     public void ClearAll()

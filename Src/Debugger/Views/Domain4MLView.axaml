@@ -7,13 +7,10 @@
              x:DataType="vm:Domain4MLViewModel"
              x:Class="Debugger.Views.Domain4MLView">
     <ScrollViewer Background="Black"
-                  AllowAutoHide="True"
-                  HorizontalScrollBarVisibility="Visible"
-                  VerticalScrollBarVisibility="Visible">
+                  AllowAutoHide="True">
         <TextBlock Padding="25" 
                    Name="FileOutput" 
                    Background="Black"
-                   TextWrapping="NoWrap"
-                   ToolTip.Tip="Displays loaded formula file."/>
+                   TextWrapping="NoWrap"/>
     </ScrollViewer>
 </UserControl>

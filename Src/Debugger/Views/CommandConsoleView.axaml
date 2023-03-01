@@ -8,13 +8,10 @@
              x:Class="Debugger.Views.CommandConsoleView"
              Name="ConsoleView">
 	<ScrollViewer Background="Black"
-	              AllowAutoHide="True"
-	              HorizontalScrollBarVisibility="Visible"
-	              VerticalScrollBarVisibility="Visible">
+	              AllowAutoHide="True">
 		    <TextBlock Padding="25" 
                        Name="ConsoleOutput" 
                        Background="Black"
-                       TextWrapping="NoWrap"
-                       ToolTip.Tip="Displays formula output."/>
+                       TextWrapping="NoWrap"/>
 	</ScrollViewer>
 </UserControl>

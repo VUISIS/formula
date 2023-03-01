@@ -12,7 +12,6 @@ public interface ISolverPublisher
 {
     public void SetSolverResult(SolveResult solverResult);
     public SolveResult GetSolverResult();
-    public void SetStartTime(DateTime time);
     public void AddPosConstraint(int id, string constraint);
     public Dictionary<int, List<string>> GetPosConstraints();
     public void AddNegConstraint(int id, string constraint);

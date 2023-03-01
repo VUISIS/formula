@@ -20,7 +20,7 @@ public class Node
     }
 
     public Node? Parent;
-    public string Header { get; }
+    public string Header { get; set; }
     public int Id { get; }
     public ObservableCollection<Node> Children { get; }
     public void AddItem(Node child) => Children.Add(child);

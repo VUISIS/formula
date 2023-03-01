@@ -28,9 +28,7 @@
                 <material:MaterialIcon Kind="BugStop"/>
             </Button>
         </StackPanel>
-		<ScrollViewer AllowAutoHide="True"
-                      HorizontalScrollBarVisibility="Visible"
-                      VerticalScrollBarVisibility="Visible">
+		<ScrollViewer AllowAutoHide="True">
             <ItemsRepeater Items="{Binding Items}" 
                            Background="#222222">
                 <ItemsRepeater.ItemTemplate>

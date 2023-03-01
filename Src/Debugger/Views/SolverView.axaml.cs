@@ -17,19 +17,4 @@ public partial class SolverView : UserControl
     {
         AvaloniaXamlLoader.Load(this);
     }
-
-    private void AddConstraintClick(object sender, RoutedEventArgs e)
-    {
-        //add the constraint
-    }
-
-    private void SolveConstraintsClick(object sender, RoutedEventArgs e)
-    {
-        //solve constraints
-    }
-
-    private void GenerateNextSolutionClick(object sender, RoutedEventArgs e)
-    {
-        //generate the next solution
-    }
 }

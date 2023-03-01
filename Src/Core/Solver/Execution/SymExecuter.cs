@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Net.Http.Headers;
 using Microsoft.Formula.API.Plugins;
 
 namespace Microsoft.Formula.Solver
@@ -149,13 +150,9 @@ namespace Microsoft.Formula.Solver
         {
             if (Publisher != null)
             {
-                foreach (var fact in varFacts)
+                foreach (var fact in aliasMap)
                 {
-                    var ct = new CancellationToken();
-                    var envParams = new EnvParams();
-                    var tw = new StringWriter();
-                    fact.PrintTerm(tw,ct,envParams);
-                    Publisher.AddVariableFact(fact.Symbol.Id, tw.ToString());
+                    Publisher.AddVariableFact(fact.Key.Id, fact.Key.Name.Replace("%",""));
                 }
             }
         }
@@ -391,7 +388,7 @@ namespace Microsoft.Formula.Solver
             Rules = solver.PartialModel.Rules;
             Index = solver.PartialModel.Index;
             Encoder = new TermEncIndex(solver);
-            Publisher = EnvParams.GetSolverPublisherParameter(new EnvParams(), EnvParamKind.Debug_SolverPublisher);
+            Publisher = EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher);
             
             solver.PartialModel.ConvertSymbCnstsToVars(out varFacts, out aliasMap);
 
@@ -424,6 +421,9 @@ namespace Microsoft.Formula.Solver
             }
 
             InitializeExecuter();
+            
+            SetPublisherCoreRules();
+            SetVarFacts();
 
             // TODO: handle cardinality terms properly
             foreach (var kvp in cardTerms)
@@ -453,8 +453,6 @@ namespace Microsoft.Formula.Solver
                     }
                 }
             }
-            SetPublisherCoreRules();
-            SetVarFacts();
         }
 
         public bool Solve()
@@ -1016,10 +1014,6 @@ namespace Microsoft.Formula.Solver
 
                 e = new SymElement(normalized, enc, Solver.Context);
                 lfp.Add(normalized, e);
-                if (Publisher != null)
-                {
-                    LFPChanged(normalized, e);
-                }
             }
 
             if (!pendingConstraints.IsEmpty() ||
@@ -1035,6 +1029,11 @@ namespace Microsoft.Formula.Solver
             else
             {
                 e.SetDirectlyProvable();
+            }
+            
+            if (Publisher != null)
+            {
+                LFPChanged(t, e);
             }
 
             return e;

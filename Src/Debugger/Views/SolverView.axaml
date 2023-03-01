@@ -11,7 +11,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="20"/>
 			<RowDefinition Height="10"/>
-			<RowDefinition Height="50"/>
+			<RowDefinition Height="51"/>
 			<RowDefinition Height="10"/>
 			<RowDefinition Height="30"/>
 			<RowDefinition Height="10"/>
@@ -45,62 +45,77 @@
 		           Text="Symbolic Variables"/>
 		<Border Grid.Row="2" 
 		        Grid.Column="0"
-		        Background="Black"
 		        BorderBrush="White"
 		        CornerRadius="1"
 		        BorderThickness="0.5">
 			<ComboBox Name="VariableSelection"
-			          Height="45"
-			          Background="Black"
+			          Height="50"
+			          IsEnabled="False"
 			          BorderBrush="White"
 			          BorderThickness="0"
-			          Items="{Binding VariableItems}"
-			          SelectedIndex="0">
+			          PlaceholderText="Vars"
+			          PlaceholderForeground="Gray"
+			          SelectedItem="{Binding Path=SelectedVariable}"
+			          Items="{Binding VariableItems}">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
-						<TextBlock Width="50" Text="{Binding Header}"/>
+						<TextBlock TextAlignment="Center"
+						           HorizontalAlignment="Center"
+						           VerticalAlignment="Center"
+						           Width="50" 
+						           Foreground="White" 
+						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>
 		</Border>
 		<Border Grid.Row="2" 
 		        Grid.Column="2"
-		        Background="Black"
 		        BorderBrush="White"
 		        CornerRadius="1"
 		        BorderThickness="0.5">
 			<ComboBox Name="ConstraintSelection"
-			          Height="45"
-			          Background="Black"
+			          IsEnabled="False"
+			          Height="50"
 			          BorderBrush="White"
 			          BorderThickness="0"
-			          Items="{Binding ConstraintItems}"
-			          SelectedIndex="0">
+			          PlaceholderText="Ops"
+			          PlaceholderForeground="Gray"
+			          SelectedItem="{Binding Path=SelectedConstraint}"
+			          Items="{Binding ConstraintItems}">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
-						<TextBlock Width="50" Text="{Binding Header}"/>
+						<TextBlock TextAlignment="Center"
+						           HorizontalAlignment="Center"
+						           VerticalAlignment="Center"
+								   Width="50" 
+						           Foreground="White" 
+						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>
 		</Border>
 		<TextBox Grid.Row="2" 
 		         Grid.Column="4"
-		         Text="{Binding AddedConstraint}"
-		         Height="{Binding $parent[ScrollViewer].Bounds.Height}"
-		         Width="{Binding $parent[ScrollViewer].Bounds.Width}"
+		         Name="InputExpression"
+		         IsEnabled="False"
+		         Height="50"
 		         Background="Black"
 		         BorderBrush="White"
 		         BorderThickness="0.5"
 		         CornerRadius="1"
 		         AcceptsReturn="False" 
 		         TextAlignment="Left"
+		         VerticalAlignment="Center"
 		         VerticalContentAlignment="Center"
 		         Watermark="Digit/Real"
 		         TextWrapping="NoWrap"/>
 		<Button Grid.Row="4" 
 		        Grid.Column="0"
 		        Grid.ColumnSpan="5"
-				Click="AddConstraintClick"
+		        Name="AddConstraintButton"
+				Command="{Binding AddConstraint}"
+		        IsEnabled="False"
 		        HorizontalAlignment="Right"
 		        ToolTip.Tip="Add Constraint">
 			<StackPanel Orientation="Horizontal"
@@ -119,20 +134,14 @@
 		<ScrollViewer Grid.Row="8" 
 		              Grid.Column="0"
 		              Grid.ColumnSpan="5"
-		              AllowAutoHide="True"
-		              HorizontalScrollBarVisibility="Visible"
-		              VerticalScrollBarVisibility="Visible">
+		              AllowAutoHide="True">
 			<ListBox Background="#222222"
 					 Items="{Binding AllConstraintsItems}"
 					 SelectionMode="Single">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<ScrollViewer>
-								<TextBlock TextAlignment="Center"
-										   Text="{Binding Header}"/>
-							</ScrollViewer>
-						</StackPanel>
+						<TextBlock TextAlignment="Center"
+						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
@@ -143,7 +152,7 @@
 		            Orientation="Horizontal"
 		            HorizontalAlignment="Right"
 		            Spacing="10">
-			<Button Click="SolveConstraintsClick"
+			<Button Command="{Binding SolveConstraints}"
 			        HorizontalAlignment="Center"
 			        VerticalAlignment="Center"
 			        ToolTip.Tip="Solve Constraints">
@@ -153,7 +162,7 @@
 					<TextBlock Text="Solve"/>
 				</StackPanel>
 			</Button>
-			<Button Click="GenerateNextSolutionClick"
+			<Button Command="{Binding GenerateNextSolution}" 
 			        HorizontalAlignment="Center"
 			        VerticalAlignment="Center"
 			        ToolTip.Tip="Generate Next Solution">
@@ -174,22 +183,14 @@
 		<ScrollViewer Grid.Row="14"
 		              Grid.Column="0"
 		              Grid.ColumnSpan="5"
-		              AllowAutoHide="True"
-		              HorizontalScrollBarVisibility="Visible"
-		              VerticalScrollBarVisibility="Visible">
+		              AllowAutoHide="True">
 			<ListBox Background="#222222"
 					 Items="{Binding SolutionItems}"
 					 SelectionMode="Single">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<ScrollViewer AllowAutoHide="True"
-							              HorizontalScrollBarVisibility="Visible"
-							              VerticalScrollBarVisibility="Visible">
-								<TextBlock TextAlignment="Center"
-										   Text="{Binding Header}"/>
-							</ScrollViewer>
-						</StackPanel>
+						<TextBlock TextAlignment="Center"
+						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
@@ -204,22 +205,14 @@
 		<ScrollViewer Grid.Row="18"
 		              Grid.Column="0"
 		              Grid.ColumnSpan="5"
-		              AllowAutoHide="True"
-		              HorizontalScrollBarVisibility="Visible"
-		              VerticalScrollBarVisibility="Visible">
+		              AllowAutoHide="True">
 			<ListBox Background="#222222"
 			         Items="{Binding CounterExampleItems}"
 			         SelectionMode="Single">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<ScrollViewer AllowAutoHide="True"
-							              HorizontalScrollBarVisibility="Visible"
-							              VerticalScrollBarVisibility="Visible">
-								<TextBlock TextAlignment="Center"
-								           Text="{Binding Header}"/>
-							</ScrollViewer>
-						</StackPanel>
+						<TextBlock TextAlignment="Center"
+						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>

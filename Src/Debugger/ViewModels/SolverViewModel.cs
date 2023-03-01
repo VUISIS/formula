@@ -1,18 +1,20 @@
 using ReactiveUI;
+using Avalonia.Controls;
+
+using System;
 using System.Collections.ObjectModel;
 
-using Debugger.Views;
 using Debugger.ViewModels.Types;
+using Debugger.Views;
 using Debugger.Windows;
-using Microsoft.Formula.API;
-using Avalonia.Interactivity;
 
 namespace Debugger.ViewModels;
 
 internal class SolverViewModel : ReactiveObject
 {
     private readonly string[] constraintIems = new string[] { "=", "<", "<=", ">", ">=" };
-    public SolverViewModel()
+    private readonly TextBox? inputExpression;
+    public SolverViewModel(MainWindow window)
     {
         VariableItems = new ObservableCollection<Node>();
         AllConstraintsItems = new ObservableCollection<Node>();
@@ -25,7 +27,10 @@ internal class SolverViewModel : ReactiveObject
             ConstraintItems.Add(new Node(item));
         }
         
-        AddedConstraint = new string("");
+        SelectedVariable = new Node("");
+        SelectedConstraint = new Node("");
+
+        inputExpression = window.Get<SolverView>("SolverCommandView").Get<TextBox>("InputExpression");
     }
 
     public void ClearAll()
@@ -33,6 +38,7 @@ internal class SolverViewModel : ReactiveObject
         VariableItems.Clear();
         AllConstraintsItems.Clear();
         SolutionItems.Clear();
+        CounterExampleItems.Clear();
     }
 
     public ObservableCollection<Node> AllConstraintsItems { get; }
@@ -40,5 +46,25 @@ internal class SolverViewModel : ReactiveObject
     public ObservableCollection<Node> CounterExampleItems { get; }
     public ObservableCollection<Node> ConstraintItems { get; }
     public ObservableCollection<Node> VariableItems { get; }
-    public string AddedConstraint { get; }
+    public Node SelectedVariable { get; }
+    public Node SelectedConstraint { get; }
+    public void AddConstraint()
+    {
+        if (inputExpression != null)
+        {
+            decimal outNum;
+            if (decimal.TryParse(inputExpression.Text, out outNum))
+            {
+                Console.WriteLine(outNum);
+            }
+        }
+    }
+
+    public void SolveConstraints()
+    {
+    }
+
+    public void GenerateNextSolution()
+    {
+    }
 }

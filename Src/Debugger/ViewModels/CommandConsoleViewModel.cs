@@ -86,7 +86,6 @@ internal class CommandConsoleViewModel : ReactiveObject
                 {
                     var cmdTask = new Task(() => LoadCommand(commandInput.Text));
                     cmdTask.Start();
-                    tasks.Add(cmdTask);
                     var timeOutTask = new Task(() => TimeoutAfter(cmdTask, TaskType.LOAD));
                     timeOutTask.Start();
                     tasks.Add(timeOutTask);
@@ -96,7 +95,6 @@ internal class CommandConsoleViewModel : ReactiveObject
                 {
                     var exeTask = new Task(SolverExecute, TaskCreationOptions.LongRunning);
                     exeTask.Start();
-                    tasks.Add(exeTask);
                     var timeExeTask = new Task(() => TimeoutAfter(exeTask, TaskType.EXECUTE));
                     timeExeTask.Start();
                     tasks.Add(timeExeTask);
@@ -106,7 +104,6 @@ internal class CommandConsoleViewModel : ReactiveObject
                 {
                     var startSolveTask = new Task(SolverStart, TaskCreationOptions.LongRunning);
                     startSolveTask.Start();
-                    tasks.Add(startSolveTask);
                     var timeoutStartTask = new Task(() => TimeoutAfter(startSolveTask, TaskType.START));
                     timeoutStartTask.Start();
                     tasks.Add(timeoutStartTask);
@@ -116,7 +113,6 @@ internal class CommandConsoleViewModel : ReactiveObject
                 {
                     var initSolveTask = new Task(SolverInit);
                     initSolveTask.Start();
-                    tasks.Add(initSolveTask);
                     var timeoutTask = new Task(() => TimeoutAfter(initSolveTask, TaskType.INIT));
                     timeoutTask.Start();
                     tasks.Add(timeoutTask);
@@ -127,7 +123,6 @@ internal class CommandConsoleViewModel : ReactiveObject
                 {
                     var commandExecuteTask = new Task(() => ExecuteCommand(commandInput.Text));
                     commandExecuteTask.Start();
-                    tasks.Add(commandExecuteTask);
                     var timeoutExecuteTask = new Task(() => TimeoutAfter(commandExecuteTask, TaskType.COMMAND));
                     timeoutExecuteTask.Start();
                     tasks.Add(timeoutExecuteTask);
@@ -136,7 +131,6 @@ internal class CommandConsoleViewModel : ReactiveObject
                 {
                     var commandExecuteTask = new Task(() => ExecuteCommand(commandInput.Text));
                     commandExecuteTask.Start();
-                    tasks.Add(commandExecuteTask);
                     var timeoutTask = new Task(() => TimeoutAfter(commandExecuteTask, TaskType.COMMAND));
                     timeoutTask.Start();
                     tasks.Add(timeoutTask);
@@ -304,14 +298,23 @@ internal class CommandConsoleViewModel : ReactiveObject
             {
                 solveRes.Init();
 
+                var coreRules = formulaProgram.FormulaPublisher.GetCoreRules();
+                var varFacts = formulaProgram.FormulaPublisher.GetVarFacts();
+                var rules = formulaProgram.FormulaPublisher.GetCurrentTerms();
+                var posConstraints = formulaProgram.FormulaPublisher.GetPosConstraints();
+                var negConstraints = formulaProgram.FormulaPublisher.GetNegConstraints();
+                var dirConstraints = formulaProgram.FormulaPublisher.GetDirConstraints();
+                var flatConstraints = formulaProgram.FormulaPublisher.GetFlatConstraints();
                 Dispatcher.UIThread.Post(() =>
                 {
-                    if (inferenceRulesViewModel != null &&
+                    if (commandOutput != null &&
+                        termsViewModel != null &&
+                        constraintsViewModel != null &&
+                        inferenceRulesViewModel != null &&
                         solverViewModel != null)
                     {
                         inferenceRulesViewModel.ClearAll();
-                        
-                        var coreRules = formulaProgram.FormulaPublisher.GetCoreRules();
+
                         if (coreRules != null)
                         {
                             foreach (var rulePair in coreRules)
@@ -324,28 +327,81 @@ internal class CommandConsoleViewModel : ReactiveObject
                             }
                         }
                         
-                        solverViewModel.ClearAll();
-                        
-                        var varFacts = formulaProgram.FormulaPublisher.GetVarFacts();
-                        foreach (var varFact in varFacts)
+                        if (varFacts.Count > 0)
                         {
-                            var n = new Node(varFact.Value, varFact.Key);
-                            solverViewModel.VariableItems.Add(n);
+                            solverViewModel.ClearAll();
+                            
+                            foreach (var varFact in varFacts)
+                            {
+                                var n = new Node(varFact.Value, varFact.Key);
+                                solverViewModel.VariableItems.Add(n);
+                            }
+                            
+                            EnableConstraintPanel();
                         }
-                    }
 
-                    if (commandOutput != null)
-                    {
-                        commandOutput.Text += "\n";
-                        commandOutput.Text += "Solve " + TaskType.INIT + " task completed.";
-                        commandOutput.Text += "\n\n";
-                        commandOutput.Text += "[]>";
+                        termsViewModel.ClearAll();
+                        constraintsViewModel.ClearAll();
+
+                        var flag = true;
+                        foreach (var term in rules)
+                        {
+                            var node = new Node(term.Value, term.Key);
+                            termsViewModel.CurrentTermItems.Add(node);
+
+                            if (flag)
+                            {
+                                if (dirConstraints.ContainsKey(term.Key))
+                                {
+                                    foreach (var v in dirConstraints[term.Key])
+                                    {
+                                        var dirn = new Node(v, term.Key);
+                                        constraintsViewModel.DirectConstraintsItems.Add(dirn);
+                                    }
+                                }
+
+                                if (posConstraints.ContainsKey(term.Key))
+                                {
+                                    foreach (var v in posConstraints[term.Key])
+                                    {
+                                        var posn = new Node(v, term.Key);
+                                        constraintsViewModel.PosConstraintsItems.Add(posn);
+                                    }
+                                }
+
+                                if (negConstraints.ContainsKey(term.Key))
+                                {
+                                    foreach (var v in negConstraints[term.Key])
+                                    {
+                                        var negn = new Node(v, term.Key);
+                                        constraintsViewModel.NegConstraintsItems.Add(negn);
+                                    }
+                                }
+
+                                if (flatConstraints.ContainsKey(term.Key))
+                                {
+                                    foreach (var v in flatConstraints[term.Key])
+                                    {
+                                        var flatn = new Node(v, term.Key);
+                                        constraintsViewModel.FlatConstraintsItems.Add(flatn);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (commandOutput != null)
+                        {
+                            commandOutput.Text += "\n";
+                            commandOutput.Text += "Solve " + TaskType.INIT + " task completed.";
+                            commandOutput.Text += "\n\n";
+                            commandOutput.Text += "[]>";
+                        }
                     }
                 }, DispatcherPriority.Render);
             }
         }
     }
-    
+
     private void SolverExecute()
     {
         if (formulaProgram != null)
@@ -354,7 +410,12 @@ internal class CommandConsoleViewModel : ReactiveObject
             if (solveRes != null)
             {
                 solveRes.Execute();
-
+                
+                var rules = formulaProgram.FormulaPublisher.GetCurrentTerms();
+                var posConstraints = formulaProgram.FormulaPublisher.GetPosConstraints();
+                var negConstraints = formulaProgram.FormulaPublisher.GetNegConstraints();
+                var dirConstraints = formulaProgram.FormulaPublisher.GetDirConstraints();
+                var flatConstraints = formulaProgram.FormulaPublisher.GetFlatConstraints();
                 Dispatcher.UIThread.Post(() =>
                 {
                     if (commandOutput != null &&
@@ -364,11 +425,6 @@ internal class CommandConsoleViewModel : ReactiveObject
                         termsViewModel.ClearAll();
                         constraintsViewModel.ClearAll();
 
-                        var rules = formulaProgram.FormulaPublisher.GetCurrentTerms();
-                        var posConstraints = formulaProgram.FormulaPublisher.GetPosConstraints();
-                        var negConstraints = formulaProgram.FormulaPublisher.GetNegConstraints();
-                        var dirConstraints = formulaProgram.FormulaPublisher.GetDirConstraints();
-                        var flatConstraints = formulaProgram.FormulaPublisher.GetFlatConstraints();
                         var flag = true;
                         foreach (var term in rules)
                         {
@@ -377,38 +433,54 @@ internal class CommandConsoleViewModel : ReactiveObject
 
                             if (flag)
                             {
-                                foreach (var v in dirConstraints[term.Key])
+                                if (dirConstraints.ContainsKey(term.Key))
                                 {
-                                    var dirn = new Node(v);
-                                    constraintsViewModel.DirectConstraintsItems.Add(dirn);
+                                    foreach (var v in dirConstraints[term.Key])
+                                    {
+                                        var dirn = new Node(v, term.Key);
+                                        constraintsViewModel.DirectConstraintsItems.Add(dirn);
+                                    }
                                 }
-                    
-                                foreach (var v in posConstraints[term.Key])
+
+                                if (posConstraints.ContainsKey(term.Key))
                                 {
-                                    var posn = new Node(v);
-                                    constraintsViewModel.PosConstraintsItems.Add(posn);
+                                    foreach (var v in posConstraints[term.Key])
+                                    {
+                                        var posn = new Node(v, term.Key);
+                                        constraintsViewModel.PosConstraintsItems.Add(posn);
+                                    }
                                 }
-                    
-                                foreach (var v in negConstraints[term.Key])
+
+                                if (negConstraints.ContainsKey(term.Key))
                                 {
-                                    var negn = new Node(v);
-                                    constraintsViewModel.NegConstraintsItems.Add(negn);
+                                    foreach (var v in negConstraints[term.Key])
+                                    {
+                                        var negn = new Node(v, term.Key);
+                                        constraintsViewModel.NegConstraintsItems.Add(negn);
+                                    }
                                 }
-                    
-                                foreach (var v in flatConstraints[term.Key])
+
+
+                                if (flatConstraints.ContainsKey(term.Key))
                                 {
-                                    var flatn = new Node(v);
-                                    constraintsViewModel.FlatConstraintsItems.Add(flatn);
+                                    foreach (var v in flatConstraints[term.Key])
+                                    {
+                                        var flatn = new Node(v, term.Key);
+                                        constraintsViewModel.FlatConstraintsItems.Add(flatn);
+                                    }
                                 }
 
                                 flag = false;
                             }
                         }
 
-                        commandOutput.Text += "\n";
-                        commandOutput.Text += "Solve " + TaskType.EXECUTE + " task completed.";
-                        commandOutput.Text += "\n\n";
-                        commandOutput.Text += "[]>";
+                        if (commandOutput != null)
+                        {
+                            commandOutput.Text += "\n";
+                            commandOutput.Text += "Solve " + TaskType.EXECUTE + " task completed.";
+                            commandOutput.Text += "\n\n";
+                            commandOutput.Text += "[]>";
+                        }
                     }
                 }, DispatcherPriority.Render);
             }
@@ -422,7 +494,7 @@ internal class CommandConsoleViewModel : ReactiveObject
             var solveRes = formulaProgram.FormulaPublisher.GetSolverResult();
             if (solveRes != null)
             {
-                formulaProgram.FormulaPublisher.SetStartTime(DateTime.Now);
+                var startTime = DateTime.Now;
                     
                 solveRes.Start();
 
@@ -433,12 +505,23 @@ internal class CommandConsoleViewModel : ReactiveObject
                         commandOutput.Text += "\n";
                         commandOutput.Text += "Solve " + TaskType.START + " task completed. Solveable: " + solveRes.Solvable;
                         commandOutput.Text += "\n";
-                        commandOutput.Text += "1ms"; // Calculate delta time.
+                        commandOutput.Text += (solveRes.StopTime - startTime).Milliseconds + "ms";
                         commandOutput.Text += "\n\n";
                         commandOutput.Text += "[]>";
                     }
                 }, DispatcherPriority.Render);
             }
+        }
+    }
+    
+    private void EnableConstraintPanel()
+    {
+        if (mainWindow != null)
+        {
+            mainWindow.Get<SolverView>("SolverCommandView").Get<ComboBox>("VariableSelection").IsEnabled = true;
+            mainWindow.Get<SolverView>("SolverCommandView").Get<ComboBox>("ConstraintSelection").IsEnabled = true;
+            mainWindow.Get<SolverView>("SolverCommandView").Get<TextBox>("InputExpression").IsEnabled = true;
+            mainWindow.Get<SolverView>("SolverCommandView").Get<Button>("AddConstraintButton").IsEnabled = true;
         }
     }
 }

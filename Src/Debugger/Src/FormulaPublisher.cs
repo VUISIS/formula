@@ -1,13 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.Formula.API;
 using Microsoft.Formula.API.Plugins;
-using Microsoft.Formula.Common;
-using Microsoft.Formula.Common.Terms;
 
 namespace Debugger;
 
@@ -21,7 +16,6 @@ public class FormulaPublisher : ISolverPublisher
     private Dictionary<int, string> VarFacts = new Dictionary<int, string>();
     private Dictionary<int, List<string>> CoreRules = new Dictionary<int, List<string>>();
     private SolveResult? SolverResult;
-    private DateTime? startTime;
 
     public void AddPosConstraint(int id, string constraint)
     {
@@ -98,17 +92,14 @@ public class FormulaPublisher : ISolverPublisher
 
     public void AddVariableFact(int id, string fact)
     {
-        Console.WriteLine("ADD FACT");
         if (!VarFacts.ContainsKey(id))
         {
-            Console.WriteLine(id.ToString() + " " + fact);
             VarFacts.Add(id, fact);
         }
     }
 
     public Dictionary<int, string> GetVarFacts()
     {
-        Console.WriteLine(VarFacts.Count.ToString());
         return VarFacts;
     }
 
@@ -130,10 +121,5 @@ public class FormulaPublisher : ISolverPublisher
     public SolveResult? GetSolverResult()
     {
         return SolverResult;
-    }
-
-    public void SetStartTime(DateTime time)
-    {
-        startTime = time;
     }
 }
