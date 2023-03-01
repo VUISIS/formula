@@ -87,7 +87,8 @@
             <v:ConstraintsView Name="ConstrView"
                                Grid.Row="5" 
                                Grid.Column="5"/>
-            <v:SolverView Grid.Row="2" 
+            <v:SolverView Name="SolverCommandView"
+                          Grid.Row="2" 
                           Grid.RowSpan="4"
                           Grid.Column="7"/>
         </Grid>

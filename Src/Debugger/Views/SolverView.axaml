@@ -11,8 +11,6 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="20"/>
 			<RowDefinition Height="10"/>
-			<RowDefinition Height="*"/>
-			<RowDefinition Height="10"/>
 			<RowDefinition Height="50"/>
 			<RowDefinition Height="10"/>
 			<RowDefinition Height="30"/>
@@ -32,9 +30,9 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="50"/>
+			<ColumnDefinition Width="75"/>
 			<ColumnDefinition Width="10"/>
-			<ColumnDefinition Width="60"/>
+			<ColumnDefinition Width="75"/>
 			<ColumnDefinition Width="10"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
@@ -45,50 +43,34 @@
 		           HorizontalAlignment="Center"
 		           VerticalAlignment="Center"
 		           Text="Symbolic Variables"/>
-		<ScrollViewer Grid.Row="2" 
-		              Grid.Column="0"
-		              Grid.ColumnSpan="5"
-		              AllowAutoHide="True"
-		              HorizontalScrollBarVisibility="Visible"
-		              VerticalScrollBarVisibility="Visible">
-			<ListBox Background="#222222"
-					 Items="{Binding SymbolicVariablesItems}"
-					 SelectionMode="Single">
-				<ListBox.ItemTemplate>
-					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<ScrollViewer AllowAutoHide="True"
-							              HorizontalScrollBarVisibility="Visible"
-							              VerticalScrollBarVisibility="Visible">
-								<TextBlock TextAlignment="Center"
-										   Text="{Binding Header}"/>
-							</ScrollViewer>
-						</StackPanel>
-					</DataTemplate>
-				</ListBox.ItemTemplate>
-			</ListBox>
-		</ScrollViewer>
-		<Border Grid.Row="4" 
+		<Border Grid.Row="2" 
 		        Grid.Column="0"
 		        Background="Black"
 		        BorderBrush="White"
-		        BorderThickness="1">
-			<TextBlock Width="50"
-			           Height="50"
-			           TextAlignment="Center"
-			           HorizontalAlignment="Center"
-			           VerticalAlignment="Center"
-			           Text="{Binding SelectedVar}"
-			           TextWrapping="NoWrap"/>
+		        CornerRadius="1"
+		        BorderThickness="0.5">
+			<ComboBox Name="VariableSelection"
+			          Height="45"
+			          Background="Black"
+			          BorderBrush="White"
+			          BorderThickness="0"
+			          Items="{Binding VariableItems}"
+			          SelectedIndex="0">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Width="50" Text="{Binding Header}"/>
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
 		</Border>
-		<Border Grid.Row="4" 
+		<Border Grid.Row="2" 
 		        Grid.Column="2"
 		        Background="Black"
 		        BorderBrush="White"
-		        BorderThickness="1">
+		        CornerRadius="1"
+		        BorderThickness="0.5">
 			<ComboBox Name="ConstraintSelection"
 			          Height="45"
-			          VerticalAlignment="Center"
 			          Background="Black"
 			          BorderBrush="White"
 			          BorderThickness="0"
@@ -96,25 +78,26 @@
 			          SelectedIndex="0">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
-						<TextBlock Text="{Binding Header}"/>
+						<TextBlock Width="50" Text="{Binding Header}"/>
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>
 		</Border>
-		<TextBox Grid.Row="4" 
+		<TextBox Grid.Row="2" 
 		         Grid.Column="4"
 		         Text="{Binding AddedConstraint}"
 		         Height="{Binding $parent[ScrollViewer].Bounds.Height}"
 		         Width="{Binding $parent[ScrollViewer].Bounds.Width}"
 		         Background="Black"
 		         BorderBrush="White"
-		         BorderThickness="1"
+		         BorderThickness="0.5"
+		         CornerRadius="1"
 		         AcceptsReturn="False" 
 		         TextAlignment="Left"
 		         VerticalContentAlignment="Center"
-		         Watermark="Expression: ex. (x - 1)"
+		         Watermark="Digit/Real"
 		         TextWrapping="NoWrap"/>
-		<Button Grid.Row="6" 
+		<Button Grid.Row="4" 
 		        Grid.Column="0"
 		        Grid.ColumnSpan="5"
 				Click="AddConstraintClick"
@@ -126,14 +109,14 @@
 				<TextBlock Text="Constraint"/>
 			</StackPanel>
 		</Button>
-		<TextBlock Grid.Row="8" 
+		<TextBlock Grid.Row="6" 
 		           Grid.Column="0"
 		           Grid.ColumnSpan="5"
 		           TextAlignment="Center"
 		           HorizontalAlignment="Center"
 		           VerticalAlignment="Center"
 		           Text="All Constraints"/>
-		<ScrollViewer Grid.Row="10" 
+		<ScrollViewer Grid.Row="8" 
 		              Grid.Column="0"
 		              Grid.ColumnSpan="5"
 		              AllowAutoHide="True"
@@ -154,7 +137,7 @@
 				</ListBox.ItemTemplate>
 			</ListBox>
 		</ScrollViewer>
-		<StackPanel Grid.Row="12" 
+		<StackPanel Grid.Row="10" 
 		            Grid.Column="0"
 		            Grid.ColumnSpan="5"
 		            Orientation="Horizontal"
@@ -181,14 +164,14 @@
 				</StackPanel>
 			</Button>
 		</StackPanel>
-		<TextBlock Grid.Row="14"
+		<TextBlock Grid.Row="12"
 		           Grid.Column="0"
 		           Grid.ColumnSpan="5"
 		           TextAlignment="Center"
 		           HorizontalAlignment="Center"
 		           VerticalAlignment="Center"
 		           Text="Solution/Unsat Core"/>
-		<ScrollViewer Grid.Row="16"
+		<ScrollViewer Grid.Row="14"
 		              Grid.Column="0"
 		              Grid.ColumnSpan="5"
 		              AllowAutoHide="True"
@@ -211,14 +194,14 @@
 				</ListBox.ItemTemplate>
 			</ListBox>
 		</ScrollViewer>
-		<TextBlock Grid.Row="18"
+		<TextBlock Grid.Row="16"
 		           Grid.Column="0"
 		           Grid.ColumnSpan="5"
 		           TextAlignment="Center"
 		           HorizontalAlignment="Center"
 		           VerticalAlignment="Center"
 		           Text="Counter Example"/>
-		<ScrollViewer Grid.Row="20"
+		<ScrollViewer Grid.Row="18"
 		              Grid.Column="0"
 		              Grid.ColumnSpan="5"
 		              AllowAutoHide="True"

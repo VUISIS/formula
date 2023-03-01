@@ -1,5 +1,4 @@
-﻿using System.Collections.Specialized;
-using System.IO;
+﻿using System.IO;
 using Microsoft.Formula.API.Plugins;
 
 namespace Microsoft.Formula.Solver
@@ -21,7 +20,7 @@ namespace Microsoft.Formula.Solver
     using Z3BoolExpr = Z3.BoolExpr;
     using System.Numerics;
     using System.Text.RegularExpressions;
-
+    
     internal class SymExecuter
     {
         private static char PatternVarBoundPrefix = '^';
@@ -67,8 +66,7 @@ namespace Microsoft.Formula.Solver
         /// <summary>
         /// The current least fixed point.
         /// </summary>
-        private Map<Term, SymElement> lfp =
-            new Map<Term, SymElement>(Term.Compare);
+        private Map<Term, SymElement> lfp = new Map<Term, SymElement>(Term.Compare);
 
         private Map<Term, Set<Derivation>> facts = new Map<Term, Set<Derivation>>(Term.Compare);
 
@@ -147,62 +145,66 @@ namespace Microsoft.Formula.Solver
             }
         }
 
-        private void LFPChanged(object? obj, NotifyCollectionChangedEventArgs args)
+        private void SetVarFacts()
         {
-            if (Publisher != null &&
-                args.NewItems != null)
+            if (Publisher != null)
             {
-                var newLFPItems = args.NewItems as Map<Term, SymElement>;
-                if (newLFPItems != null)
+                foreach (var fact in varFacts)
                 {
-                    foreach (var lfpItemKey in newLFPItems.Keys)
-                    {
-                        var cancelToken = new CancellationToken();
-                        var tw = new StringWriter();
-                        var envParams = new EnvParams();
-                        lfpItemKey.PrintTerm(tw, cancelToken, envParams);
-                        Publisher.AddCurrentTerm(lfpItemKey.Symbol.Id, tw.ToString());    
-                    }
-                    
-                    foreach (var newItem in newLFPItems)
-                    {
-                        foreach (var data in newItem.Value.GetConstraintData())
-                        {
-                            foreach (var dirConst in data.DirConstraints)
-                            {
-                                Publisher.AddDirConstraint(newItem.Key.Symbol.Id, dirConst.ToString());
-                            }
+                    var ct = new CancellationToken();
+                    var envParams = new EnvParams();
+                    var tw = new StringWriter();
+                    fact.PrintTerm(tw,ct,envParams);
+                    Publisher.AddVariableFact(fact.Symbol.Id, tw.ToString());
+                }
+            }
+        }
 
-                            foreach (var posConst in data.PosConstraints)
-                            {
-                                SymElement next;
-                                if(GetSymbolicTerm(posConst, out next))
-                                {
-                                    var cancelToken = new CancellationToken();
-                                    var tw = new StringWriter();
-                                    var envParams = new EnvParams();
-                                    next.Term.PrintTerm(tw, cancelToken, envParams);
-                                    Publisher.AddPosConstraint(newItem.Key.Symbol.Id, tw.ToString());
-                                }
-                            }
-                    
-                            foreach (var negConst in data.NegConstraints)
-                            {
-                                SymElement next;
-                                if (GetSymbolicTerm(negConst, out next))
-                                {
-                                    var cancelToken = new CancellationToken();
-                                    var tw = new StringWriter();
-                                    var envParams = new EnvParams();
-                                    next.Term.PrintTerm(tw, cancelToken, envParams);
-                                    Publisher.AddNegConstraint(newItem.Key.Symbol.Id, tw.ToString());
-                                }
-                            }
-                            
-                            var sideConstraints = newItem.Value.GetSideConstraints(this);
-                            Publisher.AddFlatConstraint(newItem.Key.Symbol.Id, sideConstraints.ToString());
+        private void LFPChanged(Term t, SymElement s)
+        {
+            if (Publisher != null)
+            {
+                var cancelToken = new CancellationToken();
+                var tw = new StringWriter();
+                var envParams = new EnvParams();
+                t.PrintTerm(tw, cancelToken, envParams);
+                Publisher.AddCurrentTerm(t.Symbol.Id, tw.ToString());
+
+                foreach (var data in s.GetConstraintData())
+                {
+                    foreach (var dirConst in data.DirConstraints)
+                    {
+                        Publisher.AddDirConstraint(t.Symbol.Id, dirConst.ToString());
+                    }
+
+                    foreach (var posConst in data.PosConstraints)
+                    {
+                        SymElement next;
+                        if(GetSymbolicTerm(posConst, out next))
+                        {
+                            cancelToken = new CancellationToken();
+                            tw = new StringWriter();
+                            envParams = new EnvParams();
+                            next.Term.PrintTerm(tw, cancelToken, envParams);
+                            Publisher.AddPosConstraint(t.Symbol.Id, tw.ToString());
                         }
                     }
+            
+                    foreach (var negConst in data.NegConstraints)
+                    {
+                        SymElement next;
+                        if (GetSymbolicTerm(negConst, out next))
+                        {
+                            cancelToken = new CancellationToken();
+                            tw = new StringWriter();
+                            envParams = new EnvParams();
+                            next.Term.PrintTerm(tw, cancelToken, envParams);
+                            Publisher.AddNegConstraint(t.Symbol.Id, tw.ToString());
+                        }
+                    }
+                    
+                    var sideConstraints = s.GetSideConstraints(this);
+                    Publisher.AddFlatConstraint(t.Symbol.Id, sideConstraints.ToString());
                 }
             }
         }
@@ -391,10 +393,6 @@ namespace Microsoft.Formula.Solver
             Encoder = new TermEncIndex(solver);
             Publisher = EnvParams.GetSolverPublisherParameter(new EnvParams(), EnvParamKind.Debug_SolverPublisher);
             
-            SetPublisherCoreRules();
-
-            lfp.CollectionChanged += LFPChanged;
-
             solver.PartialModel.ConvertSymbCnstsToVars(out varFacts, out aliasMap);
 
             Map<ConSymb, List<Term>> cardTerms = new Map<ConSymb, List<Term>>(Symbol.Compare);
@@ -455,8 +453,8 @@ namespace Microsoft.Formula.Solver
                     }
                 }
             }
-
-            
+            SetPublisherCoreRules();
+            SetVarFacts();
         }
 
         public bool Solve()
@@ -565,7 +563,6 @@ namespace Microsoft.Formula.Solver
                     }
                 }
             }
-
             return solvable;
         }
 
@@ -1019,6 +1016,10 @@ namespace Microsoft.Formula.Solver
 
                 e = new SymElement(normalized, enc, Solver.Context);
                 lfp.Add(normalized, e);
+                if (Publisher != null)
+                {
+                    LFPChanged(normalized, e);
+                }
             }
 
             if (!pendingConstraints.IsEmpty() ||

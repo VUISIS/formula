@@ -87,6 +87,11 @@
             }
         }
 
+        public void Execute()
+        {
+            solver.Execute();
+        }
+
         public void Start()
         {
             Solvable = solver.Solve();

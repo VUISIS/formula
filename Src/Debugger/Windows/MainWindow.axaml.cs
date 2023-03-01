@@ -38,6 +38,9 @@ public partial class MainWindow : Window
         var ctv = this.Get<CurrentTermsView>("TermsView");
         SetViewWindow(ctv, new CurrentTermsViewModel(this, formulaProgram));
 
+        var sv = this.Get<SolverView>("SolverCommandView");
+        SetViewWindow(sv, new SolverViewModel());
+        
         var iv = this.Get<InferenceRulesView>("SolverRulesView");
         SetViewWindow(iv, new InferenceRulesViewModel());
 

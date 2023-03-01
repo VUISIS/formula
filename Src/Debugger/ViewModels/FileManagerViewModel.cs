@@ -1,10 +1,14 @@
 using ReactiveUI;
-using Avalonia.Input;
+using Avalonia.Threading;
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using System.Threading;
 
 using Debugger.Windows;
 using Debugger.ViewModels.Types;
@@ -20,6 +24,7 @@ internal class FileManagerViewModel : ReactiveObject
     private readonly FormulaProgram? formulaProgram;
     private readonly TextBlock? consoleOutput;
     private readonly TextBlock? fileOutput;
+    private List<Task> tasks = new List<Task>();
     
     public FileManagerViewModel(MainWindow win, FormulaProgram program)
     {
@@ -51,38 +56,101 @@ internal class FileManagerViewModel : ReactiveObject
             if (Utils.LastDirectory != null &&
                 Utils.LastDirectory.TryGetUri(out uri))
             {
-                var txt = consoleOutput.Text;
-                if(txt == null || txt.Length <= 0)
+                var loadTask = new Task(() => ExecuteLoadCommand(uri, SelectedItems[0].Header));
+                loadTask.Start();
+                tasks.Add(loadTask);
+                var timeoutTask = new Task(() => TimeoutAfter(loadTask));
+                timeoutTask.Start();
+                tasks.Add(timeoutTask);
+            }
+        }
+    }
+    
+    private async void TimeoutAfter(Task task)
+    {
+        if (formulaProgram != null)
+        {
+            using (var timeoutCancellationTokenSource = new CancellationTokenSource())
+            {
+                var timeout = new TimeSpan(0, 0, 0, 10);
+                var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+                if (completedTask == task)
                 {
-                    consoleOutput.Text += "[]> ";
+                    timeoutCancellationTokenSource.Cancel();
                 }
-                
-                if(!formulaProgram.ExecuteCommand("unload *"))
+                else
                 {
-                    consoleOutput.Text += "ERROR: Command failed.";
-                    return;
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        if (consoleOutput != null)
+                        {
+                            consoleOutput.Text += "\n";
+                            consoleOutput.Text += "Solve LOAD task timed out.";
+                            consoleOutput.Text += "\n";
+                            consoleOutput.Text += "10s";
+                            consoleOutput.Text += "\n\n";
+                            consoleOutput.Text += "[]>";
+                        }
+                    }, DispatcherPriority.Render);
                 }
-            
-                formulaProgram.ClearConsoleOutput();
-
-                var file = Path.Join(uri.AbsolutePath, SelectedItems[0].Header);
-            
-                if(!formulaProgram.ExecuteCommand("load " + file))
-                {
-                    consoleOutput.Text += "ERROR: Command failed.";
-                    return;
-                }
-
-                if (fileOutput != null)
-                {
-                    fileOutput.Text = Utils.OpenFileText(file);
-                }
-
-                consoleOutput.Text += "load " + file;
-                consoleOutput.Text += "\n";
-                consoleOutput.Text += formulaProgram.GetConsoleOutput();
             }
         }
     }
 
+    private void ExecuteLoadCommand(Uri uri, string file)
+    {
+        if (formulaProgram != null &&
+            consoleOutput != null)
+        {
+            if (!formulaProgram.ExecuteCommand("unload *"))
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    if (consoleOutput != null)
+                    {
+                        consoleOutput.Text += "ERROR: COMMAND failed to execute.";
+                    }
+                }, DispatcherPriority.Render);
+                return;
+            }
+
+            formulaProgram.ClearConsoleOutput();
+
+            var fileP = Path.Join(uri.AbsolutePath, file);
+
+            if (!formulaProgram.ExecuteCommand("load " + fileP))
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    if (consoleOutput != null)
+                    {
+                        consoleOutput.Text += "ERROR: COMMAND failed to execute.";
+                    }
+                }, DispatcherPriority.Render);
+                return;
+            }
+
+            var fileTxt = Utils.OpenFileText(fileP);
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (consoleOutput != null)
+                {
+                    if (fileOutput != null)
+                    {
+                        fileOutput.Text = fileTxt;
+                    }
+                    
+                    var txt = consoleOutput.Text;
+                    if(txt == null || txt.Length <= 0)
+                    {
+                        consoleOutput.Text += "[]> ";
+                    }
+
+                    consoleOutput.Text += "load " + fileP;
+                    consoleOutput.Text += "\n";
+                    consoleOutput.Text += formulaProgram.GetConsoleOutput();
+                }
+            }, DispatcherPriority.Render);
+        }
+    }
 }

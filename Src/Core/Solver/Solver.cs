@@ -308,7 +308,6 @@
 
         public bool Solve()
         {
-            executer.Execute();
             solvable = executer.Solve();
             return solvable;
         }

@@ -11,8 +11,6 @@ public partial class SolverView : UserControl
     public SolverView()
     {
         InitializeComponent();
-
-        this.DataContext = new SolverViewModel();
     }
 
     private void InitializeComponent()

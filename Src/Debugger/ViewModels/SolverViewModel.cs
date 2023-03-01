@@ -14,7 +14,7 @@ internal class SolverViewModel : ReactiveObject
     private readonly string[] constraintIems = new string[] { "=", "<", "<=", ">", ">=" };
     public SolverViewModel()
     {
-        SymbolicVariablesItems = new ObservableCollection<Node>();
+        VariableItems = new ObservableCollection<Node>();
         AllConstraintsItems = new ObservableCollection<Node>();
         SolutionItems = new ObservableCollection<Node>();
         CounterExampleItems = new ObservableCollection<Node>();
@@ -30,15 +30,15 @@ internal class SolverViewModel : ReactiveObject
 
     public void ClearAll()
     {
-        SymbolicVariablesItems.Clear();
+        VariableItems.Clear();
         AllConstraintsItems.Clear();
         SolutionItems.Clear();
     }
 
-    public ObservableCollection<Node> SymbolicVariablesItems { get; }
     public ObservableCollection<Node> AllConstraintsItems { get; }
     public ObservableCollection<Node> SolutionItems { get; }
     public ObservableCollection<Node> CounterExampleItems { get; }
     public ObservableCollection<Node> ConstraintItems { get; }
+    public ObservableCollection<Node> VariableItems { get; }
     public string AddedConstraint { get; }
 }

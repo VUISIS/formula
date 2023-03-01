@@ -20,15 +20,8 @@ public class FormulaPublisher : ISolverPublisher
     private Dictionary<int, string> CurrentTerms = new Dictionary<int, string>();
     private Dictionary<int, string> VarFacts = new Dictionary<int, string>();
     private Dictionary<int, List<string>> CoreRules = new Dictionary<int, List<string>>();
-    private Set<Term>? varFacts;
     private SolveResult? SolverResult;
     private DateTime? startTime;
-    private int resultTime;
-
-    public string GetResultTimeString()
-    {
-        return resultTime + "ms.";
-    }
 
     public void AddPosConstraint(int id, string constraint)
     {
@@ -40,6 +33,11 @@ public class FormulaPublisher : ISolverPublisher
         PosConstraintTerms.Add(id, new List<string>{constraint});
     }
 
+    public Dictionary<int, List<string>> GetPosConstraints()
+    {
+        return PosConstraintTerms;
+    }
+
     public void AddNegConstraint(int id, string constraint)
     {
         if(NegConstraintTerms.ContainsKey(id))
@@ -48,6 +46,11 @@ public class FormulaPublisher : ISolverPublisher
             return;
         }
         NegConstraintTerms.Add(id, new List<string>{constraint});
+    }
+    
+    public Dictionary<int, List<string>> GetNegConstraints()
+    {
+        return NegConstraintTerms;
     }
 
     public void AddDirConstraint(int id, string constraint)
@@ -59,6 +62,11 @@ public class FormulaPublisher : ISolverPublisher
         }
         DirConstraintTerms.Add(id, new List<string>{constraint});
     }
+    
+    public Dictionary<int, List<string>> GetDirConstraints()
+    {
+        return DirConstraintTerms;
+    }
 
     public void AddFlatConstraint(int id, string constraint)
     {
@@ -69,6 +77,11 @@ public class FormulaPublisher : ISolverPublisher
         }
         FlatConstraintTerms.Add(id, new List<string>{constraint});
     }
+    
+    public Dictionary<int, List<string>> GetFlatConstraints()
+    {
+        return FlatConstraintTerms;
+    }
 
     public void AddCurrentTerm(int id, string currentTerm)
     {
@@ -78,12 +91,25 @@ public class FormulaPublisher : ISolverPublisher
         }
     }
 
+    public Dictionary<int, string> GetCurrentTerms()
+    {
+        return CurrentTerms;
+    }
+
     public void AddVariableFact(int id, string fact)
     {
-        if(!VarFacts.ContainsKey(id))
+        Console.WriteLine("ADD FACT");
+        if (!VarFacts.ContainsKey(id))
         {
+            Console.WriteLine(id.ToString() + " " + fact);
             VarFacts.Add(id, fact);
         }
+    }
+
+    public Dictionary<int, string> GetVarFacts()
+    {
+        Console.WriteLine(VarFacts.Count.ToString());
+        return VarFacts;
     }
 
     public void SetCoreRules(Dictionary<int, List<string>> rules)
@@ -91,42 +117,23 @@ public class FormulaPublisher : ISolverPublisher
         CoreRules = rules;
     }
 
-    public int GetResultTime()
+    public Dictionary<int, List<string>>? GetCoreRules()
     {
-        return resultTime;
+        return CoreRules;
     }
-    
+
     public void SetSolverResult(SolveResult solverResult)
     {
         SolverResult = solverResult;
     }
 
+    public SolveResult? GetSolverResult()
+    {
+        return SolverResult;
+    }
+
     public void SetStartTime(DateTime time)
     {
         startTime = time;
-    }
-
-    public void SolveInit()
-    {
-        if (SolverResult != null)
-        {
-            SolverResult.Init();
-        }
-    }
-    
-    public SolveResult? SolveStart()
-    {
-        SetStartTime(DateTime.Now);
-        if (SolverResult != null)
-        {
-            SolverResult.Start();
-            if (startTime != null)
-            {
-                var endTime = SolverResult.StopTime;
-                resultTime = (endTime - startTime).Value.Milliseconds;
-            }
-            return SolverResult;
-        }
-        return null;
     }
 }
