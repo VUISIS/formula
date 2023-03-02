@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -13,8 +12,6 @@ using Debugger.ViewModels.Helpers;
 using Debugger.Views;
 using Debugger.Windows;
 using Debugger.ViewModels.Types;
-using DynamicData;
-using Microsoft.Formula.API;
 
 namespace Debugger.ViewModels;
 
@@ -84,6 +81,9 @@ internal class CommandConsoleViewModel : ReactiveObject
                 if (commandInput.Text.StartsWith("load") ||
                     commandInput.Text.StartsWith("l"))
                 {
+                    formulaProgram.FormulaPublisher.ClearAll();
+                    tasks.Clear();
+                    
                     var cmdTask = new Task(() => LoadCommand(commandInput.Text));
                     cmdTask.Start();
                     var timeOutTask = new Task(() => TimeoutAfter(cmdTask, TaskType.LOAD));
@@ -99,15 +99,6 @@ internal class CommandConsoleViewModel : ReactiveObject
                     timeExeTask.Start();
                     tasks.Add(timeExeTask);
                 }
-                else if (commandInput.Text.StartsWith("solve start") ||
-                         commandInput.Text.StartsWith("sl start"))
-                {
-                    var startSolveTask = new Task(SolverStart, TaskCreationOptions.LongRunning);
-                    startSolveTask.Start();
-                    var timeoutStartTask = new Task(() => TimeoutAfter(startSolveTask, TaskType.START));
-                    timeoutStartTask.Start();
-                    tasks.Add(timeoutStartTask);
-                } 
                 else if (commandInput.Text.StartsWith("solve init") ||
                          commandInput.Text.StartsWith("sl init"))
                 {
@@ -129,6 +120,13 @@ internal class CommandConsoleViewModel : ReactiveObject
                 }
                 else
                 {
+                    if (commandInput.Text.StartsWith("reload") ||
+                        commandInput.Text.StartsWith("rl"))
+                    {
+                        formulaProgram.FormulaPublisher.ClearAll();
+                        tasks.Clear();
+                    }
+
                     var commandExecuteTask = new Task(() => ExecuteCommand(commandInput.Text));
                     commandExecuteTask.Start();
                     var timeoutTask = new Task(() => TimeoutAfter(commandExecuteTask, TaskType.COMMAND));
@@ -512,6 +510,15 @@ internal class CommandConsoleViewModel : ReactiveObject
                 }, DispatcherPriority.Render);
             }
         }
+    }
+
+    public void StartSolve()
+    {
+        var startSolveTask = new Task(SolverStart, TaskCreationOptions.LongRunning);
+        startSolveTask.Start();
+        var timeoutStartTask = new Task(() => TimeoutAfter(startSolveTask, TaskType.START));
+        timeoutStartTask.Start();
+        tasks.Add(timeoutStartTask);
     }
     
     private void EnableConstraintPanel()

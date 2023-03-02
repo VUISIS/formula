@@ -2,6 +2,8 @@ using ReactiveUI;
 using Avalonia.Controls;
 
 using System;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 using Debugger.ViewModels.Types;
@@ -14,8 +16,13 @@ internal class SolverViewModel : ReactiveObject
 {
     private readonly string[] constraintIems = new string[] { "=", "<", "<=", ">", ">=" };
     private readonly TextBox? inputExpression;
-    public SolverViewModel(MainWindow window)
+    private readonly FormulaProgram formulaProgram;
+    private List<Task> tasks = new List<Task>();
+    private CommandConsoleViewModel? commandConsoleViewModel;
+    public SolverViewModel(MainWindow window, FormulaProgram program)
     {
+        formulaProgram = program;
+        
         VariableItems = new ObservableCollection<Node>();
         AllConstraintsItems = new ObservableCollection<Node>();
         SolutionItems = new ObservableCollection<Node>();
@@ -31,6 +38,7 @@ internal class SolverViewModel : ReactiveObject
         SelectedConstraint = new Node("");
 
         inputExpression = window.Get<SolverView>("SolverCommandView").Get<TextBox>("InputExpression");
+        commandConsoleViewModel = window.Get<CommandConsoleView>("CommandInputView").DataContext as CommandConsoleViewModel;
     }
 
     public void ClearAll()
@@ -62,6 +70,10 @@ internal class SolverViewModel : ReactiveObject
 
     public void SolveConstraints()
     {
+        if (commandConsoleViewModel != null)
+        {
+            commandConsoleViewModel.StartSolve();
+        }
     }
 
     public void GenerateNextSolution()

@@ -23,7 +23,6 @@ internal class ToolbarViewModel : ReactiveObject
     private readonly FormulaProgram? formulaProgram;
     private readonly TextBlock? consoleOutput;
     private readonly TextBlock? fileOutput;
-    private List<Task> tasks = new List<Task>();
 
     public ToolbarViewModel(MainWindow win, FormulaProgram program)
     {
@@ -61,10 +60,8 @@ internal class ToolbarViewModel : ReactiveObject
                 {
                     var loadTask = new Task(() => ExecuteLoadCommand(uri, file));
                     loadTask.Start();
-                    tasks.Add(loadTask);
                     var timeoutTask = new Task(() => TimeoutAfter(loadTask));
                     timeoutTask.Start();
-                    tasks.Add(timeoutTask);
                 }
             }
         }
@@ -119,6 +116,7 @@ internal class ToolbarViewModel : ReactiveObject
             }
 
             formulaProgram.ClearConsoleOutput();
+            formulaProgram.FormulaPublisher.ClearAll();
 
             var fileP = Path.Join(uri.AbsolutePath, file.Name);
 

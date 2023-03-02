@@ -17,6 +17,18 @@ public class FormulaPublisher : ISolverPublisher
     private Dictionary<int, List<string>> CoreRules = new Dictionary<int, List<string>>();
     private SolveResult? SolverResult;
 
+    public void ClearAll()
+    {
+        DirConstraintTerms.Clear();
+        PosConstraintTerms.Clear();
+        NegConstraintTerms.Clear();
+        FlatConstraintTerms.Clear();
+        CurrentTerms.Clear();
+        VarFacts.Clear();
+        CoreRules.Clear();
+        SolverResult = null;
+    }
+
     public void AddPosConstraint(int id, string constraint)
     {
         if(PosConstraintTerms.ContainsKey(id))

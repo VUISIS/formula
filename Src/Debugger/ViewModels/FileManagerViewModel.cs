@@ -115,6 +115,7 @@ internal class FileManagerViewModel : ReactiveObject
             }
 
             formulaProgram.ClearConsoleOutput();
+            formulaProgram.FormulaPublisher.ClearAll();
 
             var fileP = Path.Join(uri.AbsolutePath, file);
 

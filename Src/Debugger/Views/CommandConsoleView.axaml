@@ -8,7 +8,8 @@
              x:Class="Debugger.Views.CommandConsoleView"
              Name="ConsoleView">
 	<ScrollViewer Background="Black"
-	              AllowAutoHide="True">
+	              HorizontalScrollBarVisibility="Hidden"
+	              VerticalScrollBarVisibility="Hidden">
 		    <TextBlock Padding="25" 
                        Name="ConsoleOutput" 
                        Background="Black"
