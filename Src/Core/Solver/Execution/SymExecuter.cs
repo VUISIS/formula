@@ -241,6 +241,45 @@ namespace Microsoft.Formula.Solver
             return lfp.ContainsKey(t);
         }
 
+        protected Map<Term, Set<Term>> flattenedDervs =
+            new Map<Term, Set<Term>>(Term.Compare);
+
+        protected void AddOtherDervs(Term t, Set<Term> terms)
+        {
+            if (t != Index.FalseValue)
+            {
+                if (t.Symbol is UserSymbol &&
+                    (!((UserSymbol)t.Symbol).IsAutoGen))
+                {
+                    terms.Add(t);
+                }
+                else
+                {
+                    Set<Term> otherDervs;
+                    if (flattenedDervs.TryFindValue(t, out otherDervs))
+                    {
+                        foreach (var other in otherDervs)
+                        {
+                            terms.Add(other);
+                        }
+                    }
+                }
+            }
+        }
+
+        protected void AddFlattenedDerivations(Term t, Derivation d)
+        {
+            Set<Term> myFlattenedDervs;
+            if (!flattenedDervs.TryFindValue(t, out myFlattenedDervs))
+            {
+                myFlattenedDervs = new Set<Term>(Term.Compare);
+                flattenedDervs.Add(t, myFlattenedDervs);
+            }
+
+            AddOtherDervs(d.Binding1, myFlattenedDervs);
+            AddOtherDervs(d.Binding2, myFlattenedDervs);
+        }
+
         public bool IfExistsThenDerive(Term t, Derivation d)
         {
             Contract.Requires(t != null);
@@ -257,6 +296,7 @@ namespace Microsoft.Formula.Solver
             }
 
             dervs.Add(d);
+            AddFlattenedDerivations(t, d);
             return true;
         }
 
@@ -585,7 +625,10 @@ namespace Microsoft.Formula.Solver
                 var negated = new List<Z3BoolExpr>();
                 foreach (var sol in prevSolution)
                 {
-                    negated.Add(Solver.Context.MkNot(Solver.Context.MkEq(sol.Key, sol.Value)));
+                    if (sol.Value != null)
+                    {
+                        negated.Add(Solver.Context.MkNot(Solver.Context.MkEq(sol.Key, sol.Value)));
+                    }
                 }
 
                 Solver.Z3Solver.Assert(Solver.Context.MkOr(negated));
@@ -667,6 +710,20 @@ namespace Microsoft.Formula.Solver
             return strs;
         }
 
+        protected IEnumerable<Term> GetDerivationElements(Term t)
+        {
+            Set<Term> terms;
+            if (!flattenedDervs.TryFindValue(t, out terms))
+            {
+                terms = new Set<Term>(Term.Compare);
+            }
+
+            foreach (var term in terms)
+            {
+                yield return term;
+            }
+        }
+
         public void Execute()
         {
             Activation act;
@@ -720,7 +777,7 @@ namespace Microsoft.Formula.Solver
                         {
                             if (IsConstraintSatisfiable(kv.Key))
                             {
-                                IndexFact(ExtendLFP(kv.Key), pendingAct, i);
+                                IndexFact(ExtendLFP(kv.Key), kv.Value, pendingAct, i);
                             }
                         }
                         else
@@ -836,6 +893,63 @@ namespace Microsoft.Formula.Solver
             {
                 return new Rational(int.Parse(s));
             }
+        }
+
+        public string PrefixToInfix(Term t)
+        {
+            return t.Compute<string>(
+                (x, s) => x.Args,
+                (x, ch, s) =>
+                {
+                    if (x.Symbol.Arity == 0)
+                    {
+                        string str = "";
+                        if (x.Symbol.Kind == SymbolKind.UserCnstSymb && x.Symbol.IsVariable)
+                        {
+                            return x.ToString().Substring(str.LastIndexOf('~') + 1);
+                        }
+                        else if (x.Symbol.Kind == SymbolKind.BaseCnstSymb)
+                        {
+                            str = x.Symbol.PrintableName;
+                        }
+
+                        return str;
+                    }
+                    else if (x.Symbol.Kind == SymbolKind.BaseOpSymb)
+                    {
+                        Rational r1, r2;
+                        string str;
+                        switch (((BaseOpSymb)x.Symbol).OpKind)
+                        {
+                            case OpKind.Add:
+                                return ch.ElementAt(0) + " + " + ch.ElementAt(1);
+                            case OpKind.Sub:
+                                return ch.ElementAt(0) + " - " + ch.ElementAt(1);
+                            case OpKind.Mul:
+                                return ch.ElementAt(0) + " * " + ch.ElementAt(1);
+                            case OpKind.Div:
+                                return ch.ElementAt(0) + " / " + ch.ElementAt(1);
+                            default:
+                                throw new NotImplementedException();
+                        }
+                    }
+                    else if (x.Symbol.IsDataConstructor)
+                    {
+                        string str = x.Symbol.PrintableName;
+                        str += "(";
+                        for (int i = 0; i < ch.Count(); i++)
+                        {
+                            str += ch.ElementAt(i);
+                            str += i == ch.Count() - 1 ? "" : ", ";
+                        }
+                        str += ")";
+                        return str;
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                });
         }
 
         public string GetModelInterpretation(Term t, Z3.Model model)
@@ -979,9 +1093,10 @@ namespace Microsoft.Formula.Solver
                 }
             }
 
+            var factDerv = KeepDerivations ? new Derivation[] { new Derivation(Index) } : null;
             foreach (var f in varFacts)
             {
-                IndexFact(ExtendLFP(f), null, -1);
+                IndexFact(ExtendLFP(f), factDerv, null, -1);
             }
 
             Term scTerm;
@@ -993,7 +1108,7 @@ namespace Microsoft.Formula.Solver
                     new Term[] { sc, aliasMap[(UserCnstSymb)sc.Symbol]  },
                     out wasAdded);
 
-                IndexFact(ExtendLFP(scTerm), null, -1);
+                IndexFact(ExtendLFP(scTerm), factDerv, null, -1);
             }
         }
 
@@ -1038,9 +1153,29 @@ namespace Microsoft.Formula.Solver
 
             return e;
         }
-        
-        private void IndexFact(SymElement t, Set<Activation> pending, int stratum)
+
+        private void IndexFact(SymElement t, IEnumerable<Derivation> drs, Set<Activation> pending, int stratum)
         {
+            Set<Derivation> dervs;
+            if (KeepDerivations)
+            {
+                if (!facts.TryFindValue(t.Term, out dervs))
+                {
+                    dervs = new Set<Derivation>(Derivation.Compare);
+                    facts.Add(t.Term, dervs);
+                }
+
+                foreach (var d in drs)
+                {
+                    dervs.Add(d);
+                    AddFlattenedDerivations(t.Term, d);
+                }
+            }
+            else if (!facts.TryFindValue(t.Term, out dervs))
+            {
+                facts.Add(t.Term, null);
+            }
+
             LinkedList<SymSubIndex> subindices;
             if (!symbToIndexMap.TryFindValue(t.Term.Symbol, out subindices))
             {
