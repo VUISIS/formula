@@ -34,7 +34,7 @@
 					 VerticalAlignment="Stretch">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<TextBlock TextAlignment="Center"
+						<TextBlock TextAlignment="Left"
 						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
@@ -55,7 +55,7 @@
 					 VerticalAlignment="Stretch">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<TextBlock TextAlignment="Center"
+						<TextBlock TextAlignment="Left"
 						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
@@ -75,7 +75,7 @@
 					 SelectionMode="Single">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<TextBlock TextAlignment="Center"
+						<TextBlock TextAlignment="Left"
 						           Text="{Binding Header}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
