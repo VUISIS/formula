@@ -1184,8 +1184,8 @@ namespace Microsoft.Formula.API
                 goto Unlock;
             }
             
-            var solverPublisher = EnvParams.GetSolverPublisherParameter(Parameters, EnvParamKind.Debug_SolverPublisher);
-            if (solverPublisher != null)
+            modData = queryModel.Node.CompilerData as ModuleData;
+            if (EnvParams.IsSolverPublisherSet(Parameters))
             {
                 var sr = new SolveResult(
                     redModel,
@@ -1193,12 +1193,12 @@ namespace Microsoft.Formula.API
                     maxSols,
                     this,
                     cancel);
-                solverPublisher.SetSolverResult(sr);
+                EnvParams.GetSolverPublisherParameter(Parameters, EnvParamKind.Debug_SolverPublisher)
+                         .SetSolverResult(sr);
                 task = null;
             }
             else
             {
-                modData = queryModel.Node.CompilerData as ModuleData;
                 task = new Task<SolveResult>(() =>
                 {
                     var sr = new SolveResult(
