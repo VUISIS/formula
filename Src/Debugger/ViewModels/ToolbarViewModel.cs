@@ -67,7 +67,7 @@ internal class ToolbarViewModel : ReactiveObject
                         currentTermsViewModel != null)
                     {
                         commandConsoleViewModel.SetConstraintPanelEnabled(false);
-                        commandConsoleViewModel.ClearAll();
+                        commandConsoleViewModel.ClearAll(true);
                         inferenceRulesViewModel.ClearAll();
                         currentTermsViewModel.ClearAll();
                     }

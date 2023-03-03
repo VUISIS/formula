@@ -103,7 +103,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                 }
                 else if (commandInput.Text.StartsWith("solve"))
                 {
-                    ClearAll();
+                    ClearAll(false);
 
                     if (initButton != null)
                     {
@@ -173,7 +173,7 @@ internal class CommandConsoleViewModel : ReactiveObject
 
     private void ReloadCommand()
     {
-        ClearAll();
+        ClearAll(true);
         SetConstraintPanelEnabled(false);
         
         var fileOut = Utils.OpenFileText(Utils.LoadedFile);
@@ -212,14 +212,6 @@ internal class CommandConsoleViewModel : ReactiveObject
         Utils.LoadedFile = outP;
 
         var fileOut = Utils.OpenFileText(outP);
-        Dispatcher.UIThread.Post(() =>
-        {
-            if (fileOutput != null)
-            {
-                fileOutput.Text = fileOut;
-            }
-        }, DispatcherPriority.Background);
-
         if (!formulaProgram.ExecuteCommand(input))
         {
             Dispatcher.UIThread.Post(() =>
@@ -242,7 +234,12 @@ internal class CommandConsoleViewModel : ReactiveObject
                 termsViewModel.ClearAll();
                 inferenceRulesViewModel.ClearAll();
                 SetConstraintPanelEnabled(false);
-                ClearAll();
+                ClearAll(true);
+            }
+            
+            if (fileOutput != null)
+            {
+                fileOutput.Text = fileOut;
             }
             
             if (commandOutput != null)
@@ -287,7 +284,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                         commandOutput.Text += "\n";
                     }
                 }
-
+                
                 if (input != null && 
                     input.EndsWith("debugger"))
                 {
@@ -297,9 +294,16 @@ internal class CommandConsoleViewModel : ReactiveObject
                         solutionButton.IsEnabled = false;
                         genButton.IsEnabled = true;
                     }
+                    
+                    if (solutionOut != null)
+                    {
+                        solutionOut.Text = formulaProgram.FormulaPublisher.GetExtractOutput();
+                    }
                 }
-
-                commandOutput.Text += formulaProgram.GetConsoleOutput();
+                else
+                {
+                    commandOutput.Text += formulaProgram.GetConsoleOutput();
+                }
             }
 
             if (mainWindow != null)
@@ -552,7 +556,7 @@ internal class CommandConsoleViewModel : ReactiveObject
             {
                 if (solutionOut != null)
                 {
-                    solutionOut.Text += formulaProgram.FormulaPublisher.GetUnsatOutput();
+                    solutionOut.Text = formulaProgram.FormulaPublisher.GetUnsatOutput();
                 }
             }
             else
@@ -610,31 +614,22 @@ internal class CommandConsoleViewModel : ReactiveObject
     {
         solutionNum += 1;
         
-        var solveResult = formulaProgram.FormulaPublisher.GetSolverResult();
-        var solNum = new LiftedInt(solutionNum);
-        if ((bool)(solNum < solveResult.NumSolutions))
-        {
-            var extractTask = new Task(() => ExecuteCommand("extract 0 " + solutionNum + " debugger"));
-            extractTask.Start();
-            tasks.Add(extractTask);
-        }
-        else
-        {
-            if (solutionOut != null)
-            {
-                solutionOut.Text += "Solution number exceeds number of solutions";
-            }
-        }
+        var extractTask = new Task(() => ExecuteCommand("extract 0 " + solutionNum + " debugger"));
+        extractTask.Start();
+        tasks.Add(extractTask);
     }
 
-    public void ClearAll()
+    public void ClearAll(bool file)
     {
         formulaProgram.FormulaPublisher.ClearAll();
         tasks.Clear();
         if (solutionOut != null &&
             fileOutput != null)
         {
-            fileOutput.Text = "";
+            if (file)
+            {
+                fileOutput.Text = "";
+            }
             solutionOut.Text = "";
         }
 
