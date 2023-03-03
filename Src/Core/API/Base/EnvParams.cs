@@ -127,9 +127,9 @@ namespace Microsoft.Formula.API
             return (ISolverPublisher)parameters[prm].Item3;
         }
         
-        public static bool IsSolverPublisherSet()
+        public static bool IsSolverPublisherSet(EnvParams prms)
         {
-            return (parameters[EnvParamKind.Debug_SolverPublisher].Item3 != null);
+            return prms.settings[EnvParamKind.Debug_SolverPublisher] != null;
         }
 
         /// <summary>

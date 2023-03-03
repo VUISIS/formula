@@ -7,11 +7,14 @@ using ReactiveUI;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Avalonia.Controls.Shapes;
 using Avalonia.Interactivity;
 using Debugger.ViewModels.Helpers;
 using Debugger.Views;
 using Debugger.Windows;
+using Material.Icons.Avalonia;
 using Microsoft.Formula.API;
+using Microsoft.Formula.Common;
 using Node = Debugger.ViewModels.Types.Node;
 
 namespace Debugger.ViewModels;
@@ -34,20 +37,8 @@ internal class CommandConsoleViewModel : ReactiveObject
     private readonly Button? executeButton;
     private readonly Button? genButton;
     private readonly Button? solutionButton;
-    private int solutionNum = 0;
+    private static int solutionNum = 0;
 
-    private enum TaskType
-    {
-        INIT = 0,
-        EXECUTE = 1,
-        START = 2,
-        COMMAND = 3,
-        SOLUTION = 4,
-        GENERATE = 5,
-        SOLVE = 6,
-        LOAD = 7
-    }
-    
     public CommandConsoleViewModel(MainWindow win, FormulaProgram program)
     {
         mainWindow = win;
@@ -101,11 +92,14 @@ internal class CommandConsoleViewModel : ReactiveObject
             {
                 if (commandInput.Text.StartsWith("load"))
                 {
+                    if (mainWindow != null)
+                    {
+                        mainWindow.Get<Ellipse>("Iterator").IsVisible = true;
+                    }
+                    
                     var cmdTask = new Task(() => LoadCommand(commandInput.Text));
                     cmdTask.Start();
-                    var timeOutTask = new Task(() => TimeoutAfter(cmdTask, TaskType.LOAD));
-                    timeOutTask.Start();
-                    tasks.Add(timeOutTask);
+                    tasks.Add(cmdTask);
                 }
                 else if (commandInput.Text.StartsWith("solve"))
                 {
@@ -116,11 +110,27 @@ internal class CommandConsoleViewModel : ReactiveObject
                         initButton.IsEnabled = true;
                     }
                     
+                    formulaProgram.ClearConsoleOutput();
+                    
+                    if (mainWindow != null)
+                    {
+                        mainWindow.Get<Ellipse>("Iterator").IsVisible = true;
+                    }
+            
+                    if (commandOutput != null)
+                    {
+                        if (commandOutput.Text == null ||
+                            commandOutput.Text.Length <= 0)
+                        {
+                            commandOutput.Text += "[]> ";
+                        }
+                    }
+
                     if (!formulaProgram.ExecuteCommand("tunload *"))
                     {
                         if (commandOutput != null)
                         {
-                            commandOutput.Text += "ERROR: " + TaskType.COMMAND + " failed to execute.";
+                            commandOutput.Text += "ERROR: tunload * failed to execute.";
                         }
                     }
                         
@@ -128,152 +138,48 @@ internal class CommandConsoleViewModel : ReactiveObject
 
                     var commandExecuteTask = new Task(() => ExecuteCommand(commandInput.Text));
                     commandExecuteTask.Start();
-                    var timeoutExecuteTask = new Task(() => TimeoutAfter(commandExecuteTask, TaskType.SOLVE));
-                    timeoutExecuteTask.Start();
-                    tasks.Add(timeoutExecuteTask);
+                    tasks.Add(commandExecuteTask);
                 }
                 else
                 {
                     if (commandInput.Text.StartsWith("reload") ||
                         commandInput.Text.StartsWith("rl"))
                     {
-                        ClearAll();
-                        SetConstraintPanelEnabled(false);
+                        ReloadCommand();
+                        commandOutput.Text += "\n";
+                    }
+                    
+                    if (mainWindow != null)
+                    {
+                        mainWindow.Get<Ellipse>("Iterator").IsVisible = true;
+                    }
+            
+                    if (commandOutput != null)
+                    {
+                        if (commandOutput.Text == null ||
+                            commandOutput.Text.Length <= 0)
+                        {
+                            commandOutput.Text += "[]> ";
+                        }
                     }
 
                     var commandExecuteTask = new Task(() => ExecuteCommand(commandInput.Text));
                     commandExecuteTask.Start();
-                    var timeoutTask = new Task(() => TimeoutAfter(commandExecuteTask, TaskType.COMMAND));
-                    timeoutTask.Start();
-                    tasks.Add(timeoutTask);
+                    tasks.Add(commandExecuteTask);
                 }
             }
         }
     }
-    
-    private async void TimeoutAfter(Task task, TaskType type) 
+
+    private void ReloadCommand()
     {
-        using(var timeoutCancellationTokenSource = new CancellationTokenSource())
+        ClearAll();
+        SetConstraintPanelEnabled(false);
+        
+        var fileOut = Utils.OpenFileText(Utils.LoadedFile);
+        if (fileOutput != null)
         {
-            formulaProgram.ClearConsoleOutput();
-
-            Dispatcher.UIThread.Post(() =>
-            {
-                if (commandOutput != null)
-                {
-                    if (commandOutput.Text == null ||
-                        commandOutput.Text.Length <= 0)
-                    {
-                        commandOutput.Text += "[]> ";
-                    }
-                }
-            }, DispatcherPriority.Background);
-
-            var timeout = new TimeSpan(0, 0, 0, 10);
-            var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
-            if (completedTask == task)
-            {
-                if (type == TaskType.INIT)
-                {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        if (executeButton != null &&
-                            initButton != null)
-                        {
-                            initButton.IsEnabled = false;
-                            executeButton.IsEnabled = true;
-                        }
- 
-                        if (commandOutput != null &&
-                            commandInput != null)
-                        {
-                            commandOutput.Text += " Use buttons in solver view to init, execute, and start the solver.";
-                            commandOutput.Text += "\n\n";
-                        }
-                    }, DispatcherPriority.Background);
-                }
-                else if (type == TaskType.EXECUTE)
-                {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        if (executeButton != null &&
-                            startButton != null)
-                        {
-                            startButton.IsEnabled = true;
-                            executeButton.IsEnabled = false;
-                        }
-                    }, DispatcherPriority.Background);
-                }
-                else if (type == TaskType.START)
-                {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        if (startButton != null &&
-                            solutionButton != null)
-                        {
-                            startButton.IsEnabled = false;
-                            solutionButton.IsEnabled = true;
-                        }
-                    }, DispatcherPriority.Background);
-                }
-                else if (type == TaskType.SOLUTION)
-                {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        if (solutionButton != null &&
-                            genButton != null)
-                        {
-                            solutionButton.IsEnabled = false;
-                            genButton.IsEnabled = true;
-                        }
-                        
-                        if (solutionOut != null)
-                        {
-                            solutionOut.Text += formulaProgram.FormulaPublisher.GetExtractOutput();
-                        }
-                    }, DispatcherPriority.Background);
-                }
-                else if (type == TaskType.LOAD)
-                {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        if (inferenceRulesViewModel != null &&
-                            termsViewModel != null &&
-                            constraintsViewModel != null)
-                        {
-                            constraintsViewModel.ClearAll();
-                            termsViewModel.ClearAll();
-                            inferenceRulesViewModel.ClearAll();
-                            SetConstraintPanelEnabled(false);
-                            ClearAll();
-                        }
-                    }, DispatcherPriority.Background);
-                }
-
-                Dispatcher.UIThread.Post(() =>
-                {
-                    if (commandOutput != null)
-                    {
-                        commandOutput.Text += formulaProgram.GetConsoleOutput();
-                    }
-                }, DispatcherPriority.Background);
-                timeoutCancellationTokenSource.Cancel();
-            } 
-            else
-            {
-                Dispatcher.UIThread.Post(() =>
-                {
-                    if (commandOutput != null)
-                    {
-                        commandOutput.Text += "\n";
-                        commandOutput.Text += "Solve " + type + " task timed out.";
-                        commandOutput.Text += "\n";
-                        commandOutput.Text += "10s";
-                        commandOutput.Text += "\n\n";
-                        commandOutput.Text += "[]>";
-                    }
-                }, DispatcherPriority.Background);
-            }
+            fileOutput.Text = fileOut;
         }
     }
 
@@ -285,7 +191,7 @@ internal class CommandConsoleViewModel : ReactiveObject
             {
                 if (commandOutput != null)
                 {
-                    commandOutput.Text += "ERROR: " + TaskType.COMMAND + " failed to execute.";
+                    commandOutput.Text += "ERROR: " + input + " failed to execute.";
                 }
             }, DispatcherPriority.Background);
             return;
@@ -303,6 +209,8 @@ internal class CommandConsoleViewModel : ReactiveObject
             outP = input.Replace("l ", "");
         }
 
+        Utils.LoadedFile = outP;
+
         var fileOut = Utils.OpenFileText(outP);
         Dispatcher.UIThread.Post(() =>
         {
@@ -318,7 +226,7 @@ internal class CommandConsoleViewModel : ReactiveObject
             {
                 if (commandOutput != null)
                 {
-                    commandOutput.Text += "ERROR: " + TaskType.COMMAND + " failed to execute.";
+                    commandOutput.Text += "ERROR: " + input + " failed to execute.";
                 }
             }, DispatcherPriority.Background);
             return;
@@ -326,11 +234,27 @@ internal class CommandConsoleViewModel : ReactiveObject
 
         Dispatcher.UIThread.Post(() =>
         {
+            if (inferenceRulesViewModel != null &&
+                termsViewModel != null &&
+                constraintsViewModel != null)
+            {
+                constraintsViewModel.ClearAll();
+                termsViewModel.ClearAll();
+                inferenceRulesViewModel.ClearAll();
+                SetConstraintPanelEnabled(false);
+                ClearAll();
+            }
+            
             if (commandOutput != null)
             {
                 commandOutput.Text += input;
                 commandOutput.Text += "\n";
                 commandOutput.Text += formulaProgram.GetConsoleOutput();
+            }
+            
+            if (mainWindow != null)
+            {
+                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
             }
         }, DispatcherPriority.Background);
     }
@@ -343,7 +267,7 @@ internal class CommandConsoleViewModel : ReactiveObject
             {
                 if (commandOutput != null)
                 {
-                    commandOutput.Text += "ERROR: " + TaskType.COMMAND + " failed to execute.";
+                    commandOutput.Text += "ERROR: " + input + " failed to execute.";
                 }
             }, DispatcherPriority.Background);
             return;
@@ -364,7 +288,23 @@ internal class CommandConsoleViewModel : ReactiveObject
                     }
                 }
 
+                if (input != null && 
+                    input.EndsWith("debugger"))
+                {
+                    if (solutionButton != null &&
+                        genButton != null)
+                    {
+                        solutionButton.IsEnabled = false;
+                        genButton.IsEnabled = true;
+                    }
+                }
+
                 commandOutput.Text += formulaProgram.GetConsoleOutput();
+            }
+
+            if (mainWindow != null)
+            {
+                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
             }
         }, DispatcherPriority.Background);
     }
@@ -461,13 +401,32 @@ internal class CommandConsoleViewModel : ReactiveObject
                         }
                     }
                 }
+                
+                if (executeButton != null &&
+                    initButton != null)
+                {
+                    initButton.IsEnabled = false;
+                    executeButton.IsEnabled = true;
+                }
+ 
+                if (commandOutput != null &&
+                    commandInput != null)
+                {
+                    commandOutput.Text += " Use buttons in solver view to init, execute, and start the solver.";
+                    commandOutput.Text += "\n\n";
+                }
 
                 if (commandOutput != null)
                 {
-                    commandOutput.Text += "Solve " + TaskType.INIT + " task completed.";
+                    commandOutput.Text += "Solve initialize task completed.";
                     commandOutput.Text += "\n\n";
                     commandOutput.Text += "[]>";
                 }
+            }
+            
+            if (mainWindow != null)
+            {
+                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
             }
         }, DispatcherPriority.Background);
     }
@@ -539,13 +498,25 @@ internal class CommandConsoleViewModel : ReactiveObject
                         flag = false;
                     }
                 }
+                
+                if (executeButton != null &&
+                    startButton != null)
+                {
+                    startButton.IsEnabled = true;
+                    executeButton.IsEnabled = false;
+                }
 
                 if (commandOutput != null)
                 {
-                    commandOutput.Text += "[]> Solve " + TaskType.EXECUTE + " task completed.";
+                    commandOutput.Text += " Solve execution task completed.";
                     commandOutput.Text += "\n\n";
                     commandOutput.Text += "[]>";
                 }
+            }
+            
+            if (mainWindow != null)
+            {
+                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
             }
         }, DispatcherPriority.Background);
     }
@@ -562,13 +533,39 @@ internal class CommandConsoleViewModel : ReactiveObject
             if (commandOutput != null &&
                 solverViewModel != null)
             {
-                commandOutput.Text += " Solve " + TaskType.START + " task completed.";
+                commandOutput.Text += " Solve start task completed.";
                 commandOutput.Text += "\n";
                 commandOutput.Text += "Solveable: " + solveResult.Solvable;
                 commandOutput.Text += "\n";
                 commandOutput.Text += (solveResult.StopTime - startTime).Milliseconds + "ms";
                 commandOutput.Text += "\n\n";
                 commandOutput.Text += "[]>";
+            }
+            
+            if (startButton != null)
+            {
+                startButton.IsEnabled = false;
+            }
+            
+            var solvable = (bool)solveResult.Solvable;
+            if (!solvable)
+            {
+                if (solutionOut != null)
+                {
+                    solutionOut.Text += formulaProgram.FormulaPublisher.GetUnsatOutput();
+                }
+            }
+            else
+            {
+                if (solutionButton != null)
+                {
+                    solutionButton.IsEnabled = true;
+                }
+            }
+
+            if (mainWindow != null)
+            {
+                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
             }
         }, DispatcherPriority.Background);
 
@@ -579,9 +576,12 @@ internal class CommandConsoleViewModel : ReactiveObject
     {
         var extractTask = new Task(() => ExecuteCommand("extract 0 0 debugger"));
         extractTask.Start();
-        var timeoutTask = new Task(() => TimeoutAfter(extractTask, TaskType.SOLUTION));
-        timeoutTask.Start();
-        tasks.Add(timeoutTask);
+        tasks.Add(extractTask);
+    
+        if (solutionOut != null)
+        {
+            solutionOut.Text += formulaProgram.FormulaPublisher.GetExtractOutput();
+        }
     }
 
     private void StartSolve(object? obj, RoutedEventArgs args)
@@ -589,45 +589,64 @@ internal class CommandConsoleViewModel : ReactiveObject
         var startSolveTask = new Task<SolveResult>(SolverStart, TaskCreationOptions.LongRunning);
         formulaProgram.AddStartTask(startSolveTask);
         startSolveTask.Start();
-        var timeoutStartTask = new Task(() => TimeoutAfter(startSolveTask, TaskType.START));
-        timeoutStartTask.Start();
-        tasks.Add(timeoutStartTask);
+        tasks.Add(startSolveTask);
     }
     
     private void InitSolve(object? obj, RoutedEventArgs args)
     {
         var initSolveTask = new Task(SolverInit);
         initSolveTask.Start();
-        var timeoutTask = new Task(() => TimeoutAfter(initSolveTask, TaskType.INIT));
-        timeoutTask.Start();
-        tasks.Add(timeoutTask);
+        tasks.Add(initSolveTask);
     }
     
     private void ExecuteSolve(object? obj, RoutedEventArgs args)
     {
         var exeTask = new Task(SolverExecute, TaskCreationOptions.LongRunning);
         exeTask.Start();
-        var timeExeTask = new Task(() => TimeoutAfter(exeTask, TaskType.EXECUTE));
-        timeExeTask.Start();
-        tasks.Add(timeExeTask);
+        tasks.Add(exeTask);
     }
 
     private void GenerateSolve(object? obj, RoutedEventArgs args)
     {
         solutionNum += 1;
         
-        var extractTask = new Task(() => ExecuteCommand("extract 0 1 debugger"));
-        extractTask.Start();
-        var timeoutTask = new Task(() => TimeoutAfter(extractTask, TaskType.SOLUTION));
-        timeoutTask.Start();
-        tasks.Add(timeoutTask);
+        var solveResult = formulaProgram.FormulaPublisher.GetSolverResult();
+        var solNum = new LiftedInt(solutionNum);
+        if ((bool)(solNum < solveResult.NumSolutions))
+        {
+            var extractTask = new Task(() => ExecuteCommand("extract 0 " + solutionNum + " debugger"));
+            extractTask.Start();
+            tasks.Add(extractTask);
+        }
+        else
+        {
+            if (solutionOut != null)
+            {
+                solutionOut.Text += "Solution number exceeds number of solutions";
+            }
+        }
     }
 
     public void ClearAll()
     {
         formulaProgram.FormulaPublisher.ClearAll();
         tasks.Clear();
-                        
+        if (solutionOut != null &&
+            fileOutput != null)
+        {
+            fileOutput.Text = "";
+            solutionOut.Text = "";
+        }
+
+        if (inferenceRulesViewModel != null &&
+            constraintsViewModel != null &&
+            termsViewModel != null)
+        {
+            inferenceRulesViewModel.ClearAll();
+            constraintsViewModel.ClearAll();
+            termsViewModel.ClearAll();
+        }
+
         if (startButton != null &&
             executeButton != null &&
             initButton != null &&

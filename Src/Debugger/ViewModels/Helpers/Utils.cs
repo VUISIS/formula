@@ -15,6 +15,8 @@ namespace Debugger.ViewModels.Helpers;
 
 public static class Utils
 {
+    public static string LoadedFile;
+    
     public static readonly HashSet<string> InputCommands = new HashSet<string>()
     {
         "unload",
@@ -23,6 +25,14 @@ public static class Utils
         "solve",
         "extract"
     };
+    
+    public static readonly HashSet<string> TUnloadCommands = new HashSet<string>()
+    {
+        "solve",
+        "apply",
+        "query"
+    };
+    
     public static async Task<IStorageFolder?> GetFolder(MainWindow win)
     {
         var topLevel = win.GetVisualRoot() as TopLevel;

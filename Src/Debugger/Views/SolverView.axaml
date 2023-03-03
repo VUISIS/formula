@@ -158,55 +158,35 @@
 			        VerticalAlignment="Center"
 			        IsEnabled="False"
 			        ToolTip.Tip="Init Constraints">
-				<StackPanel Orientation="Horizontal"
-				            Spacing="5">
-					<material:MaterialIcon Kind="HeadCheck"/>
-					<TextBlock Text="Init"/>
-				</StackPanel>
+				<material:MaterialIcon Kind="HeadCheck"/>
 			</Button>
 			<Button Name="ExecuteButton"
 			        HorizontalAlignment="Center"
 			        VerticalAlignment="Center"
 			        IsEnabled="False"
 			        ToolTip.Tip="Execute Constraints">
-				<StackPanel Orientation="Horizontal"
-				            Spacing="5">
-					<material:MaterialIcon Kind="HeadSync"/>
-					<TextBlock Text="Execute"/>
-				</StackPanel>
+				<material:MaterialIcon Kind="HeadSync"/>
 			</Button>
 			<Button Name="SolveButton"
 			        HorizontalAlignment="Center"
 			        VerticalAlignment="Center"
 			        IsEnabled="False"
 			        ToolTip.Tip="Solve Constraints">
-				<StackPanel Orientation="Horizontal"
-				            Spacing="5">
-					<material:MaterialIcon Kind="HeadLightbulb"/>
-					<TextBlock Text="Solve"/>
-				</StackPanel>
+				<material:MaterialIcon Kind="HeadLightbulb"/>
 			</Button>
 			<Button Name="SolutionButton"
 			        HorizontalAlignment="Center"
 			        VerticalAlignment="Center"
 			        IsEnabled="False"
 			        ToolTip.Tip="Constraints Solution">
-				<StackPanel Orientation="Horizontal"
-				            Spacing="5">
-					<material:MaterialIcon Kind="HeadCheck"/>
-					<TextBlock Text="Solution"/>
-				</StackPanel>
+				<material:MaterialIcon Kind="HeadCheck"/>
 			</Button>
 			<Button Name="GenSolButton"
 					HorizontalAlignment="Center"
 			        VerticalAlignment="Center"
 			        IsEnabled="False"
 			        ToolTip.Tip="Generate Next Solution">
-				<StackPanel Orientation="Horizontal"
-				            Spacing="5">
-					<material:MaterialIcon Kind="Cog"/>
-					<TextBlock Text="Generate"/>
-				</StackPanel>
+				<material:MaterialIcon Kind="Cog"/>
 			</Button>
 		</StackPanel>
 		<TextBlock Grid.Row="12"

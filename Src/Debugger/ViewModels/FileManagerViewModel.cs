@@ -1,13 +1,12 @@
 using ReactiveUI;
 using Avalonia.Threading;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using System.Threading;
 
 using Debugger.Windows;
 using Debugger.ViewModels.Types;
@@ -71,43 +70,16 @@ internal class FileManagerViewModel : ReactiveObject
                     currentTermsViewModel.ClearAll();
                 }
                 
+                Utils.LoadedFile = System.IO.Path.Join(uri.AbsolutePath, SelectedItems[0].Header);
+                
+                if (mainWindow != null)
+                {
+                    mainWindow.Get<Ellipse>("Iterator").IsVisible = true;
+                }
+
                 var loadTask = new Task(() => ExecuteLoadCommand(uri, SelectedItems[0].Header));
                 loadTask.Start();
                 tasks.Add(loadTask);
-                var timeoutTask = new Task(() => TimeoutAfter(loadTask));
-                timeoutTask.Start();
-                tasks.Add(timeoutTask);
-            }
-        }
-    }
-    
-    private async void TimeoutAfter(Task task)
-    {
-        if (formulaProgram != null)
-        {
-            using (var timeoutCancellationTokenSource = new CancellationTokenSource())
-            {
-                var timeout = new TimeSpan(0, 0, 0, 10);
-                var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
-                if (completedTask == task)
-                {
-                    timeoutCancellationTokenSource.Cancel();
-                }
-                else
-                {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        if (consoleOutput != null)
-                        {
-                            consoleOutput.Text += "\n";
-                            consoleOutput.Text += "Solve LOAD task timed out.";
-                            consoleOutput.Text += "\n";
-                            consoleOutput.Text += "10s";
-                            consoleOutput.Text += "\n\n";
-                            consoleOutput.Text += "[]>";
-                        }
-                    }, DispatcherPriority.Render);
-                }
             }
         }
     }
@@ -132,7 +104,7 @@ internal class FileManagerViewModel : ReactiveObject
             formulaProgram.ClearConsoleOutput();
             formulaProgram.FormulaPublisher.ClearAll();
 
-            var fileP = Path.Join(uri.AbsolutePath, file);
+            var fileP = System.IO.Path.Join(uri.AbsolutePath, file);
 
             if (!formulaProgram.ExecuteCommand("load " + fileP))
             {
@@ -165,6 +137,10 @@ internal class FileManagerViewModel : ReactiveObject
                     consoleOutput.Text += "load " + fileP;
                     consoleOutput.Text += "\n";
                     consoleOutput.Text += formulaProgram.GetConsoleOutput();
+                }
+                if (mainWindow != null)
+                {
+                    mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
                 }
             }, DispatcherPriority.Render);
         }

@@ -23,5 +23,6 @@ public interface ISolverPublisher
     public Dictionary<int, List<string>> GetCoreRules();
     public void ClearAll();
     public void SetExtractOutput(string output);
-    public string GetExtractOutput();
+    public void SetUnsatOutput(string output);
+    public string GetUnsatOutput();
 }

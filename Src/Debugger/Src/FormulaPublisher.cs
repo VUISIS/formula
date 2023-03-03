@@ -15,6 +15,7 @@ public class FormulaPublisher : ISolverPublisher
     private Dictionary<int, string> VarFacts = new Dictionary<int, string>();
     private Dictionary<int, List<string>> CoreRules = new Dictionary<int, List<string>>();
     private string extractOut;
+    private string unsatCore;
     private SolveResult SolverResult;
 
     public void ClearAll()
@@ -31,6 +32,16 @@ public class FormulaPublisher : ISolverPublisher
     public void SetExtractOutput(string output)
     {
         extractOut = output;
+    }
+
+    public void SetUnsatOutput(string output)
+    {
+        unsatCore = output;
+    }
+
+    public string GetUnsatOutput()
+    {
+        return unsatCore;
     }
 
     public string GetExtractOutput()

@@ -104,7 +104,6 @@ namespace Microsoft.Formula.Solver
         private Map<Term, List<Term>> symCountMap =
             new Map<Term, List<Term>>(Term.Compare);
 
-        private ISolverPublisher Publisher { get; set; }
         public int GetSymbolicCountIndex(Term t)
         {
             List<Term> terms;
@@ -148,30 +147,33 @@ namespace Microsoft.Formula.Solver
 
         private void SetVarFacts()
         {
-            if (Publisher != null)
+            if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
             {
                 foreach (var fact in aliasMap)
                 {
-                    Publisher.AddVariableFact(fact.Key.Id, fact.Key.Name.Replace("%",""));
+                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                             .AddVariableFact(fact.Key.Id, fact.Key.Name.Replace("%",""));
                 }
             }
         }
 
         private void LFPChanged(Term t, SymElement s)
         {
-            if (Publisher != null)
+            if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
             {
                 var cancelToken = new CancellationToken();
                 var tw = new StringWriter();
                 var envParams = new EnvParams();
                 t.PrintTerm(tw, cancelToken, envParams);
-                Publisher.AddCurrentTerm(t.Symbol.Id, tw.ToString());
+                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                         .AddCurrentTerm(t.Symbol.Id, tw.ToString());
 
                 foreach (var data in s.GetConstraintData())
                 {
                     foreach (var dirConst in data.DirConstraints)
                     {
-                        Publisher.AddDirConstraint(t.Symbol.Id, dirConst.ToString());
+                        EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                                 .AddDirConstraint(t.Symbol.Id, dirConst.ToString());
                     }
 
                     foreach (var posConst in data.PosConstraints)
@@ -183,7 +185,8 @@ namespace Microsoft.Formula.Solver
                             tw = new StringWriter();
                             envParams = new EnvParams();
                             next.Term.PrintTerm(tw, cancelToken, envParams);
-                            Publisher.AddPosConstraint(t.Symbol.Id, tw.ToString());
+                            EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                                     .AddPosConstraint(t.Symbol.Id, tw.ToString());
                         }
                     }
             
@@ -196,19 +199,21 @@ namespace Microsoft.Formula.Solver
                             tw = new StringWriter();
                             envParams = new EnvParams();
                             next.Term.PrintTerm(tw, cancelToken, envParams);
-                            Publisher.AddNegConstraint(t.Symbol.Id, tw.ToString());
+                            EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                                     .AddNegConstraint(t.Symbol.Id, tw.ToString());
                         }
                     }
                     
                     var sideConstraints = s.GetSideConstraints(this);
-                    Publisher.AddFlatConstraint(t.Symbol.Id, sideConstraints.ToString());
+                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                             .AddFlatConstraint(t.Symbol.Id, sideConstraints.ToString());
                 }
             }
         }
 
         public void SetPublisherCoreRules()
         {
-            if (Publisher == null)
+            if (!EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
                 return;
             
             var rules = new Dictionary<int, List<string>>();
@@ -233,7 +238,8 @@ namespace Microsoft.Formula.Solver
                 }
             }
 
-            Publisher.SetCoreRules(rules);
+            EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                     .SetCoreRules(rules);
         }
 
         public bool Exists(Term t)
@@ -428,7 +434,6 @@ namespace Microsoft.Formula.Solver
             Rules = solver.PartialModel.Rules;
             Index = solver.PartialModel.Index;
             Encoder = new TermEncIndex(solver);
-            Publisher = EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher);
             
             solver.PartialModel.ConvertSymbCnstsToVars(out varFacts, out aliasMap);
 
@@ -500,6 +505,7 @@ namespace Microsoft.Formula.Solver
             bool solvable = false;
             bool hasConforms = false;
             bool hasRequires = false;
+            StringBuilder sb = new StringBuilder();
             string requiresPattern = @"_Query_\d+.requires$";
 
             foreach (var elem in lfp)
@@ -571,18 +577,18 @@ namespace Microsoft.Formula.Solver
                 }
                 else if (status == Z3.Status.UNSATISFIABLE)
                 {
-                    Console.WriteLine("Model not solvable.\nUnsat core and related terms below.");
+                    sb.AppendLine("Model not solvable.\nUnsat core and related terms below.");
                     var core = Solver.Z3Solver.UnsatCore;
                     foreach (var expr in core)
                     {
                         if (recursionConstraints.ContainsValue(expr))
                         {
-                            PrintRecursionConflict(expr);
+                            sb.AppendLine("Conflict detected in recursion constraint: " + expr + "\n\n");
                         }
                         else
                         {
-                            Console.WriteLine("Expr: " + expr);
-                            Console.WriteLine("Terms: ");
+                            sb.AppendLine("Expr: " + expr);
+                            sb.AppendLine("Terms: ");
                             foreach (var item in lfp)
                             {
                                 Term t = item.Key;
@@ -593,13 +599,23 @@ namespace Microsoft.Formula.Solver
                                     if (!(t.Symbol is UserCnstSymb &&
                                           ((UserCnstSymb)t.Symbol).IsAutoGen))
                                     {
-                                        Console.WriteLine("  " + item.Key);
+                                        sb.AppendLine("  " + item.Key);
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }
+            
+            if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
+            {
+                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                    .SetUnsatOutput(sb.ToString());
+            }
+            else
+            {
+                Console.WriteLine(sb.ToString());
             }
             return solvable;
         }
@@ -615,11 +631,15 @@ namespace Microsoft.Formula.Solver
                     sb.AppendLine(str);
                 }
                 sb.AppendLine();
-                if (Publisher != null)
+                if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
                 {
-                    Publisher.SetExtractOutput(sb.ToString());
+                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                             .SetExtractOutput(sb.ToString());
                 }
-                Console.WriteLine(sb.ToString());
+                else
+                {
+                    Console.WriteLine(sb.ToString());
+                }
                 return;
             }
 
@@ -681,11 +701,15 @@ namespace Microsoft.Formula.Solver
                 sb.AppendLine("Could not find solution " + num);
             }
 
-            if (Publisher != null)
+            if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
             {
-                Publisher.SetExtractOutput(sb.ToString());
+                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                         .SetExtractOutput(sb.ToString());
             }
-            Console.WriteLine(sb.ToString());
+            else
+            {
+                Console.WriteLine(sb.ToString());
+            }
         }
 
         private void PrintSymbolicConstants(Z3.Model model)
@@ -1157,10 +1181,7 @@ namespace Microsoft.Formula.Solver
                 e.SetDirectlyProvable();
             }
             
-            if (Publisher != null)
-            {
-                LFPChanged(t, e);
-            }
+            LFPChanged(t, e);
 
             return e;
         }

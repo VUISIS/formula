@@ -578,7 +578,7 @@ namespace Microsoft.Formula.CommandLine
                 return;
             }
 
-            Common.Rules.ExecuterStatistics stats;
+            ExecuterStatistics stats;
             if (!taskManager.TryGetStatistics(taskId, out stats))
             {
                 sink.WriteMessageLine(string.Format("{0} is not a task id", cmdParts[0]), SeverityKind.Warning);

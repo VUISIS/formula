@@ -1,13 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Threading;
 using Avalonia.Platform.Storage;
+using Avalonia.Controls.Shapes;
 using ReactiveUI;
 
 using System;
-using System.IO;
 using System.Threading.Tasks;
-using System.Threading;
-using System.Collections.Generic;
 
 using Debugger.ViewModels.Helpers;
 using Debugger.Views;
@@ -74,46 +72,20 @@ internal class ToolbarViewModel : ReactiveObject
                         currentTermsViewModel.ClearAll();
                     }
                     
+                    Utils.LoadedFile = System.IO.Path.Join(uri.AbsolutePath, file.Name);
+                    
+                    if (mainWindow != null)
+                    {
+                        mainWindow.Get<Ellipse>("Iterator").IsVisible = true;
+                    }
+                    
                     var loadTask = new Task(() => ExecuteLoadCommand(uri, file));
                     loadTask.Start();
-                    var timeoutTask = new Task(() => TimeoutAfter(loadTask));
-                    timeoutTask.Start();
                 }
             }
         }
     }
-
-    private async void TimeoutAfter(Task task)
-    {
-        if (formulaProgram != null)
-        {
-            using (var timeoutCancellationTokenSource = new CancellationTokenSource())
-            {
-                var timeout = new TimeSpan(0, 0, 0, 10);
-                var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
-                if (completedTask == task)
-                {
-                    timeoutCancellationTokenSource.Cancel();
-                }
-                else
-                {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        if (consoleOutput != null)
-                        {
-                            consoleOutput.Text += "\n";
-                            consoleOutput.Text += "Solve LOAD task timed out.";
-                            consoleOutput.Text += "\n";
-                            consoleOutput.Text += "10s";
-                            consoleOutput.Text += "\n\n";
-                            consoleOutput.Text += "[]>";
-                        }
-                    }, DispatcherPriority.Render);
-                }
-            }
-        }
-    }
-
+    
     private void ExecuteLoadCommand(Uri uri, IStorageFile file)
     {
         if (formulaProgram != null &&
@@ -134,7 +106,7 @@ internal class ToolbarViewModel : ReactiveObject
             formulaProgram.ClearConsoleOutput();
             formulaProgram.FormulaPublisher.ClearAll();
 
-            var fileP = Path.Join(uri.AbsolutePath, file.Name);
+            var fileP = System.IO.Path.Join(uri.AbsolutePath, file.Name);
 
             if (!formulaProgram.ExecuteCommand("load " + fileP))
             {
@@ -167,6 +139,11 @@ internal class ToolbarViewModel : ReactiveObject
                     consoleOutput.Text += "load " + fileP;
                     consoleOutput.Text += "\n";
                     consoleOutput.Text += formulaProgram.GetConsoleOutput();
+                }
+                
+                if (mainWindow != null)
+                {
+                    mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
                 }
             }, DispatcherPriority.Render);
         }
