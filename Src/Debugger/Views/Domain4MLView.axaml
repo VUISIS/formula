@@ -7,7 +7,8 @@
              x:DataType="vm:Domain4MLViewModel"
              x:Class="Debugger.Views.Domain4MLView">
     <ScrollViewer Background="Black"
-                  AllowAutoHide="True">
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Auto">
         <TextBlock Padding="25" 
                    Name="FileOutput" 
                    Background="Black"

@@ -18,7 +18,7 @@ internal class SolverViewModel : ReactiveObject
     private readonly TextBox? inputExpression;
     private readonly FormulaProgram formulaProgram;
     private List<Task> tasks = new List<Task>();
-    private CommandConsoleViewModel? commandConsoleViewModel;
+    private readonly CommandConsoleViewModel? commandConsoleViewModel;
     public SolverViewModel(MainWindow window, FormulaProgram program)
     {
         formulaProgram = program;
@@ -65,14 +65,6 @@ internal class SolverViewModel : ReactiveObject
             {
                 Console.WriteLine(outNum);
             }
-        }
-    }
-
-    public void SolveConstraints()
-    {
-        if (commandConsoleViewModel != null)
-        {
-            commandConsoleViewModel.StartSolve();
         }
     }
 

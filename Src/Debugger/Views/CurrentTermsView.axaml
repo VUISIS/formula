@@ -6,18 +6,19 @@
              xmlns:vm="using:Debugger.ViewModels"
              x:DataType="vm:CurrentTermsViewModel"
              x:Class="Debugger.Views.CurrentTermsView">
-    <ScrollViewer AllowAutoHide="True">
-        <ListBox Items="{Binding CurrentTermItems}"
-                 SelectedItems="{Binding CurrentTermSelectedItems}"
-                 Background="#222222"
-                 SelectionMode="Single"
-                 Name="CurrentTerms">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
+    <ListBox Items="{Binding CurrentTermItems}"
+             SelectedItems="{Binding CurrentTermSelectedItems}"
+             Background="#222222"
+             SelectionMode="Single"
+             Name="CurrentTerms">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <ScrollViewer VerticalScrollBarVisibility="Hidden"
+                              HorizontalScrollBarVisibility="Hidden">
                     <TextBlock TextAlignment="Left"
                                Text="{Binding Header}"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-    </ScrollViewer>
+                </ScrollViewer>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
 </UserControl>

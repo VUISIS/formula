@@ -18,13 +18,10 @@ public static class Utils
     public static readonly HashSet<string> InputCommands = new HashSet<string>()
     {
         "unload",
-        "ul",
         "load",
-        "l",
         "help",
-        "h",
         "solve",
-        "sl"
+        "extract"
     };
     public static async Task<IStorageFolder?> GetFolder(MainWindow win)
     {

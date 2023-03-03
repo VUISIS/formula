@@ -1,7 +1,6 @@
 using ReactiveUI;
 using Avalonia.Threading;
 using Avalonia.Controls;
-using Avalonia.Platform.Storage;
 
 using System;
 using System.Collections.Generic;
@@ -25,6 +24,9 @@ internal class FileManagerViewModel : ReactiveObject
     private readonly TextBlock? consoleOutput;
     private readonly TextBlock? fileOutput;
     private List<Task> tasks = new List<Task>();
+    private readonly CommandConsoleViewModel? commandConsoleViewModel;
+    private readonly InferenceRulesViewModel? inferenceRulesViewModel;
+    private readonly CurrentTermsViewModel? currentTermsViewModel;
     
     public FileManagerViewModel(MainWindow win, FormulaProgram program)
     {
@@ -40,6 +42,9 @@ internal class FileManagerViewModel : ReactiveObject
 
         consoleOutput = mainWindow.Get<CommandConsoleView>("CommandInputView")
                                   .Get<TextBlock>("ConsoleOutput");
+        commandConsoleViewModel = mainWindow.Get<CommandConsoleView>("CommandInputView").DataContext as CommandConsoleViewModel;
+        currentTermsViewModel = mainWindow.Get<CurrentTermsView>("TermsView").DataContext as CurrentTermsViewModel;
+        inferenceRulesViewModel = mainWindow.Get<InferenceRulesView>("SolverRulesView").DataContext as InferenceRulesViewModel;
     }
 
     public ObservableCollection<Node> Items { get; }
@@ -56,6 +61,16 @@ internal class FileManagerViewModel : ReactiveObject
             if (Utils.LastDirectory != null &&
                 Utils.LastDirectory.TryGetUri(out uri))
             {
+                if (commandConsoleViewModel != null &&
+                    inferenceRulesViewModel != null &&
+                    currentTermsViewModel != null)
+                {
+                    commandConsoleViewModel.SetConstraintPanelEnabled(false);
+                    commandConsoleViewModel.ClearAll();
+                    inferenceRulesViewModel.ClearAll();
+                    currentTermsViewModel.ClearAll();
+                }
+                
                 var loadTask = new Task(() => ExecuteLoadCommand(uri, SelectedItems[0].Header));
                 loadTask.Start();
                 tasks.Add(loadTask);

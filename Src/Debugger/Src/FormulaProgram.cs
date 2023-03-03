@@ -2,6 +2,9 @@ using Microsoft.Formula.CommandLine;
 using Microsoft.Formula.API;
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Formula.Common.Rules;
 
 namespace Debugger;
 
@@ -12,7 +15,6 @@ public class FormulaProgram
     private EnvParams parameters;
     
     public FormulaPublisher FormulaPublisher { get; }
-
     
     public FormulaProgram()
     {
@@ -24,6 +26,12 @@ public class FormulaProgram
         tuple.SetValue(value,0);
         parameters = new EnvParams(tuple);
         ci = new CommandInterface(consoleSink, consoleChooser, parameters);
+    }
+
+    public void AddStartTask(Task task)
+    {
+        var cts = new CancellationTokenSource();
+        ci.AddExternalTask(task,new ExecuterStatistics(null), cts);
     }
 
     public bool ExecuteCommand(string command)

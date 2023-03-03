@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 using Microsoft.Formula.API;
@@ -15,7 +14,8 @@ public class FormulaPublisher : ISolverPublisher
     private Dictionary<int, string> CurrentTerms = new Dictionary<int, string>();
     private Dictionary<int, string> VarFacts = new Dictionary<int, string>();
     private Dictionary<int, List<string>> CoreRules = new Dictionary<int, List<string>>();
-    private SolveResult? SolverResult;
+    private string extractOut;
+    private SolveResult SolverResult;
 
     public void ClearAll()
     {
@@ -26,7 +26,16 @@ public class FormulaPublisher : ISolverPublisher
         CurrentTerms.Clear();
         VarFacts.Clear();
         CoreRules.Clear();
-        SolverResult = null;
+    }
+
+    public void SetExtractOutput(string output)
+    {
+        extractOut = output;
+    }
+
+    public string GetExtractOutput()
+    {
+        return extractOut;
     }
 
     public void AddPosConstraint(int id, string constraint)
@@ -120,7 +129,7 @@ public class FormulaPublisher : ISolverPublisher
         CoreRules = rules;
     }
 
-    public Dictionary<int, List<string>>? GetCoreRules()
+    public Dictionary<int, List<string>> GetCoreRules()
     {
         return CoreRules;
     }
@@ -130,7 +139,7 @@ public class FormulaPublisher : ISolverPublisher
         SolverResult = solverResult;
     }
 
-    public SolveResult? GetSolverResult()
+    public SolveResult GetSolverResult()
     {
         return SolverResult;
     }

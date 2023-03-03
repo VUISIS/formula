@@ -1183,7 +1183,7 @@ namespace Microsoft.Formula.API
                 task = null;
                 goto Unlock;
             }
-
+            
             var solverPublisher = EnvParams.GetSolverPublisherParameter(Parameters, EnvParamKind.Debug_SolverPublisher);
             if (solverPublisher != null)
             {
@@ -1207,6 +1207,8 @@ namespace Microsoft.Formula.API
                         maxSols,
                         this,
                         cancel);
+                    sr.Init();
+                    sr.Execute();
                     sr.Start();
                     return sr;
                 },

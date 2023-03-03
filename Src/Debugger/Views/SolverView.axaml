@@ -131,30 +131,54 @@
 		           HorizontalAlignment="Center"
 		           VerticalAlignment="Center"
 		           Text="All Constraints"/>
-		<ScrollViewer Grid.Row="8" 
-		              Grid.Column="0"
-		              Grid.ColumnSpan="5"
-		              AllowAutoHide="True">
-			<ListBox Background="#222222"
-					 Items="{Binding AllConstraintsItems}"
-					 SelectionMode="Single">
-				<ListBox.ItemTemplate>
-					<DataTemplate>
+		<ListBox Grid.Row="8" 
+		         Grid.Column="0"
+		         Grid.ColumnSpan="5"
+		         Background="#222222"
+		         Items="{Binding AllConstraintsItems}"
+		         SelectionMode="Single">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<ScrollViewer VerticalScrollBarVisibility="Auto"
+					              HorizontalScrollBarVisibility="Auto">
 						<TextBlock TextAlignment="Center"
 						           Text="{Binding Header}"/>
-					</DataTemplate>
-				</ListBox.ItemTemplate>
-			</ListBox>
-		</ScrollViewer>
+					</ScrollViewer>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
 		<StackPanel Grid.Row="10" 
 		            Grid.Column="0"
 		            Grid.ColumnSpan="5"
 		            Orientation="Horizontal"
 		            HorizontalAlignment="Right"
 		            Spacing="10">
-			<Button Command="{Binding SolveConstraints}"
+			<Button Name="InitButton"
 			        HorizontalAlignment="Center"
 			        VerticalAlignment="Center"
+			        IsEnabled="False"
+			        ToolTip.Tip="Init Constraints">
+				<StackPanel Orientation="Horizontal"
+				            Spacing="5">
+					<material:MaterialIcon Kind="HeadCheck"/>
+					<TextBlock Text="Init"/>
+				</StackPanel>
+			</Button>
+			<Button Name="ExecuteButton"
+			        HorizontalAlignment="Center"
+			        VerticalAlignment="Center"
+			        IsEnabled="False"
+			        ToolTip.Tip="Execute Constraints">
+				<StackPanel Orientation="Horizontal"
+				            Spacing="5">
+					<material:MaterialIcon Kind="HeadSync"/>
+					<TextBlock Text="Execute"/>
+				</StackPanel>
+			</Button>
+			<Button Name="SolveButton"
+			        HorizontalAlignment="Center"
+			        VerticalAlignment="Center"
+			        IsEnabled="False"
 			        ToolTip.Tip="Solve Constraints">
 				<StackPanel Orientation="Horizontal"
 				            Spacing="5">
@@ -162,9 +186,21 @@
 					<TextBlock Text="Solve"/>
 				</StackPanel>
 			</Button>
-			<Button Command="{Binding GenerateNextSolution}" 
+			<Button Name="SolutionButton"
 			        HorizontalAlignment="Center"
 			        VerticalAlignment="Center"
+			        IsEnabled="False"
+			        ToolTip.Tip="Constraints Solution">
+				<StackPanel Orientation="Horizontal"
+				            Spacing="5">
+					<material:MaterialIcon Kind="HeadCheck"/>
+					<TextBlock Text="Solution"/>
+				</StackPanel>
+			</Button>
+			<Button Name="GenSolButton"
+					HorizontalAlignment="Center"
+			        VerticalAlignment="Center"
+			        IsEnabled="False"
 			        ToolTip.Tip="Generate Next Solution">
 				<StackPanel Orientation="Horizontal"
 				            Spacing="5">
@@ -183,17 +219,11 @@
 		<ScrollViewer Grid.Row="14"
 		              Grid.Column="0"
 		              Grid.ColumnSpan="5"
-		              AllowAutoHide="True">
-			<ListBox Background="#222222"
-					 Items="{Binding SolutionItems}"
-					 SelectionMode="Single">
-				<ListBox.ItemTemplate>
-					<DataTemplate>
-						<TextBlock TextAlignment="Center"
-						           Text="{Binding Header}"/>
-					</DataTemplate>
-				</ListBox.ItemTemplate>
-			</ListBox>
+		              VerticalScrollBarVisibility="Auto"
+		              HorizontalScrollBarVisibility="Auto">
+			<TextBlock Name="SolutionOutput" 
+			           Padding="20"
+			           Background="#222222"/>
 		</ScrollViewer>
 		<TextBlock Grid.Row="16"
 		           Grid.Column="0"
@@ -202,20 +232,21 @@
 		           HorizontalAlignment="Center"
 		           VerticalAlignment="Center"
 		           Text="Counter Example"/>
-		<ScrollViewer Grid.Row="18"
-		              Grid.Column="0"
-		              Grid.ColumnSpan="5"
-		              AllowAutoHide="True">
-			<ListBox Background="#222222"
-			         Items="{Binding CounterExampleItems}"
-			         SelectionMode="Single">
-				<ListBox.ItemTemplate>
-					<DataTemplate>
+		<ListBox Grid.Row="18"
+		         Grid.Column="0"
+		         Grid.ColumnSpan="5" 
+		         Background="#222222"
+		         Items="{Binding CounterExampleItems}"
+		         SelectionMode="Single">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<ScrollViewer VerticalScrollBarVisibility="Auto"
+					              HorizontalScrollBarVisibility="Auto">
 						<TextBlock TextAlignment="Center"
 						           Text="{Binding Header}"/>
-					</DataTemplate>
-				</ListBox.ItemTemplate>
-			</ListBox>
-		</ScrollViewer>
+					</ScrollViewer>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
 	</Grid>
 </UserControl>

@@ -1,10 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Formula.Common;
-using Microsoft.Formula.Common.Terms;
-
-using System.Threading.Tasks;
-using Microsoft.Formula.Common.Rules;
 
 namespace Microsoft.Formula.API.Plugins;
 
@@ -26,4 +21,7 @@ public interface ISolverPublisher
     public Dictionary<int, string> GetVarFacts();
     public void SetCoreRules(Dictionary<int, List<string>> rules);
     public Dictionary<int, List<string>> GetCoreRules();
+    public void ClearAll();
+    public void SetExtractOutput(string output);
+    public string GetExtractOutput();
 }

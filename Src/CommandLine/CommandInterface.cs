@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
+using Microsoft.Formula.Common.Rules;
+
 namespace Microsoft.Formula.CommandLine
 {
     using System;
@@ -1260,7 +1262,7 @@ namespace Microsoft.Formula.CommandLine
             module.Node.TryGetStringAttribute(AttributeKind.Name, out name);
 
             List<Flag> flags;
-            System.Threading.Tasks.Task<SolveResult> task;
+            Task<SolveResult> task;
             var solveCancel = new CancellationTokenSource();
             var goals = new AST<Body>[bodies.Count];
             int i = 0;
@@ -1284,14 +1286,13 @@ namespace Microsoft.Formula.CommandLine
                 return;
             }
             
-            WriteFlags(cmdLineName, flags);
-            
             var solverPublisher = EnvParams.GetSolverPublisherParameter(env.Parameters, EnvParamKind.Debug_SolverPublisher);
             if (solverPublisher == null)
             {
+                WriteFlags(cmdLineName, flags);
                 if (task != null)
                 {
-                    var id = taskManager.StartTask(task, new Common.Rules.ExecuterStatistics(null), solveCancel);
+                    var id = taskManager.StartTask(task, new ExecuterStatistics(null), solveCancel);
                     sink.WriteMessageLine(string.Format("Started solve task with Id {0}.", id), SeverityKind.Info);
                 }
                 else
@@ -1495,6 +1496,11 @@ namespace Microsoft.Formula.CommandLine
                     WriteEnvironment(env, 0);
                 },
                 canceler.Token);
+        }
+
+        public void AddExternalTask(Task task, ExecuterStatistics stats, CancellationTokenSource src)
+        {
+            taskManager.AddTask(task, stats, src);
         }
 
         private void WriteEnvironment(TypeEnvironment env, int indent)

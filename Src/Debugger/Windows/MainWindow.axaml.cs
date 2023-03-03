@@ -31,35 +31,27 @@ public partial class MainWindow : Window
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
-
-        var conModel = new ConstraintsViewModel();
-        var cmdModel = new CommandConsoleViewModel(this, formulaProgram);
-        var termModel = new CurrentTermsViewModel(this, formulaProgram);
-        var solveModel = new SolverViewModel(this, formulaProgram);
-        var infModel = new InferenceRulesViewModel();
-        var fileModel = new FileManagerViewModel(this, formulaProgram);
-        var toolModel = new ToolbarViewModel(this, formulaProgram);
         
         var cv = this.Get<ConstraintsView>("ConstrView");
-        SetViewWindow(cv, conModel);
+        SetViewWindow(cv, new ConstraintsViewModel());
         
         var ctv = this.Get<CurrentTermsView>("TermsView");
-        SetViewWindow(ctv, termModel);
+        SetViewWindow(ctv, new CurrentTermsViewModel(this, formulaProgram));
 
         var sv = this.Get<SolverView>("SolverCommandView");
-        SetViewWindow(sv, solveModel);
+        SetViewWindow(sv, new SolverViewModel(this, formulaProgram));
         
         var iv = this.Get<InferenceRulesView>("SolverRulesView");
-        SetViewWindow(iv, infModel);
+        SetViewWindow(iv, new InferenceRulesViewModel());
 
         var civ = this.Get<CommandConsoleView>("CommandInputView");
-        SetViewWindow(civ, cmdModel);
+        SetViewWindow(civ, new CommandConsoleViewModel(this, formulaProgram));
         
         var fmv = this.Get<FileManagerView>("FileTreeView");
-        SetViewWindow(fmv, fileModel);
+        SetViewWindow(fmv, new FileManagerViewModel(this, formulaProgram));
         
         var tbv = this.Get<ToolbarView>("TopToolbarView");
-        SetViewWindow(tbv, toolModel);
+        SetViewWindow(tbv, new ToolbarViewModel(this, formulaProgram));
     }
 
     private void SetViewWindow(UserControl uc, ReactiveObject obj)

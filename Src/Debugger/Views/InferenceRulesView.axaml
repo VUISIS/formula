@@ -28,19 +28,20 @@
                 <material:MaterialIcon Kind="BugStop"/>
             </Button>
         </StackPanel>
-		<ScrollViewer AllowAutoHide="True">
-            <ItemsRepeater Items="{Binding Items}" 
-                           Background="#222222">
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <CheckBox/>
+        <ItemsRepeater Items="{Binding Items}" 
+                       Background="#222222">
+            <ItemsRepeater.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Auto">
                             <TextBlock Text="{Binding Header}"
                                        Margin="0,8,0,0"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
-		</ScrollViewer>
+                        </ScrollViewer>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
     </DockPanel>
 </UserControl>

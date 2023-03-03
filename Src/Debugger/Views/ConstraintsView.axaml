@@ -33,8 +33,8 @@
 		         VerticalAlignment="Stretch">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<ScrollViewer HorizontalScrollBarVisibility="Hidden"
-						              VerticalScrollBarVisibility="Hidden">
+						<ScrollViewer HorizontalScrollBarVisibility="Auto"
+						              VerticalScrollBarVisibility="Auto">
 							<TextBlock TextAlignment="Left"
 							           Text="{Binding Header}"/>
 						</ScrollViewer>

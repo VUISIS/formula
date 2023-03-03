@@ -23,6 +23,9 @@ internal class ToolbarViewModel : ReactiveObject
     private readonly FormulaProgram? formulaProgram;
     private readonly TextBlock? consoleOutput;
     private readonly TextBlock? fileOutput;
+    private CommandConsoleViewModel? commandConsoleViewModel;
+    private InferenceRulesViewModel? inferenceRulesViewModel;
+    private CurrentTermsViewModel? currentTermsViewModel;
 
     public ToolbarViewModel(MainWindow win, FormulaProgram program)
     {
@@ -34,7 +37,10 @@ internal class ToolbarViewModel : ReactiveObject
                               .Get<TextBlock>("FileOutput");
         consoleOutput = mainWindow.Get<CommandConsoleView>("CommandInputView")
                                   .Get<TextBlock>("ConsoleOutput");
+        commandConsoleViewModel = mainWindow.Get<CommandConsoleView>("CommandInputView").DataContext as CommandConsoleViewModel;
         fileManagerModel = mainWindow.Get<FileManagerView>("FileTreeView").DataContext as FileManagerViewModel;
+        currentTermsViewModel = mainWindow.Get<CurrentTermsView>("TermsView").DataContext as CurrentTermsViewModel;
+        inferenceRulesViewModel = mainWindow.Get<InferenceRulesView>("SolverRulesView").DataContext as InferenceRulesViewModel;
     }
     
     public async void OpenCmd()
@@ -58,6 +64,16 @@ internal class ToolbarViewModel : ReactiveObject
                 if (Utils.LastDirectory != null &&
                     Utils.LastDirectory.TryGetUri(out uri))
                 {
+                    if (commandConsoleViewModel != null &&
+                        inferenceRulesViewModel != null &&
+                        currentTermsViewModel != null)
+                    {
+                        commandConsoleViewModel.SetConstraintPanelEnabled(false);
+                        commandConsoleViewModel.ClearAll();
+                        inferenceRulesViewModel.ClearAll();
+                        currentTermsViewModel.ClearAll();
+                    }
+                    
                     var loadTask = new Task(() => ExecuteLoadCommand(uri, file));
                     loadTask.Start();
                     var timeoutTask = new Task(() => TimeoutAfter(loadTask));

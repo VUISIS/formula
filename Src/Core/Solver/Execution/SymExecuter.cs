@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.Formula.API.Plugins;
 
 namespace Microsoft.Formula.Solver
@@ -606,14 +606,20 @@ namespace Microsoft.Formula.Solver
 
         public void GetSolution(int num)
         {
+            StringBuilder sb = new StringBuilder();
             if (num < solutionStrings.Count)
             {
-                Console.WriteLine("Solution number " + num);
+                sb.AppendLine("Solution number " + num);
                 foreach (var str in solutionStrings[num])
                 {
-                    Console.WriteLine(str);
+                    sb.AppendLine(str);
                 }
-                Console.WriteLine();
+                sb.AppendLine();
+                if (Publisher != null)
+                {
+                    Publisher.SetExtractOutput(sb.ToString());
+                }
+                Console.WriteLine(sb.ToString());
                 return;
             }
 
@@ -662,17 +668,24 @@ namespace Microsoft.Formula.Solver
 
             if (num < solutionStrings.Count)
             {
-                Console.WriteLine("Solution number " + num);
+                sb.AppendLine("Solution number " + num);
                 foreach (var str in solutionStrings[num])
                 {
-                    Console.WriteLine(str);
+                    sb.AppendLine(str);
                 }
-                Console.WriteLine();
+
+                sb.AppendLine();
             }
             else
             {
-                Console.WriteLine("Could not find solution " + num);
+                sb.AppendLine("Could not find solution " + num);
             }
+
+            if (Publisher != null)
+            {
+                Publisher.SetExtractOutput(sb.ToString());
+            }
+            Console.WriteLine(sb.ToString());
         }
 
         private void PrintSymbolicConstants(Z3.Model model)
@@ -917,8 +930,6 @@ namespace Microsoft.Formula.Solver
                     }
                     else if (x.Symbol.Kind == SymbolKind.BaseOpSymb)
                     {
-                        Rational r1, r2;
-                        string str;
                         switch (((BaseOpSymb)x.Symbol).OpKind)
                         {
                             case OpKind.Add:
