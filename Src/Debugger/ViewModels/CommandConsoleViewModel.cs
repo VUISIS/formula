@@ -4,7 +4,6 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using ReactiveUI;
 
-using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Avalonia.Controls.Shapes;
@@ -12,9 +11,7 @@ using Avalonia.Interactivity;
 using Debugger.ViewModels.Helpers;
 using Debugger.Views;
 using Debugger.Windows;
-using Material.Icons.Avalonia;
 using Microsoft.Formula.API;
-using Microsoft.Formula.Common;
 using Node = Debugger.ViewModels.Types.Node;
 
 namespace Debugger.ViewModels;
@@ -274,19 +271,7 @@ internal class CommandConsoleViewModel : ReactiveObject
         {
             if (commandOutput != null)
             {
-                commandOutput.Text += input;
-
-                foreach (var cmd in Utils.InputCommands)
-                {
-                    if (input != null &&
-                        input.StartsWith(cmd))
-                    {
-                        commandOutput.Text += "\n";
-                    }
-                }
-                
-                if (input != null && 
-                    input.EndsWith("debugger"))
+                if (input.EndsWith("debugger"))
                 {
                     if (solutionButton != null &&
                         genButton != null)
@@ -297,11 +282,22 @@ internal class CommandConsoleViewModel : ReactiveObject
                     
                     if (solutionOut != null)
                     {
-                        solutionOut.Text = formulaProgram.FormulaPublisher.GetExtractOutput();
+                        solutionOut.Text += formulaProgram.FormulaPublisher.GetExtractOutput();
                     }
                 }
                 else
                 {
+                    commandOutput.Text += input;
+
+                    foreach (var cmd in Utils.InputCommands)
+                    {
+                        if (input != null &&
+                            input.StartsWith(cmd))
+                        {
+                            commandOutput.Text += "\n";
+                        }
+                    }
+                    
                     commandOutput.Text += formulaProgram.GetConsoleOutput();
                 }
             }
