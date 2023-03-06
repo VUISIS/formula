@@ -337,6 +337,14 @@
             Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.MaxAll);
             return ValidateArity(ft, "maxAll", BinSecCompr, flags);
         }
+        
+        internal static bool ValidateUse_SymMaxAll(Node n, List<Flag> flags)
+        {
+            Contract.Requires(n.NodeKind == NodeKind.FuncTerm);
+            var ft = (FuncTerm)n;
+            Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.SymAndAll);
+            return ValidateArity(ft, "symmaxall", UnCompr, flags);
+        }
 
         internal static bool ValidateUse_Min(Node n, List<Flag> flags)
         {
@@ -1734,6 +1742,45 @@
                 var cmp = facts.Index.LexicographicCompare(x, y);
                 return cmp >= 0 ? x : y;
             }
+        }
+
+        internal static Term SymEvaluator_MaxAll(SymExecuter facts, Bindable[] values)
+        {
+            Contract.Requires(values.Length == 2);
+            int nResults;
+            bool hasSymbolics = false;
+            using (var it = facts.Query(values[1].Binding, out nResults).GetEnumerator())
+            {
+                if (nResults == 0)
+                {
+                    return values[0].Binding;
+                }
+
+                it.MoveNext();
+                var max = it.Current.Args[it.Current.Symbol.Arity - 1];
+                while (it.MoveNext())
+                {
+                    var temp = it.Current.Args[it.Current.Symbol.Arity - 1];
+                    if (Term.IsSymbolicTerm(max) || Term.IsSymbolicTerm(temp))
+                    {
+                        hasSymbolics = true;
+                        break;
+                    }
+                    else if (facts.Index.LexicographicCompare(temp, max) > 0)
+                    {
+                        max = temp;
+                    }
+                }
+                if (hasSymbolics)
+                {
+                    return max;
+                }
+            }
+            
+            BaseOpSymb bos = facts.Index.SymbolTable.GetOpSymbol(OpKind.SymMaxAll);
+            Term[] terms = facts.Query(values[1].Binding, out nResults).Select(t => t.Args[t.Symbol.Arity - 1]).ToArray();
+            bool wasAdded;
+            return facts.Index.MkApply(bos, terms, out wasAdded);
         }
 
         internal static Term SymEvaluator_Min(SymExecuter facts, Bindable[] values)

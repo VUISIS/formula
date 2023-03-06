@@ -118,6 +118,7 @@
         SymAndAll,
         SymCount,
         SymMax,
+        SymMaxAll,
         SymMin,
         Sub,
         Sum,

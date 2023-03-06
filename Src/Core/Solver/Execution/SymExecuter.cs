@@ -923,6 +923,17 @@ namespace Microsoft.Formula.Solver
                                 r1 = MakeRational(ch.ElementAt(0));
                                 r2 = MakeRational(ch.ElementAt(1));
                                 return r1 < r2 ? r1.ToString() : r2.ToString();
+                            case OpKind.SymMaxAll:
+                                r1 = MakeRational(ch.ElementAt(0));
+                                for (int i = 1; i < ch.Count(); i++)
+                                {
+                                    r2 = MakeRational(ch.ElementAt(i));
+                                    if (r1 < r2)
+                                    {
+                                        r1 = r2;
+                                    }
+                                }
+                                return  r1.ToString();
                             default:
                                 throw new NotImplementedException();
                         }

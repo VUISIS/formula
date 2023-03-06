@@ -86,6 +86,15 @@
             }
         }
         
+        public override bool IsSymMaxAll
+        {
+            get
+            {
+                return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymMaxAll;
+            }
+        }
+
+        
         public override bool IsSymMin
         {
             get
