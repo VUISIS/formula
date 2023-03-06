@@ -257,6 +257,27 @@
                                     ch.ElementAt(0), ch.ElementAt(1));
                                 encodings.Add(x, encp);
                                 return encp;
+                            case OpKind.SymMaxAll: ;
+                                Z3Expr maxExpr = null;
+                                for (int i = 1; i < ch.Count(); i++)
+                                {
+                                    if (maxExpr == null)
+                                    {
+                                        maxExpr = Solver.TypeEmbedder.Context.MkITE(
+                                            Solver.TypeEmbedder.Context.MkGt((Z3ArithExpr)ch.ElementAt(i), (Z3ArithExpr)ch.ElementAt(i-1)), 
+                                            ch.ElementAt(i), ch.ElementAt(i-1)
+                                            );
+                                    }
+                                    else
+                                    {
+                                        maxExpr = Solver.TypeEmbedder.Context.MkITE(
+                                            Solver.TypeEmbedder.Context.MkGt((Z3ArithExpr)ch.ElementAt(i), (Z3ArithExpr)maxExpr), 
+                                            ch.ElementAt(i), maxExpr
+                                        );
+                                    }
+                                }
+                                encodings.Add(x, maxExpr);
+                                return maxExpr;
                             case OpKind.SymMin:
                                 encp = Solver.TypeEmbedder.Context.MkITE(
                                     Solver.TypeEmbedder.Context.MkLt((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1)), 

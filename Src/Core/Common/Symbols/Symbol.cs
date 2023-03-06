@@ -79,6 +79,11 @@
         {
             get { return false; }
         }
+        public virtual bool IsSymMaxAll
+        {
+            get { return false; }
+        }
+
         
         public virtual bool IsSymMin
         {

@@ -49,13 +49,13 @@ namespace Tests
         }
 
         [Fact]
-        public void TestSolvingSymbolicMaxExample()
+        public void TestSolvingSymbolicMaxAllExample()
         {
-            _ciFixture.RunCommand("load " + Path.GetFullPath("../../../../../../../Tst/Tests/Symbolic/SymbolicMax.4ml"), "SolveTests: Load command for SymbolicMax.4ml failed.");
-            Assert.True(_ciFixture.GetLoadResult(), "SolveTests: Loading SymbolicMax.4ml failed.");
+            _ciFixture.RunCommand("load " + Path.GetFullPath("../../../../../../../Tst/Tests/Symbolic/SymbolicMaxAll.4ml"), "SolveTests: Load command for SymbolicMaxAll.4ml failed.");
+            Assert.True(_ciFixture.GetLoadResult(), "SolveTests: Loading SymbolicMaxAll.4ml failed.");
 
-            _ciFixture.RunCommand("solve pm 1 SymbolicMax.conforms", "SolveTests: Solve command for SymbolicMax.4ml failed.");
-            Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicMax.4ml.");
+            _ciFixture.RunCommand("solve pm 1 SymbolicMaxAll.conforms", "SolveTests: Solve command for SymbolicMaxAll.4ml failed.");
+            Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicMaxAll.4ml.");
         }
 
         [Fact]

@@ -2666,7 +2666,19 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.ValidateUse_MaxAll,
                 OpLibrary.TypeApprox_Unconstrained2_Up,
                 OpLibrary.TypeApprox_Unconstrained2_Down,
-                OpLibrary.Evaluator_MaxAll));
+                OpLibrary.Evaluator_MaxAll,
+                null,
+                OpLibrary.SymEvaluator_MaxAll));
+            
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymMaxAll,
+                2,
+                OpLibrary.ValidateUse_MaxAll,
+                OpLibrary.TypeApprox_Max_Up,
+                OpLibrary.TypeApprox_Max_Down,
+                OpLibrary.Evaluator_MaxAll,
+                null,
+                OpLibrary.SymEvaluator_MaxAll));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.Min,

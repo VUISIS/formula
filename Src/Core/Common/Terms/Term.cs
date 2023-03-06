@@ -178,7 +178,8 @@
                 sym.IsSymAnd ||
                 sym.IsSymAndAll ||
                 sym.IsSymMax ||
-                sym.IsSymMin)
+                sym.IsSymMin ||
+                sym.IsSymMaxAll)
             {
                 return true;
             }
@@ -214,7 +215,9 @@
                 sym1.IsSymMax ||
                 sym2.IsSymMax ||
                 sym1.IsSymMin ||
-                sym2.IsSymMin)
+                sym2.IsSymMin ||
+                sym1.IsSymMaxAll ||
+                sym2.IsSymMaxAll)
             {
                 return true;
             }
