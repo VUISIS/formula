@@ -28,8 +28,6 @@ public abstract class OpPluginFunc
             return (OpKind) nextOpKind;
         }
     }
-    Func<TermIndex, Term[], IEnumerable<Tuple<RelKind, Term, Term>>> appConstrainer = null;
-    Func<SymExecuter, Bindable[], Term> symEvaluator = null;
 
     public OpPluginFunc()
     {
