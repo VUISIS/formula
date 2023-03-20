@@ -1,7 +1,6 @@
 using Microsoft.Formula.API;
 using Xunit;
 using System.IO;
-using Xunit.Abstractions;
 
 namespace Tests
 {

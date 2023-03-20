@@ -1,11 +1,8 @@
-using System;
 using System.IO;
 using System.Collections.Generic;
 using Xunit;
 using Microsoft.Formula.Compiler;
-using Microsoft.Formula.API.Nodes;
 using Microsoft.Formula.API;
-using Xunit.Abstractions;
 
 namespace Tests
 {

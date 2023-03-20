@@ -1,12 +1,10 @@
 using System;
 using System.Text;
 using System.IO;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Xunit;
 using Microsoft.Formula.CommandLine;
 using Microsoft.Formula.API;
-using Xunit.Abstractions;
 
 namespace Tests
 {
