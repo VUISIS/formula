@@ -1,10 +1,5 @@
-using System;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Collections.Generic;
 using Xunit;
-using Microsoft.Formula.CommandLine;
-using Xunit.Abstractions;
 
 namespace Tests
 {
