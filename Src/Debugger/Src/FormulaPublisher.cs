@@ -14,9 +14,9 @@ public class FormulaPublisher : ISolverPublisher
     private Dictionary<int, string> CurrentTerms = new Dictionary<int, string>();
     private Dictionary<int, string> VarFacts = new Dictionary<int, string>();
     private Dictionary<int, List<string>> CoreRules = new Dictionary<int, List<string>>();
-    private string extractOut;
-    private string unsatCore;
-    private SolveResult SolverResult;
+    private string extractOut = "";
+    private string unsatCore = "";
+    private SolveResult? SolverResult = null;
 
     public void ClearAll()
     {
@@ -150,7 +150,7 @@ public class FormulaPublisher : ISolverPublisher
         SolverResult = solverResult;
     }
 
-    public SolveResult GetSolverResult()
+    public SolveResult? GetSolverResult()
     {
         return SolverResult;
     }

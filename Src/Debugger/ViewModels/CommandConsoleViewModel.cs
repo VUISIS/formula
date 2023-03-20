@@ -312,7 +312,10 @@ internal class CommandConsoleViewModel : ReactiveObject
     private void SolverInit()
     {
         var solveResult = formulaProgram.FormulaPublisher.GetSolverResult();
-        solveResult.Init();
+        if (solveResult != null)
+        {
+            solveResult.Init();
+        }
 
         var coreRules = formulaProgram.FormulaPublisher.GetCoreRules();
         var varFacts = formulaProgram.FormulaPublisher.GetVarFacts();
@@ -434,7 +437,10 @@ internal class CommandConsoleViewModel : ReactiveObject
     private void SolverExecute()
     {
         var solveResult = formulaProgram.FormulaPublisher.GetSolverResult();
-        solveResult.Execute();
+        if (solveResult != null)
+        {
+            solveResult.Execute();
+        }
             
         var rules = formulaProgram.FormulaPublisher.GetCurrentTerms();
         var posConstraints = formulaProgram.FormulaPublisher.GetPosConstraints();
@@ -521,13 +527,16 @@ internal class CommandConsoleViewModel : ReactiveObject
         }, DispatcherPriority.Background);
     }
 
-    private SolveResult SolverStart()
+    private SolveResult? SolverStart()
     {
         var startTime = DateTime.Now;
 
         var solveResult = formulaProgram.FormulaPublisher.GetSolverResult();
-        solveResult.Start();
-        
+        if (solveResult != null)
+        {
+            solveResult.Start();
+        }
+
         Dispatcher.UIThread.Post(() =>
         {
             if (commandOutput != null &&
@@ -535,9 +544,9 @@ internal class CommandConsoleViewModel : ReactiveObject
             {
                 commandOutput.Text += " Solve start task completed.";
                 commandOutput.Text += "\n";
-                commandOutput.Text += "Solveable: " + solveResult.Solvable;
+                commandOutput.Text += "Solveable: " + (solveResult != null ? solveResult.Solvable : "null");
                 commandOutput.Text += "\n";
-                commandOutput.Text += (solveResult.StopTime - startTime).Milliseconds + "ms";
+                commandOutput.Text += solveResult != null ? (solveResult.StopTime - startTime).Milliseconds + "ms" : "null";
                 commandOutput.Text += "\n\n";
                 commandOutput.Text += "[]>";
             }
@@ -547,7 +556,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                 startButton.IsEnabled = false;
             }
             
-            var solvable = (bool)solveResult.Solvable;
+            var solvable = solveResult != null ? (bool)solveResult.Solvable : false;
             if (!solvable)
             {
                 if (solutionOut != null)
@@ -586,7 +595,7 @@ internal class CommandConsoleViewModel : ReactiveObject
 
     private void StartSolve(object? obj, RoutedEventArgs args)
     {
-        var startSolveTask = new Task<SolveResult>(SolverStart, TaskCreationOptions.LongRunning);
+        var startSolveTask = new Task<SolveResult?>(SolverStart, TaskCreationOptions.LongRunning);
         formulaProgram.AddStartTask(startSolveTask);
         startSolveTask.Start();
         tasks.Add(startSolveTask);

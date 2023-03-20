@@ -15,7 +15,7 @@ namespace Debugger.ViewModels.Helpers;
 
 public static class Utils
 {
-    public static string LoadedFile;
+    public static string LoadedFile = "";
     
     public static readonly HashSet<string> InputCommands = new HashSet<string>()
     {
