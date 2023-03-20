@@ -129,6 +129,10 @@ namespace Microsoft.Formula.API
         
         public static bool IsSolverPublisherSet(EnvParams prms)
         {
+            if (!prms.settings.ContainsKey(EnvParamKind.Debug_SolverPublisher))
+            {
+                return false;
+            }
             return prms.settings[EnvParamKind.Debug_SolverPublisher] != null;
         }
 
