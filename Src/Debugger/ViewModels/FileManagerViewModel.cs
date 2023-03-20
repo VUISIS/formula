@@ -20,8 +20,8 @@ internal class FileManagerViewModel : ReactiveObject
 {
     private readonly MainWindow? mainWindow;
     private readonly FormulaProgram? formulaProgram;
-    private readonly TextBlock? consoleOutput;
-    private readonly TextBlock? fileOutput;
+    private readonly TextBox? consoleOutput;
+    private readonly TextBox? fileOutput;
     private List<Task> tasks = new List<Task>();
     private readonly CommandConsoleViewModel? commandConsoleViewModel;
     private readonly InferenceRulesViewModel? inferenceRulesViewModel;
@@ -37,10 +37,10 @@ internal class FileManagerViewModel : ReactiveObject
         SelectedItems = new ObservableCollection<Node>();
         
         fileOutput = mainWindow.Get<Domain4MLView>("DomainView")
-                              .Get<TextBlock>("FileOutput");
+                              .Get<TextBox>("FileOutput");
 
         consoleOutput = mainWindow.Get<CommandConsoleView>("CommandInputView")
-                                  .Get<TextBlock>("ConsoleOutput");
+                                  .Get<TextBox>("ConsoleOutput");
         commandConsoleViewModel = mainWindow.Get<CommandConsoleView>("CommandInputView").DataContext as CommandConsoleViewModel;
         currentTermsViewModel = mainWindow.Get<CurrentTermsView>("TermsView").DataContext as CurrentTermsViewModel;
         inferenceRulesViewModel = mainWindow.Get<InferenceRulesView>("SolverRulesView").DataContext as InferenceRulesViewModel;

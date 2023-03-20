@@ -9,9 +9,12 @@
     <ScrollViewer Background="Black"
                   VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Auto">
-        <TextBlock Padding="25" 
-                   Name="FileOutput" 
-                   Background="Black"
-                   TextWrapping="NoWrap"/>
+        <TextBox Padding="25" 
+                 Name="FileOutput" 
+                 Background="Black"
+                 IsReadOnly="True"
+                 CaretBrush="Transparent"
+                 FocusAdorner="{x:Null}"
+                 TextWrapping="NoWrap"/>
     </ScrollViewer>
 </UserControl>

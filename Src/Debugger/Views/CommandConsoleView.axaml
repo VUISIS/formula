@@ -10,9 +10,12 @@
 	<ScrollViewer Background="Black"
 	              HorizontalScrollBarVisibility="Auto"
 	              VerticalScrollBarVisibility="Auto">
-		    <TextBlock Padding="25" 
+		    <TextBox Padding="25" 
                        Name="ConsoleOutput" 
                        Background="Black"
-                       TextWrapping="NoWrap"/>
+                       TextWrapping="NoWrap"
+                       CaretBrush="Transparent"
+                       FocusAdorner="{x:Null}"
+                       IsReadOnly="True"/>
 	</ScrollViewer>
 </UserControl>

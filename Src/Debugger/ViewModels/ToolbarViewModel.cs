@@ -19,8 +19,8 @@ internal class ToolbarViewModel : ReactiveObject
     private readonly FileManagerViewModel? fileManagerModel;
     private readonly MainWindow? mainWindow;
     private readonly FormulaProgram? formulaProgram;
-    private readonly TextBlock? consoleOutput;
-    private readonly TextBlock? fileOutput;
+    private readonly TextBox? consoleOutput;
+    private readonly TextBox? fileOutput;
     private CommandConsoleViewModel? commandConsoleViewModel;
     private InferenceRulesViewModel? inferenceRulesViewModel;
     private CurrentTermsViewModel? currentTermsViewModel;
@@ -32,9 +32,9 @@ internal class ToolbarViewModel : ReactiveObject
         formulaProgram = program;
 
         fileOutput = mainWindow.Get<Domain4MLView>("DomainView")
-                              .Get<TextBlock>("FileOutput");
+                              .Get<TextBox>("FileOutput");
         consoleOutput = mainWindow.Get<CommandConsoleView>("CommandInputView")
-                                  .Get<TextBlock>("ConsoleOutput");
+                                  .Get<TextBox>("ConsoleOutput");
         commandConsoleViewModel = mainWindow.Get<CommandConsoleView>("CommandInputView").DataContext as CommandConsoleViewModel;
         fileManagerModel = mainWindow.Get<FileManagerView>("FileTreeView").DataContext as FileManagerViewModel;
         currentTermsViewModel = mainWindow.Get<CurrentTermsView>("TermsView").DataContext as CurrentTermsViewModel;

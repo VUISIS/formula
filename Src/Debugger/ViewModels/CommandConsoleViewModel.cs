@@ -21,12 +21,12 @@ internal class CommandConsoleViewModel : ReactiveObject
     private readonly MainWindow? mainWindow;
     private readonly FormulaProgram formulaProgram;
     private readonly AutoCompleteBox? commandInput;
-    private readonly TextBlock? commandOutput;
+    private readonly TextBox? commandOutput;
     private readonly InferenceRulesViewModel? inferenceRulesViewModel;
     private readonly CurrentTermsViewModel? termsViewModel;
     private readonly ConstraintsViewModel? constraintsViewModel;
     private readonly SolverViewModel? solverViewModel;
-    private readonly TextBlock? fileOutput;
+    private readonly TextBox? fileOutput;
     private readonly TextBlock? solutionOut;
     private List<Task> tasks = new List<Task>();
     private readonly Button? startButton;
@@ -48,10 +48,10 @@ internal class CommandConsoleViewModel : ReactiveObject
         }
         
         fileOutput = mainWindow.Get<Domain4MLView>("DomainView")
-                              .Get<TextBlock>("FileOutput");
+                              .Get<TextBox>("FileOutput");
         
         var commandInputView = mainWindow.Get<CommandConsoleView>("CommandInputView");
-        commandOutput = commandInputView.Get<TextBlock>("ConsoleOutput");
+        commandOutput = commandInputView.Get<TextBox>("ConsoleOutput");
 
         termsViewModel = mainWindow.Get<CurrentTermsView>("TermsView").DataContext as CurrentTermsViewModel;
         constraintsViewModel = mainWindow.Get<ConstraintsView>("ConstrView").DataContext as ConstraintsViewModel;
