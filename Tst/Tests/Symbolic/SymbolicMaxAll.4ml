@@ -8,12 +8,10 @@ domain SymbolicMaxAll
   goodA :- a is A, a.x > 10.
   goodB :- b is B, b.x > 20.
 
-  maxVal(x) :- a is A, b is B, x = maxAll(b.x, {a.x, b.x}).
+  maxVal(x) :- a is A, b is B, x = maxAll(a.x,{a.x, b.x}), x : Integer.
   
   goodModel :- m is maxVal, m.x > 51.
-  
-  conforms goodA.
-  conforms goodB.
+
   conforms goodModel.
 }
 
