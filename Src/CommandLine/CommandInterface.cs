@@ -2272,7 +2272,7 @@ namespace Microsoft.Formula.CommandLine
             if (n.NodeKind == NodeKind.Program)
             {
                 var pathName = path.Peek();
-                var progName = ((Microsoft.Formula.API.Nodes.Program)n).Name.Uri.AbsoluteUri;
+                var progName = ((Microsoft.Formula.API.Nodes.Program)n).Name.Uri.ToString();
                 Contract.Assert(progName.StartsWith(pathName));
                 sink.WriteMessageLine(
                     string.Format("{0}| {1}",

@@ -114,7 +114,8 @@
 
             try
             {
-                var fi = new System.IO.FileInfo(name.Uri.AbsolutePath);
+                var unescapedPath = Uri.UnescapeDataString(name.Uri.AbsolutePath);
+                var fi = new System.IO.FileInfo(unescapedPath);
                 if (!fi.Exists)
                 {
                     var badFile = new Flag(
@@ -130,7 +131,7 @@
                     return false;
                 }
 
-                var str = new System.IO.FileStream(name.Uri.AbsolutePath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                var str = new System.IO.FileStream(unescapedPath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
                 ((Scanner)Scanner).SetSource(str);
                 ((Scanner)Scanner).ParseResult = parseResult;
                 ResetState();
