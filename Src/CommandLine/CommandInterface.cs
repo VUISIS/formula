@@ -1205,6 +1205,14 @@ namespace Microsoft.Formula.CommandLine
         private void DoSolve(string s)
         {
             var cmdParts = s.Split(cmdSplitChars, 3, StringSplitOptions.RemoveEmptyEntries);
+
+            // default solve
+            if (cmdParts.Length == 0)
+            {
+                var res = DefaultSolve();
+                cmdParts = res.Split(cmdSplitChars, 3, StringSplitOptions.RemoveEmptyEntries);
+            }
+
             if (cmdParts.Length != 3)
             {
                 sink.WriteMessageLine(SolveMsg, SeverityKind.Warning);
@@ -1294,6 +1302,42 @@ namespace Microsoft.Formula.CommandLine
             {
                 sink.WriteMessageLine("Failed to start solved task.", SeverityKind.Warning);
             }
+        }
+
+        private String DefaultSolve()
+        {
+
+            sink.WriteMessageLine("Which partial model do you want to solve?", SeverityKind.Info);
+            int index = 0;
+
+            Dictionary<int, Model> models = new Dictionary<int, Model>();
+
+            foreach (KeyValuePair<ProgramName, Program> kvp in env.Programs)
+            {
+                var program = kvp.Value;
+
+                foreach (var module in program.Modules)
+                {
+                    if (module is Model)
+                    {
+                        var model = (Model)module;
+                        models.Add(index++, model);
+                        sink.WriteMessageLine(index + ": " + model.Name + " model of " + model.Domain.Name + " domain", SeverityKind.Info);
+                    }
+                }
+            }
+
+            DigitChoiceKind choice;
+            while (!chooser.GetChoice(out choice) ||
+                ((int)choice) <= 0 ||
+                ((int)choice) > models.Count)
+            {
+                sink.WriteMessageLine("Invalid index, please provide a valid index", SeverityKind.Warning);
+            }
+
+            Model selected = models[(int)choice - 1];
+
+            return selected.Name + " 1 " + selected.Domain.Name + ".conforms";
         }
 
         private void DoSolveOld(string s)

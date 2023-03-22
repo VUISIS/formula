@@ -35,7 +35,7 @@
            
         private CancellationTokenSource canceler = null;
 
-        internal Dictionary<ProgramName, Program> Programs
+        public Dictionary<ProgramName, Program> Programs
         {
             get { return programs; }
         }
