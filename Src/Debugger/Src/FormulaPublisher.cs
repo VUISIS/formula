@@ -11,7 +11,7 @@ public class FormulaPublisher : ISolverPublisher
     private Dictionary<int, List<string>> PosConstraintTerms = new Dictionary<int, List<string>>();
     private Dictionary<int, List<string>> NegConstraintTerms = new Dictionary<int, List<string>>();
     private Dictionary<int, List<string>> FlatConstraintTerms = new Dictionary<int, List<string>>();
-    private Dictionary<int, string> CurrentTerms = new Dictionary<int, string>();
+    private List<KeyValuePair<int, string>> CurrentTerms = new List<KeyValuePair<int, string>>();
     private Dictionary<int, string> VarFacts = new Dictionary<int, string>();
     private Dictionary<int, List<string>> CoreRules = new Dictionary<int, List<string>>();
     private string extractOut = "";
@@ -111,13 +111,10 @@ public class FormulaPublisher : ISolverPublisher
 
     public void AddCurrentTerm(int id, string currentTerm)
     {
-        if (!CurrentTerms.ContainsKey(id))
-        {
-            CurrentTerms.Add(id, currentTerm);
-        }
+        CurrentTerms.Add(new KeyValuePair<int, string>(id, currentTerm));
     }
 
-    public Dictionary<int, string> GetCurrentTerms()
+    public List<KeyValuePair<int, string>> GetCurrentTerms()
     {
         return CurrentTerms;
     }

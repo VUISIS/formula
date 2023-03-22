@@ -16,7 +16,7 @@ public interface ISolverPublisher
     public void AddFlatConstraint(int id, string constraint);
     public Dictionary<int, List<string>> GetFlatConstraints();
     public void AddCurrentTerm(int id, string currentTerm);
-    public Dictionary<int, string> GetCurrentTerms();
+    public List<KeyValuePair<int, string>> GetCurrentTerms();
     public void AddVariableFact(int id, string fact);
     public Dictionary<int, string> GetVarFacts();
     public void SetCoreRules(Dictionary<int, List<string>> rules);
