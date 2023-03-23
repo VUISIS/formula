@@ -123,6 +123,9 @@
         private Map<Term, List<Term>> symCountMap =
             new Map<Term, List<Term>>(Term.Compare);
 
+        Dictionary<Z3BoolExpr, Z3BoolExpr> unsatCoreMap =
+            new Dictionary<Z3BoolExpr, Z3BoolExpr>();
+
         public int GetSymbolicCountIndex(Term t)
         {
             List<Term> terms;
@@ -418,8 +421,68 @@
                     }
                 }
             }
+        }
 
-            
+        protected Z3BoolExpr ConvertToCNF(Z3Expr expr, int level)
+        {
+            Z3BoolExpr top = Solver.Context.MkBoolConst("P" + level);
+            Z3BoolExpr negTop = Solver.Context.MkNot(top);
+            List<Z3BoolExpr> topExprs = new List<Z3BoolExpr>();
+            Z3BoolExpr subExpr;
+
+            if (expr.IsAnd)
+            {
+                List<Z3BoolExpr> subExprs = new List<Z3BoolExpr>();
+                foreach (var arg in expr.Args[0].Args)
+                {
+                    subExpr = ConvertToCNF(arg, level + 1);
+                    topExprs.Add(Solver.Context.MkOr(negTop, subExpr));
+                    subExprs.Add(Solver.Context.MkNot(subExpr));
+                }
+
+                subExprs.Add(top);
+                topExprs.Add(Solver.Context.MkOr(subExprs));
+            }
+            else if (expr.IsOr)
+            {
+                List<Z3BoolExpr> posExprs = new List<Z3BoolExpr>();
+                List<Z3BoolExpr> negExprs = new List<Z3BoolExpr>();
+                foreach (var arg in expr.Args[0].Args)
+                {
+                    subExpr = ConvertToCNF(arg, level + 1);
+                    posExprs.Add(subExpr);
+                    negExprs.Add(Solver.Context.MkNot(subExpr));
+                }
+
+                posExprs.Add(Solver.Context.MkNot(top));
+                negExprs.Add(top);
+                topExprs.Add(Solver.Context.MkOr(posExprs));
+                topExprs.Add(Solver.Context.MkOr(negExprs));
+            }
+            else if (expr.IsNot)
+            {
+                subExpr = ConvertToCNF(expr.Args[0], level + 1);
+                topExprs.Add(Solver.Context.MkOr(top, subExpr));
+                topExprs.Add(Solver.Context.MkOr(Solver.Context.MkNot(top), Solver.Context.MkNot(subExpr)));
+            }
+            else
+            {
+                return (Z3BoolExpr)expr;
+            }
+
+            if (level == 0)
+            {
+                int counter = 0;
+                foreach (var curr in topExprs)
+                {
+                    Z3BoolExpr p = Solver.Context.MkBoolConst("UC_" + counter++);
+                    unsatCoreMap.Add(p, curr);
+                    Solver.Z3Solver.AssertAndTrack(curr, p);
+                }
+                Solver.Z3Solver.AssertAndTrack(top, Solver.Context.MkBoolConst("UC_" + counter++));
+            }
+
+            return top;
         }
 
         public bool Solve()
@@ -443,7 +506,8 @@
                 }
             }
 
-            if (hasConforms && hasRequires)
+            //if (hasConforms && hasRequires)
+            if (hasConforms)
             {
                 var assumptions = new List<Z3BoolExpr>();
                 string conformsPattern = @"conforms\d+$";
@@ -467,14 +531,8 @@
                     assumptions.Add(kvp.Value);
                 }
 
-                int i = 1;
-                foreach (var assumption in assumptions)
-                {
-                    // TODO: map assumptions back to Terms and Rules
-                    string name = "P" + i++;
-                    Z3BoolExpr p = Solver.Context.MkBoolConst(name);
-                    Solver.Z3Solver.AssertAndTrack(assumption, p);
-                }
+                var allConstraints = Solver.Context.MkAnd(assumptions);
+                ConvertToCNF(allConstraints, 0);
 
                 var status = Solver.Z3Solver.Check();
                 if (status == Z3.Status.SATISFIABLE)
@@ -504,6 +562,12 @@
                     var core = Solver.Z3Solver.UnsatCore;
                     foreach (var expr in core)
                     {
+                        Z3BoolExpr mappedExpr;
+                        if (unsatCoreMap.TryGetValue(expr, out mappedExpr))
+                        {
+                            Console.WriteLine("Mapped Expr: " + mappedExpr);
+                        }
+                        
                         if (recursionConstraints.ContainsValue(expr))
                         {
                             PrintRecursionConflict(expr);
