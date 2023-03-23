@@ -1,4 +1,7 @@
-﻿namespace Microsoft.Formula.Common.Terms
+﻿using System.Text;
+using System.Text.RegularExpressions;
+
+namespace Microsoft.Formula.Common.Terms
 {
     using System;
     using System.Collections.Generic;
@@ -374,6 +377,59 @@
                 s.FullName.Replace(".", "@").Replace("%", "~SC2VAR~"),
                 true,
                 out wasAdded);
+        }
+        
+        /// <summary>
+        /// Converts a variable arg to symbolic constant string.
+        /// </summary>
+        public string VarToSymbCnstString(Term v)
+        {
+            if (v != null && v.Symbol.IsVariable)
+            {
+                var matchEval = new MatchEvaluator((m) =>
+                { 
+                    return m.Groups[1].Value;
+                });
+                return Regex.Replace(v.ToString(), "^.+@~SC2VAR~(.+)", matchEval);
+            }
+
+            return "";
+        }
+
+        /// <summary>
+        /// Recursively loops through ConSymb Args and converts to symbolic constant string.
+        /// </summary>
+        public string ConvertConSymbAll(Term v)
+        {
+            var convertedStr = "";
+
+            var count = 1;
+            foreach (var arg in v.Args)
+            {
+
+                if (arg.Symbol is BaseCnstSymb baseSymb &&
+                    baseSymb.CnstKind == CnstKind.Numeric)
+                {
+                    convertedStr += baseSymb.PrintableName;
+                } 
+                else if (arg.Symbol.Kind == SymbolKind.ConSymb)
+                {
+                    convertedStr += ((ConSymb)arg.Symbol).FullName + "(" + ConvertConSymbAll(arg) + ")";
+                }
+                else if (arg.Symbol.IsVariable)
+                {
+                    convertedStr += VarToSymbCnstString(arg);
+                }
+                
+                if (count < v.Args.Length)
+                {
+                    convertedStr += ", ";
+                }
+
+                count++;
+            }
+
+            return convertedStr;
         }
 
         /// <summary>
