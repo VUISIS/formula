@@ -45,7 +45,7 @@ public class CurrentTermsViewModel : ReactiveObject
             {
                 foreach (var constraints in dirConstraints[CurrentTermSelectedItems[0].Id])
                 {
-                    var node = new Node(constraints);
+                    var node = new Node(constraints, constraintsViewModel.DirectConstraintsItems.Count);
                     constraintsViewModel.DirectConstraintsItems.Add(node);
                 }
             }
@@ -54,7 +54,7 @@ public class CurrentTermsViewModel : ReactiveObject
             {
                 foreach (var constraints in posConstraints[CurrentTermSelectedItems[0].Id])
                 {
-                    var node = new Node(constraints);
+                    var node = new Node(constraints, constraintsViewModel.PosConstraintsItems.Count);
                     constraintsViewModel.PosConstraintsItems.Add(node);
                 }
             }
@@ -63,7 +63,7 @@ public class CurrentTermsViewModel : ReactiveObject
             {
                 foreach (var constraints in negConstraints[CurrentTermSelectedItems[0].Id])
                 {
-                    var node = new Node(constraints);
+                    var node = new Node(constraints, constraintsViewModel.NegConstraintsItems.Count);
                     constraintsViewModel.NegConstraintsItems.Add(node);
                 }
             }
@@ -72,7 +72,7 @@ public class CurrentTermsViewModel : ReactiveObject
             {
                 foreach (var constraints in flatConstraints[CurrentTermSelectedItems[0].Id])
                 {
-                    var node = new Node(constraints);
+                    var node = new Node(constraints, constraintsViewModel.FlatConstraintsItems.Count);
                     constraintsViewModel.FlatConstraintsItems.Add(node);
                 }
             }

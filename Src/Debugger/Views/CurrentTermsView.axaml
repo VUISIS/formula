@@ -16,7 +16,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Hidden"
                               HorizontalScrollBarVisibility="Hidden">
                     <TextBlock TextAlignment="Left"
-                               Text="{Binding Header}"/>
+                               Text="{Binding Display}"/>
                 </ScrollViewer>
             </DataTemplate>
         </ListBox.ItemTemplate>

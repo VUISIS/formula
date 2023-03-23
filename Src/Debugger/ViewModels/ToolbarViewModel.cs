@@ -52,7 +52,7 @@ internal class ToolbarViewModel : ReactiveObject
             if(file != null)
             {
                 Utils.LastDirectory = await file.GetParentAsync();
-                var root = new Node(file.Name);
+                var root = new Node(file.Name, fileManagerModel.Items.Count);
             
                 fileManagerModel.ItemsSource.Clear();
                 fileManagerModel.Items.Clear();
@@ -157,7 +157,7 @@ internal class ToolbarViewModel : ReactiveObject
             var folder = await Utils.GetFolder(mainWindow);
             if(folder != null)
             {
-                var root = new Node(folder.Name);
+                var root = new Node(folder.Name, 0);
                 var items = await folder.GetItemsAsync();
                 if (items.Count > 0)
                 {
@@ -165,7 +165,7 @@ internal class ToolbarViewModel : ReactiveObject
                     {
                         if (file.Name.EndsWith(".4ml"))
                         {
-                            var child = new Node(root, file.Name);
+                            var child = new Node(root, file.Name, root.Children.Count);
                             root.AddItem(child);
                         }
                     }

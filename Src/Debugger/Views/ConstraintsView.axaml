@@ -36,7 +36,7 @@
 						<ScrollViewer HorizontalScrollBarVisibility="Auto"
 						              VerticalScrollBarVisibility="Auto">
 							<TextBlock TextAlignment="Left"
-							           Text="{Binding Header}"/>
+							           Text="{Binding Display}"/>
 						</ScrollViewer>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
@@ -58,7 +58,7 @@
 					<ScrollViewer HorizontalScrollBarVisibility="Hidden"
 					              VerticalScrollBarVisibility="Hidden">
 						<TextBlock TextAlignment="Left"
-						           Text="{Binding Header}"/>
+						           Text="{Binding Display}"/>
 					</ScrollViewer>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
@@ -79,7 +79,7 @@
 					<ScrollViewer HorizontalScrollBarVisibility="Hidden"
 					              VerticalScrollBarVisibility="Hidden">
 						<TextBlock TextAlignment="Left"
-						           Text="{Binding Header}"/>
+						           Text="{Binding Display}"/>
 					</ScrollViewer>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
@@ -100,7 +100,7 @@
 					<ScrollViewer HorizontalScrollBarVisibility="Hidden"
 					              VerticalScrollBarVisibility="Hidden">
 						<TextBlock TextAlignment="Left"
-						           Text="{Binding Header}"/>
+						           Text="{Binding Display}"/>
 					</ScrollViewer>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
