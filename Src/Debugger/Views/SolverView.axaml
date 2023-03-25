@@ -142,7 +142,7 @@
 					<ScrollViewer VerticalScrollBarVisibility="Auto"
 					              HorizontalScrollBarVisibility="Auto">
 						<TextBlock TextAlignment="Center"
-						           Text="{Binding Header}"/>
+						           Text="{Binding Display}"/>
 					</ScrollViewer>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
@@ -223,7 +223,7 @@
 					<ScrollViewer VerticalScrollBarVisibility="Auto"
 					              HorizontalScrollBarVisibility="Auto">
 						<TextBlock TextAlignment="Center"
-						           Text="{Binding Header}"/>
+						           Text="{Binding Display}"/>
 					</ScrollViewer>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
