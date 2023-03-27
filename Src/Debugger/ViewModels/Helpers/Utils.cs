@@ -81,17 +81,14 @@ public static class Utils
     public static string OpenFileText(string filepath)
     {
         StringBuilder sb = new StringBuilder();
-        using (FileStream fs = File.Open(filepath, FileMode.Open))
+        using (StreamReader sr = new StreamReader(filepath, Encoding.UTF8))
         {
-            byte[] b = new byte[1024];
-            UTF8Encoding temp = new UTF8Encoding(true);
-
-            while (fs.Read(b,0,b.Length) > 0)
+            string line;
+            while ((line = sr.ReadLine()) != null)
             {
-                sb.Append(temp.GetString(b));
+                sb.AppendLine(line);
             }
         }
-
-        return sb.ToString();
+        return sb.ToString().Trim();
     }
 }

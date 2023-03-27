@@ -338,7 +338,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                 {
                     foreach (var rule in rulePair.Value)
                     {
-                        var rn = new Node(rule);
+                        var rn = new Node(rule, inferenceRulesViewModel.Items.Count);
                         inferenceRulesViewModel.Items.Add(rn);
                     }
                 }
@@ -349,7 +349,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                     
                     foreach (var varFact in varFacts)
                     {
-                        var n = new Node(varFact.Value, varFact.Key);
+                        var n = new Node(varFact.Value, solverViewModel.VariableItems.Count, varFact.Key);
                         solverViewModel.VariableItems.Add(n);
                     }
                     
@@ -362,7 +362,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                 var flag = true;
                 foreach (var term in rules)
                 {
-                    var node = new Node(term.Value, term.Key);
+                    var node = new Node(term.Value, termsViewModel.CurrentTermItems.Count, term.Key);
                     termsViewModel.CurrentTermItems.Add(node);
 
                     if (flag)
@@ -371,7 +371,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                         {
                             foreach (var v in dirConstraints[term.Key])
                             {
-                                var dirn = new Node(v, term.Key);
+                                var dirn = new Node(v, constraintsViewModel.DirectConstraintsItems.Count, term.Key);
                                 constraintsViewModel.DirectConstraintsItems.Add(dirn);
                             }
                         }
@@ -380,7 +380,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                         {
                             foreach (var v in posConstraints[term.Key])
                             {
-                                var posn = new Node(v, term.Key);
+                                var posn = new Node(v, constraintsViewModel.PosConstraintsItems.Count, term.Key);
                                 constraintsViewModel.PosConstraintsItems.Add(posn);
                             }
                         }
@@ -389,7 +389,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                         {
                             foreach (var v in negConstraints[term.Key])
                             {
-                                var negn = new Node(v, term.Key);
+                                var negn = new Node(v, constraintsViewModel.NegConstraintsItems.Count, term.Key);
                                 constraintsViewModel.NegConstraintsItems.Add(negn);
                             }
                         }
@@ -398,7 +398,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                         {
                             foreach (var v in flatConstraints[term.Key])
                             {
-                                var flatn = new Node(v, term.Key);
+                                var flatn = new Node(v, constraintsViewModel.FlatConstraintsItems.Count, term.Key);
                                 constraintsViewModel.FlatConstraintsItems.Add(flatn);
                             }
                         }
@@ -459,7 +459,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                 var flag = true;
                 foreach (var term in rules)
                 {
-                    var node = new Node(term.Value, term.Key);
+                    var node = new Node(term.Value, termsViewModel.CurrentTermItems.Count, term.Key);
                     termsViewModel.CurrentTermItems.Add(node);
 
                     if (flag)
@@ -468,7 +468,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                         {
                             foreach (var v in dirConstraints[term.Key])
                             {
-                                var dirn = new Node(v, term.Key);
+                                var dirn = new Node(v, constraintsViewModel.DirectConstraintsItems.Count, term.Key);
                                 constraintsViewModel.DirectConstraintsItems.Add(dirn);
                             }
                         }
@@ -477,7 +477,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                         {
                             foreach (var v in posConstraints[term.Key])
                             {
-                                var posn = new Node(v, term.Key);
+                                var posn = new Node(v, constraintsViewModel.PosConstraintsItems.Count, term.Key);
                                 constraintsViewModel.PosConstraintsItems.Add(posn);
                             }
                         }
@@ -486,7 +486,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                         {
                             foreach (var v in negConstraints[term.Key])
                             {
-                                var negn = new Node(v, term.Key);
+                                var negn = new Node(v, constraintsViewModel.NegConstraintsItems.Count, term.Key);
                                 constraintsViewModel.NegConstraintsItems.Add(negn);
                             }
                         }
@@ -496,7 +496,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                         {
                             foreach (var v in flatConstraints[term.Key])
                             {
-                                var flatn = new Node(v, term.Key);
+                                var flatn = new Node(v, constraintsViewModel.FlatConstraintsItems.Count, term.Key);
                                 constraintsViewModel.FlatConstraintsItems.Add(flatn);
                             }
                         }

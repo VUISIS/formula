@@ -31,11 +31,11 @@ internal class SolverViewModel : ReactiveObject
         
         foreach(var item in constraintIems)
         {
-            ConstraintItems.Add(new Node(item));
+            ConstraintItems.Add(new Node(item, ConstraintItems.Count));
         }
         
-        SelectedVariable = new Node("");
-        SelectedConstraint = new Node("");
+        SelectedVariable = new Node("", 0);
+        SelectedConstraint = new Node("", 0);
 
         inputExpression = window.Get<SolverView>("SolverCommandView").Get<TextBox>("InputExpression");
         commandConsoleViewModel = window.Get<CommandConsoleView>("CommandInputView").DataContext as CommandConsoleViewModel;
