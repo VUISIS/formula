@@ -69,6 +69,16 @@ namespace Tests
         }
         
         [Fact]
+        public void TestSolvingSymbolicAndAllExample()
+        {
+            _ciFixture.RunCommand("load " + Path.GetFullPath("../../../../../../../Tst/Tests/Symbolic/SymbolicAndAll.4ml"), "SolveTests: Load command for SymbolicAndAll.4ml failed.");
+            Assert.True(_ciFixture.GetLoadResult(), "SolveTests: Loading SymbolicAndAll.4ml failed.");
+
+            _ciFixture.RunCommand("solve pm 1 SymbolicAndAll.conforms", "SolveTests: Solve command for SymbolicAndAll.4ml failed.");
+            Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicAndAll.4ml.");
+        }
+        
+        [Fact]
         public void TestSymbolicOLPExample()
         {
             _ciFixture.RunCommand("load " + Path.GetFullPath("../../../../../../../Tst/Tests/Symbolic/SymbolicOLP.4ml"), "SolveTests: Load command for SymbolicOLP.4ml failed.");

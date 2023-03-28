@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Formula.Solver
+﻿using Microsoft.Z3;
+
+namespace Microsoft.Formula.Solver
 {
     using System;
     using System.Collections.Generic;
@@ -99,6 +101,19 @@
                 );
 
             return hasEncoding;
+        }
+
+        protected Z3Expr CheckAndAll(int index, List<Z3Expr> exprs, Z3Expr tEnc, Z3Expr fEnc)
+        {
+            if (index == exprs.Count - 1)
+            {
+                return Solver.Context.MkITE(Solver.Context.MkEq(exprs[index], tEnc), tEnc, fEnc);
+            }
+            else
+            {
+                return Solver.Context.MkITE(Solver.Context.MkEq(exprs[index], tEnc), CheckAndAll(index + 1, exprs, tEnc, fEnc),
+                    fEnc);
+            }
         }
 
         /// <summary>
@@ -232,23 +247,7 @@
                             case OpKind.SymAndAll:
                                 var tEnc = GetTerm(facts.Index.TrueValue, out tempTerm);
                                 var fEnc = GetTerm(facts.Index.FalseValue, out tempTerm);
-                                Z3BoolExpr[] boolExprs = new Z3BoolExpr[ch.Count()];
-                                for (int i = 0; i < ch.Count(); i++)
-                                {
-                                    boolExprs[i] = Solver.Context.MkEq(tEnc, ch.ElementAt(i));
-                                }
-                                Z3Expr currExpr = null;
-                                for (int i = 0; i < ch.Count(); i++)
-                                {
-                                    if (currExpr == null)
-                                    {
-                                        currExpr = Solver.Context.MkITE(boolExprs[i], tEnc, fEnc);
-                                    }
-                                    else
-                                    {
-                                        currExpr = Solver.Context.MkITE(boolExprs[i], currExpr, fEnc);
-                                    }
-                                }
+                                Z3Expr currExpr = CheckAndAll(0, ch.ToList(), tEnc, fEnc);
                                 encodings.Add(x, currExpr);
                                 return currExpr;
                             case OpKind.SymMax:

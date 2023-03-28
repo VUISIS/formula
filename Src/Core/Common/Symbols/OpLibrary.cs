@@ -1889,7 +1889,6 @@
                     if (Term.IsSymbolicTerm(t))
                     {
                         hasSymbolics = true;
-                        break;
                     }
                     if (t == facts.Index.FalseValue)
                     {
