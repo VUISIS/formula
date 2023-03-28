@@ -1304,12 +1304,10 @@ namespace Microsoft.Formula.CommandLine
             }
         }
 
-        private String DefaultSolve()
+        private string DefaultSolve()
         {
 
-            sink.WriteMessageLine("Which partial model do you want to solve?", SeverityKind.Info);
             int index = 0;
-
             Dictionary<int, Model> models = new Dictionary<int, Model>();
 
             foreach (KeyValuePair<ProgramName, Program> kvp in env.Programs)
@@ -1321,21 +1319,42 @@ namespace Microsoft.Formula.CommandLine
                     if (module is Model)
                     {
                         var model = (Model)module;
-                        models.Add(index++, model);
-                        sink.WriteMessageLine(index + ": " + model.Name + " model of " + model.Domain.Name + " domain", SeverityKind.Info);
+
+                        if (model.IsPartial)
+                        {
+                            models.Add(index++, model);
+                        }
                     }
                 }
             }
 
-            DigitChoiceKind choice;
-            while (!chooser.GetChoice(out choice) ||
-                ((int)choice) <= 0 ||
-                ((int)choice) > models.Count)
+            Model selected;
+            if (models.Count() == 1)
             {
-                sink.WriteMessageLine("Invalid index, please provide a valid index", SeverityKind.Warning);
-            }
+                selected = models[0];
+            } else
+            {
+                sink.WriteMessageLine("Which partial model do you want to solve?", SeverityKind.Info);
 
-            Model selected = models[(int)choice - 1];
+                foreach (KeyValuePair<int, Model> kvp in models)
+                {
+                    var model = kvp.Value;
+                    var indx = kvp.Key;
+
+                    sink.WriteMessageLine(indx + ": " + model.Name + " model of " + model.Domain.Name + " domain", SeverityKind.Info);
+                }
+
+                DigitChoiceKind choice;
+
+                while (!chooser.GetChoice(out choice) ||
+                ((int)choice) < 0 ||
+                ((int)choice) >= models.Count)
+                {
+                    sink.WriteMessageLine("Invalid index, please provide a valid index", SeverityKind.Warning);
+                }
+
+                selected = models[(int)choice];
+            }
 
             return selected.Name + " 1 " + selected.Domain.Name + ".conforms";
         }
