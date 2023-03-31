@@ -128,6 +128,9 @@
         protected int coreCounter = 0;
         protected int exprCounter = 0;
 
+        protected bool hasCore = false;
+        protected Z3BoolExpr[] coreExprs;
+
         protected Dictionary<Z3Expr, Z3BoolExpr> cnfMap =
             new Dictionary<Z3Expr, Z3BoolExpr>();
 
@@ -530,16 +533,21 @@
                     List<Term> conflicts;
                     if (lookupMap.TryGetValue(subExpr, out conflicts))
                     {
-                        Console.Write("Conflicts: ");
+                        StringBuilder currConflict = new StringBuilder("Conflicts: ");
+                        int conflictCount = 0;
                         foreach (var term in conflicts)
                         {
                             if (term.Symbol is UserSymbol &&
                                (!((UserSymbol)term.Symbol).IsAutoGen))
                             {
-                                Console.Write(term.ToString() + " ");
+                                currConflict.Append(term.ToString() + " ");
+                                ++conflictCount;
                             }
                         }
-                        Console.WriteLine();
+                        if (conflictCount > 0)
+                        {
+                            Console.WriteLine(currConflict.ToString());
+                        }
                     }
                 }
             }
@@ -627,8 +635,8 @@
                 }
                 else if (status == Z3.Status.UNSATISFIABLE)
                 {
-                    Console.WriteLine("Model not solvable. Unsat core terms below.");
-                    MapCoreToTerms(Solver.Z3Solver.UnsatCore);
+                    hasCore = true;
+                    coreExprs = Solver.Z3Solver.UnsatCore;
                 }
             }
 
@@ -637,6 +645,13 @@
 
         public void GetSolution(int num)
         {
+            if (hasCore)
+            {
+                Console.WriteLine("Model not solvable. Unsat core terms below.");
+                MapCoreToTerms(coreExprs);
+                return;
+            }
+
             if (num < solutionStrings.Count)
             {
                 System.Console.WriteLine("Solution number " + num);
