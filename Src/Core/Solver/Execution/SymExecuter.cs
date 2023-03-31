@@ -79,6 +79,8 @@
         private Dictionary<int, int> ruleCycles =
             new Dictionary<int, int>();
 
+        private bool hasCycles = false;
+
         private List<Dictionary<Z3Expr, Z3Expr>> prevSolutions =
             new List<Dictionary<Z3Expr, Z3Expr>>();
 
@@ -122,6 +124,12 @@
 
         private Map<Term, List<Term>> symCountMap =
             new Map<Term, List<Term>>(Term.Compare);
+
+        protected int coreCounter = 0;
+        protected int exprCounter = 0;
+
+        protected Dictionary<Z3Expr, Z3BoolExpr> cnfMap =
+            new Dictionary<Z3Expr, Z3BoolExpr>();
 
         Dictionary<Z3BoolExpr, Z3BoolExpr> unsatCoreMap =
             new Dictionary<Z3BoolExpr, Z3BoolExpr>();
@@ -425,7 +433,17 @@
 
         protected Z3BoolExpr ConvertToCNF(Z3Expr expr, int level)
         {
-            Z3BoolExpr top = Solver.Context.MkBoolConst("P" + level);
+            Z3BoolExpr top;
+            if (cnfMap.TryGetValue(expr, out top))
+            {
+                return top;
+            }
+            else
+            {
+                top = Solver.Context.MkBoolConst("P" + level + "_" + (exprCounter++));
+                cnfMap.Add(expr, top);
+            }
+
             Z3BoolExpr negTop = Solver.Context.MkNot(top);
             List<Z3BoolExpr> topExprs = new List<Z3BoolExpr>();
             Z3BoolExpr subExpr;
@@ -433,7 +451,7 @@
             if (expr.IsAnd)
             {
                 List<Z3BoolExpr> subExprs = new List<Z3BoolExpr>();
-                foreach (var arg in expr.Args[0].Args)
+                foreach (var arg in expr.Args)
                 {
                     subExpr = ConvertToCNF(arg, level + 1);
                     topExprs.Add(Solver.Context.MkOr(negTop, subExpr));
@@ -467,22 +485,64 @@
             }
             else
             {
-                return (Z3BoolExpr)expr;
+                topExprs.Add(Solver.Context.MkOr(negTop, (Z3BoolExpr)expr));
+                topExprs.Add(Solver.Context.MkOr(top, Solver.Context.MkNot((Z3BoolExpr)expr)));
+            }
+
+            foreach (var curr in topExprs)
+            {
+                Z3BoolExpr p = Solver.Context.MkBoolConst("UC_" + coreCounter++);
+                unsatCoreMap.Add(p, top);
+                Solver.Z3Solver.AssertAndTrack(curr, p);
             }
 
             if (level == 0)
             {
-                int counter = 0;
-                foreach (var curr in topExprs)
-                {
-                    Z3BoolExpr p = Solver.Context.MkBoolConst("UC_" + counter++);
-                    unsatCoreMap.Add(p, curr);
-                    Solver.Z3Solver.AssertAndTrack(curr, p);
-                }
-                Solver.Z3Solver.AssertAndTrack(top, Solver.Context.MkBoolConst("UC_" + counter++));
+                Solver.Z3Solver.AssertAndTrack(top, Solver.Context.MkBoolConst("UC_" + coreCounter++));
             }
 
             return top;
+        }
+
+        protected void MapCoreToTerms(IEnumerable<Z3BoolExpr> coreExprs)
+        {
+            Dictionary<Z3BoolExpr, List<Term>> lookupMap = new Dictionary<Z3BoolExpr, List<Term>>();
+            foreach (var curr in lfp)
+            {
+                var mapped = ConvertToCNF(curr.Value.GetSideConstraints(this), -1);
+                List<Term> terms;
+                if (!lookupMap.TryGetValue(mapped, out terms))
+                {
+                    terms = new List<Term>();
+                    lookupMap.Add(mapped, terms);
+                }
+                terms.Add(curr.Key);
+            }
+
+            List<Z3BoolExpr> processed = new List<Z3BoolExpr>();
+            foreach (var item in coreExprs)
+            {
+                Z3BoolExpr subExpr;
+                if (unsatCoreMap.TryGetValue(item, out subExpr) &&
+                    !processed.Contains(subExpr))
+                {
+                    processed.Add(subExpr);
+                    List<Term> conflicts;
+                    if (lookupMap.TryGetValue(subExpr, out conflicts))
+                    {
+                        Console.Write("Conflicts: ");
+                        foreach (var term in conflicts)
+                        {
+                            if (term.Symbol is UserSymbol &&
+                               (!((UserSymbol)term.Symbol).IsAutoGen))
+                            {
+                                Console.Write(term.ToString() + " ");
+                            }
+                        }
+                        Console.WriteLine();
+                    }
+                }
+            }
         }
 
         public bool Solve()
@@ -506,8 +566,7 @@
                 }
             }
 
-            //if (hasConforms && hasRequires)
-            if (hasConforms)
+            if (hasConforms && hasRequires)
             {
                 var assumptions = new List<Z3BoolExpr>();
                 string conformsPattern = @"conforms\d+$";
@@ -531,8 +590,18 @@
                     assumptions.Add(kvp.Value);
                 }
 
-                var allConstraints = Solver.Context.MkAnd(assumptions);
-                ConvertToCNF(allConstraints, 0);
+                if (assumptions.IsEmpty())
+                {
+                    return true;
+                }
+                else if (assumptions.Count() == 1)
+                {
+                    ConvertToCNF(assumptions[0], 0);
+                }
+                else
+                {
+                    ConvertToCNF(Solver.Context.MkAnd(assumptions), 0);
+                }
 
                 var status = Solver.Z3Solver.Check();
                 if (status == Z3.Status.SATISFIABLE)
@@ -558,40 +627,8 @@
                 }
                 else if (status == Z3.Status.UNSATISFIABLE)
                 {
-                    Console.WriteLine("Model not solvable.\nUnsat core and related terms below.");
-                    var core = Solver.Z3Solver.UnsatCore;
-                    foreach (var expr in core)
-                    {
-                        Z3BoolExpr mappedExpr;
-                        if (unsatCoreMap.TryGetValue(expr, out mappedExpr))
-                        {
-                            Console.WriteLine("Mapped Expr: " + mappedExpr);
-                        }
-                        
-                        if (recursionConstraints.ContainsValue(expr))
-                        {
-                            PrintRecursionConflict(expr);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Expr: " + expr);
-                            Console.WriteLine("Terms: ");
-                            foreach (var item in lfp)
-                            {
-                                Term t = item.Key;
-                                SymElement e = item.Value;
-
-                                if (e.ContainsConstraint(expr))
-                                {
-                                    if (!(t.Symbol is UserCnstSymb &&
-                                          ((UserCnstSymb)t.Symbol).IsAutoGen))
-                                    {
-                                        Console.WriteLine("  " + item.Key.ToString());
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    Console.WriteLine("Model not solvable. Unsat core terms below.");
+                    MapCoreToTerms(Solver.Z3Solver.UnsatCore);
                 }
             }
 
@@ -800,6 +837,11 @@
 
         private bool ShouldCheckConstraints(Term t)
         {
+            if (!hasCycles)
+            {
+                return false;
+            }
+
             bool shouldCheckConstraints = true;
             string pattern = @"conforms\d+$";
 
@@ -1062,6 +1104,7 @@
         {
             var optRules = Rules.Optimize();
             ruleCycles = Rules.GetCycles(optRules);
+            hasCycles = !ruleCycles.IsEmpty();
 
             foreach (var r in optRules)
             {

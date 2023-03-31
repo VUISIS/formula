@@ -3,16 +3,42 @@ domain Simple
   A ::= new (id: Integer).
   B ::= (id: Integer).
   C ::= (id: Integer).
-  
+
   B(x) :- A(x), x > 0.
   C(x) :- A(x), x < 0.
-  goodModel :- B(x).
-  badModel :- C(x).  
   
+  goodModel :- B(x).
+  badModel :- C(x).
+
   conforms goodModel, badModel.
 }
 
+domain Simple2
+{
+  A ::= new (id: Integer).
+  B ::= (id: Integer).
+  C ::= (id: Integer).
+  D ::= (id: Integer).
+  E ::= (id: Integer).
+
+  B(x) :- A(x), x > 0.
+  C(x) :- A(x), x < 0.
+  D(x) :- A(x).
+
+  goodModel :- B(x).
+  badModel :- C(x).
+  weirdModel :- goodModel, badModel.
+  okModel :- weirdModel, D(x).
+
+  conforms okModel.
+}
+
 partial model pm of Simple
+{
+  A(x).
+}
+
+partial model pm2 of Simple2
 {
   A(x).
 }
