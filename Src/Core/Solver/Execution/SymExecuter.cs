@@ -80,6 +80,8 @@ namespace Microsoft.Formula.Solver
         private Dictionary<int, int> ruleCycles =
             new Dictionary<int, int>();
 
+        private bool hasCycles = false;
+
         private List<Dictionary<Z3Expr, Z3Expr>> prevSolutions =
             new List<Dictionary<Z3Expr, Z3Expr>>();
 
@@ -103,6 +105,18 @@ namespace Microsoft.Formula.Solver
 
         private Map<Term, List<Term>> symCountMap =
             new Map<Term, List<Term>>(Term.Compare);
+
+        protected int coreCounter = 0;
+        protected int exprCounter = 0;
+
+        protected bool hasCore = false;
+        protected Z3BoolExpr[] coreExprs;
+
+        protected Dictionary<Z3Expr, Z3BoolExpr> cnfMap =
+            new Dictionary<Z3Expr, Z3BoolExpr>();
+
+        Dictionary<Z3BoolExpr, Z3BoolExpr> unsatCoreMap =
+            new Dictionary<Z3BoolExpr, Z3BoolExpr>();
 
         public int GetSymbolicCountIndex(Term t)
         {
@@ -492,7 +506,9 @@ namespace Microsoft.Formula.Solver
             Rules = solver.PartialModel.Rules;
             Index = solver.PartialModel.Index;
             Encoder = new TermEncIndex(solver);
-            
+
+            KeepDerivations = true;
+
             solver.PartialModel.ConvertSymbCnstsToVars(out varFacts, out aliasMap);
 
             Map<ConSymb, List<Term>> cardTerms = new Map<ConSymb, List<Term>>(Symbol.Compare);
@@ -524,7 +540,7 @@ namespace Microsoft.Formula.Solver
             }
 
             InitializeExecuter();
-            
+
             SetPublisherCoreRules();
             SetVarFacts();
 
@@ -555,6 +571,136 @@ namespace Microsoft.Formula.Solver
                         Z3BoolExpr boolExpr = Solver.Context.MkNot(Solver.Context.MkEq(firstEnc.Encoding, secondEnc.Encoding));
                     }
                 }
+            }
+        }
+        protected Z3BoolExpr ConvertToCNF(Z3Expr expr, int level)
+        {
+            Z3BoolExpr top;
+            if (cnfMap.TryGetValue(expr, out top))
+            {
+                return top;
+            }
+            else
+            {
+                top = Solver.Context.MkBoolConst("P" + level + "_" + (exprCounter++));
+                cnfMap.Add(expr, top);
+            }
+
+            Z3BoolExpr negTop = Solver.Context.MkNot(top);
+            List<Z3BoolExpr> topExprs = new List<Z3BoolExpr>();
+            Z3BoolExpr subExpr;
+
+            if (expr.IsAnd)
+            {
+                List<Z3BoolExpr> subExprs = new List<Z3BoolExpr>();
+                foreach (var arg in expr.Args)
+                {
+                    subExpr = ConvertToCNF(arg, level + 1);
+                    topExprs.Add(Solver.Context.MkOr(negTop, subExpr));
+                    subExprs.Add(Solver.Context.MkNot(subExpr));
+                }
+
+                subExprs.Add(top);
+                topExprs.Add(Solver.Context.MkOr(subExprs));
+            }
+            else if (expr.IsOr)
+            {
+                List<Z3BoolExpr> posExprs = new List<Z3BoolExpr>();
+                List<Z3BoolExpr> negExprs = new List<Z3BoolExpr>();
+                foreach (var arg in expr.Args[0].Args)
+                {
+                    subExpr = ConvertToCNF(arg, level + 1);
+                    posExprs.Add(subExpr);
+                    negExprs.Add(Solver.Context.MkNot(subExpr));
+                }
+
+                posExprs.Add(Solver.Context.MkNot(top));
+                negExprs.Add(top);
+                topExprs.Add(Solver.Context.MkOr(posExprs));
+                topExprs.Add(Solver.Context.MkOr(negExprs));
+            }
+            else if (expr.IsNot)
+            {
+                subExpr = ConvertToCNF(expr.Args[0], level + 1);
+                topExprs.Add(Solver.Context.MkOr(top, subExpr));
+                topExprs.Add(Solver.Context.MkOr(Solver.Context.MkNot(top), Solver.Context.MkNot(subExpr)));
+            }
+            else
+            {
+                topExprs.Add(Solver.Context.MkOr(negTop, (Z3BoolExpr)expr));
+                topExprs.Add(Solver.Context.MkOr(top, Solver.Context.MkNot((Z3BoolExpr)expr)));
+            }
+
+            foreach (var curr in topExprs)
+            {
+                Z3BoolExpr p = Solver.Context.MkBoolConst("UC_" + coreCounter++);
+                unsatCoreMap.Add(p, top);
+                Solver.Z3Solver.AssertAndTrack(curr, p);
+            }
+
+            if (level == 0)
+            {
+                Solver.Z3Solver.AssertAndTrack(top, Solver.Context.MkBoolConst("UC_" + coreCounter++));
+            }
+
+            return top;
+        }
+
+        protected void MapCoreToTerms(IEnumerable<Z3BoolExpr> coreExprs)
+        {
+            StringBuilder sb = new StringBuilder();
+            Dictionary<Z3BoolExpr, List<Term>> lookupMap = new Dictionary<Z3BoolExpr, List<Term>>();
+            foreach (var curr in lfp)
+            {
+                var mapped = ConvertToCNF(curr.Value.GetSideConstraints(this), -1);
+                List<Term> terms;
+                if (!lookupMap.TryGetValue(mapped, out terms))
+                {
+                    terms = new List<Term>();
+                    lookupMap.Add(mapped, terms);
+                }
+                terms.Add(curr.Key);
+            }
+
+            List<Z3BoolExpr> processed = new List<Z3BoolExpr>();
+            foreach (var item in coreExprs)
+            {
+                Z3BoolExpr subExpr;
+                if (unsatCoreMap.TryGetValue(item, out subExpr) &&
+                    !processed.Contains(subExpr))
+                {
+                    processed.Add(subExpr);
+                    List<Term> conflicts;
+                    if (lookupMap.TryGetValue(subExpr, out conflicts))
+                    {
+                        StringBuilder currConflict = new StringBuilder("Conflicts: ");
+                        int conflictCount = 0;
+                        foreach (var term in conflicts)
+                        {
+                            if (term.Symbol is UserSymbol &&
+                               (!((UserSymbol)term.Symbol).IsAutoGen))
+                            {
+                                currConflict.Append(term.ToString() + " ");
+                                ++conflictCount;
+                            }
+                        }
+                        if (conflictCount > 0)
+                        {
+                            currConflict.Append("\n");
+                            sb.Append(currConflict);
+                        }
+                    }
+                }
+            }
+
+            if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
+            {
+                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                    .SetUnsatOutput(sb.ToString());
+            }
+            else
+            {
+                Console.WriteLine(sb.ToString());
             }
         }
 
@@ -601,13 +747,18 @@ namespace Microsoft.Formula.Solver
                     assumptions.Add(kvp.Value);
                 }
 
-                int i = 1;
-                foreach (var assumption in assumptions)
+                assumptions = assumptions.Distinct().ToList();
+                if (assumptions.IsEmpty())
                 {
-                    // TODO: map assumptions back to Terms and Rules
-                    string name = "P" + i++;
-                    Z3BoolExpr p = Solver.Context.MkBoolConst(name);
-                    Solver.Z3Solver.AssertAndTrack(assumption, p);
+                    return true;
+                }
+                else if (assumptions.Count() == 1)
+                {
+                    ConvertToCNF(assumptions[0], 0);
+                }
+                else
+                {
+                    ConvertToCNF(Solver.Context.MkAnd(assumptions), 0);
                 }
 
                 var status = Solver.Z3Solver.Check();
@@ -634,42 +785,14 @@ namespace Microsoft.Formula.Solver
                 }
                 else if (status == Z3.Status.UNSATISFIABLE)
                 {
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendLine("Model not solvable.\nUnsat core and related terms below.");
-                    var core = Solver.Z3Solver.UnsatCore;
-                    foreach (var expr in core)
-                    {
-                        if (recursionConstraints.ContainsValue(expr))
-                        {
-                            sb.AppendLine("Conflict detected in recursion constraint: " + expr + "\n\n");
-                        }
-                        else
-                        {
-                            sb.AppendLine("Expr: " + expr);
-                            sb.AppendLine("Terms: ");
-                            foreach (var item in lfp)
-                            {
-                                Term t = item.Key;
-                                SymElement e = item.Value;
+                    hasCore = true;
+                    coreExprs = Solver.Z3Solver.UnsatCore;
 
-                                if (e.ContainsConstraint(expr))
-                                {
-                                    if (!(t.Symbol is UserCnstSymb &&
-                                          ((UserCnstSymb)t.Symbol).IsAutoGen))
-                                    {
-                                        sb.AppendLine("  " + item.Key);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
                     if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
                     {
                         EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
-                            .SetUnsatOutput(sb.ToString());
+                            .SetUnsatOutput("Model not solvable.");
                     }
-                    Console.WriteLine(sb.ToString());
                 }
             }
             return solvable;
@@ -677,6 +800,13 @@ namespace Microsoft.Formula.Solver
 
         public void GetSolution(int num)
         {
+            if (hasCore)
+            {
+                Console.WriteLine("Model not solvable. Unsat core terms below.");
+                MapCoreToTerms(coreExprs);
+                return;
+            }
+
             StringBuilder sb = new StringBuilder();
             if (num < solutionStrings.Count)
             {
@@ -898,6 +1028,11 @@ namespace Microsoft.Formula.Solver
 
         private bool ShouldCheckConstraints(Term t)
         {
+            if (!hasCycles)
+            {
+                return false;
+            }
+
             bool shouldCheckConstraints = true;
             string pattern = @"conforms\d+$";
 
@@ -1158,6 +1293,7 @@ namespace Microsoft.Formula.Solver
         {
             var optRules = Rules.Optimize();
             ruleCycles = Rules.GetCycles(optRules);
+            hasCycles = !ruleCycles.IsEmpty();
 
             foreach (var r in optRules)
             {
