@@ -598,6 +598,7 @@
                     assumptions.Add(kvp.Value);
                 }
 
+                assumptions = assumptions.Distinct().ToList();
                 if (assumptions.IsEmpty())
                 {
                     return true;
