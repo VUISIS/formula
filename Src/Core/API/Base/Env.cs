@@ -40,6 +40,11 @@
             get { return programs; }
         }
 
+        public IEnumerable<Program> GetProgramsEnumerable()
+        {
+            return Programs.Values.AsEnumerable();
+        }
+
         public EnvParams Parameters
         {
             get;
