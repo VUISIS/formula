@@ -35,9 +35,14 @@
            
         private CancellationTokenSource canceler = null;
 
-        public Dictionary<ProgramName, Program> Programs
+        internal Dictionary<ProgramName, Program> Programs
         {
             get { return programs; }
+        }
+
+        public IEnumerable<Program> GetProgramsEnumerable()
+        {
+            return Programs.Values.AsEnumerable();
         }
 
         public EnvParams Parameters

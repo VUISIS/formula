@@ -1310,10 +1310,9 @@ namespace Microsoft.Formula.CommandLine
             int index = 0;
             Dictionary<int, Model> models = new Dictionary<int, Model>();
 
-            foreach (KeyValuePair<ProgramName, Program> kvp in env.Programs)
-            {
-                var program = kvp.Value;
 
+            foreach (Program program in env.GetProgramsEnumerable())
+            {
                 foreach (var module in program.Modules)
                 {
                     if (module is Model)
