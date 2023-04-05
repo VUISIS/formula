@@ -6,8 +6,10 @@ using ReactiveUI;
 
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Drawing;
 using Avalonia.Controls.Shapes;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Debugger.ViewModels.Helpers;
 using Debugger.Views;
 using Debugger.Windows;
@@ -91,7 +93,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                 {
                     if (mainWindow != null)
                     {
-                        mainWindow.Get<Ellipse>("Iterator").IsVisible = true;
+                        mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Green);
                     }
                     
                     var cmdTask = new Task(() => LoadCommand(commandInput.Text));
@@ -111,7 +113,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                     
                     if (mainWindow != null)
                     {
-                        mainWindow.Get<Ellipse>("Iterator").IsVisible = true;
+                        mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Green);
                     }
             
                     if (commandOutput != null)
@@ -148,7 +150,7 @@ internal class CommandConsoleViewModel : ReactiveObject
                     
                     if (mainWindow != null)
                     {
-                        mainWindow.Get<Ellipse>("Iterator").IsVisible = true;
+                        mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Green);
                     }
             
                     if (commandOutput != null)
@@ -248,7 +250,7 @@ internal class CommandConsoleViewModel : ReactiveObject
             
             if (mainWindow != null)
             {
-                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
+                mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Gray);
             }
         }, DispatcherPriority.Background);
     }
@@ -304,7 +306,7 @@ internal class CommandConsoleViewModel : ReactiveObject
 
             if (mainWindow != null)
             {
-                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
+                mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Gray);
             }
         }, DispatcherPriority.Background);
     }
@@ -429,7 +431,7 @@ internal class CommandConsoleViewModel : ReactiveObject
             
             if (mainWindow != null)
             {
-                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
+                mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Gray);
             }
         }, DispatcherPriority.Background);
     }
@@ -522,7 +524,7 @@ internal class CommandConsoleViewModel : ReactiveObject
             
             if (mainWindow != null)
             {
-                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
+                mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Gray);
             }
         }, DispatcherPriority.Background);
     }
@@ -574,7 +576,7 @@ internal class CommandConsoleViewModel : ReactiveObject
 
             if (mainWindow != null)
             {
-                mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
+                mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Gray);
             }
         }, DispatcherPriority.Background);
 

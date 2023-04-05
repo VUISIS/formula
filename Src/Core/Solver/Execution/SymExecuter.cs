@@ -1,14 +1,10 @@
-﻿using System.IO;
-using System.Text;
-using Microsoft.Formula.API.Plugins;
-
-namespace Microsoft.Formula.Solver
+﻿namespace Microsoft.Formula.Solver
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
-    using System.Threading;
+    using System.Text;
 
     using API;
     using API.Nodes;
@@ -16,16 +12,20 @@ namespace Microsoft.Formula.Solver
     using Common.Extras;
     using Common.Rules;
     using Common.Terms;
+    using API.Base;
 
     using Z3Expr = Z3.Expr;
     using Z3BoolExpr = Z3.BoolExpr;
     using System.Numerics;
     using System.Text.RegularExpressions;
-    
+
     internal class SymExecuter
     {
         private static char PatternVarBoundPrefix = '^';
         private static char PatternVarUnboundPrefix = '*';
+
+        private static string termSymbGen = 
+            "(\\(|\\s)?[\\w\\d]+@~SC2VAR~([\\w\\d]+)(\\s|\\))?";
 
         /// <summary>
         /// Facts where symbolic constants have been replaced by variables
@@ -81,7 +81,7 @@ namespace Microsoft.Formula.Solver
             new Dictionary<int, int>();
 
         private bool hasCycles = false;
-
+        
         private List<Dictionary<Z3Expr, Z3Expr>> prevSolutions =
             new List<Dictionary<Z3Expr, Z3Expr>>();
 
@@ -159,7 +159,24 @@ namespace Microsoft.Formula.Solver
             }
         }
 
-        private void SetVarFacts()
+        private string RemoveSymGenVar(string b)
+        {
+            var matchEval = new MatchEvaluator((m) =>
+            { 
+                return m.Groups[1].Value + m.Groups[2].Value + m.Groups[3].Value;
+            });
+            var newStr = Regex.Replace(b, termSymbGen, matchEval);
+            if (newStr.Length < 1)
+            {
+                return b;
+            }
+            else
+            {
+                return newStr;
+            }
+        }
+
+        public void SetVarFacts()
         {
             if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
             {
@@ -175,79 +192,64 @@ namespace Microsoft.Formula.Solver
         {
             if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
             {
-                Console.WriteLine("Current Term Kind");
-                Console.WriteLine(t.Symbol.Kind.ToString());
-                Console.WriteLine("");
                 if (t.Symbol.Kind == SymbolKind.ConSymb)
                 {
                     if (!((ConSymb)t.Symbol).IsAutoGen)
                     {
-                        var convStr = ((UserSymbol)t.Symbol).FullName + "(" + Index.ConvertConSymbAll(t) + ")";
+                        var temp = PrefixToInfix(t);
+                        var n = RemoveSymGenVar(temp);
                         EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
-                            .AddCurrentTerm(t.Symbol.Id, convStr);
+                            .AddCurrentTerm(t.Symbol.Id, n);
                     }
                 }
+                else 
+                {
+                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                        .AddCurrentTerm(t.Symbol.Id, t.ToString());
+                }
                 
-                SymElement next;
                 foreach (var data in s.GetConstraintData())
                 {
                     foreach (var dirConst in data.DirConstraints)
                     {
+                        var cnvStr = Z3Printer.ConvertZ3ExprPrefixToInfix(dirConst);
                         EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
-                                 .AddDirConstraint(t.Symbol.Id, dirConst.ToString());
+                                 .AddDirConstraint(t.Symbol.Id, RemoveSymGenVar(cnvStr));
                     }
 
                     foreach (var posConst in data.PosConstraints)
                     {
-                        if(GetSymbolicTerm(posConst, out next))
+                        if (posConst.Symbol is UserSymbol userSym &&
+                            !userSym.IsAutoGen)
                         {
-                            Console.WriteLine("Pos Constraint Kind");
-                            Console.WriteLine(next.Term.Symbol.Kind.ToString());
-                            Console.WriteLine("");
-                            if (next.Term.Symbol.Kind == SymbolKind.UserCnstSymb)
+                            var temp = PrefixToInfix(posConst);
+                            if (temp.Length > 0)
                             {
-                                var userCnstSymb = next.Term.Symbol as UserCnstSymb;
-                                var newTerm = Index.SymbCnstToVar(userCnstSymb, out var wasAdded);
-                                if (wasAdded)
-                                {
-                                    var cancelToken = new CancellationToken();
-                                    var tw = new StringWriter();
-                                    var envParams = new EnvParams();
-                                    newTerm.PrintTerm(tw, cancelToken, envParams);
-                                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
-                                        .AddPosConstraint(newTerm.Symbol.Id, tw.ToString());
-                                }
+                                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                                    .AddPosConstraint(t.Symbol.Id, RemoveSymGenVar(temp));
                             }
                         }
                     }
             
                     foreach (var negConst in data.NegConstraints)
                     {
-                        if (GetSymbolicTerm(negConst, out next))
+                        if (negConst.Symbol is UserSymbol userSym &&
+                            !userSym.IsAutoGen)
                         {
-                            Console.WriteLine("Neg Constraint Kind");
-                            Console.WriteLine(next.Term.Symbol.Kind.ToString());
-                            Console.WriteLine("");
-                            if (next.Term.Symbol.Kind == SymbolKind.UserCnstSymb)
+                            var temp = PrefixToInfix(negConst);
+                            if (temp.Length > 0)
                             {
-                                var userCnstSymb = next.Term.Symbol as UserCnstSymb;
-                                var newTerm = Index.SymbCnstToVar(userCnstSymb, out var wasAdded);
-                                if (wasAdded)
-                                {
-                                    var cancelToken = new CancellationToken();
-                                    var tw = new StringWriter();
-                                    var envParams = new EnvParams();
-                                    newTerm.PrintTerm(tw, cancelToken, envParams);
-                                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
-                                        .AddNegConstraint(newTerm.Symbol.Id, tw.ToString());
-                                }
+                                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters,
+                                        EnvParamKind.Debug_SolverPublisher)
+                                    .AddNegConstraint(t.Symbol.Id, RemoveSymGenVar(temp));
                             }
                         }
                     }
                     
                     var sideConstraints = s.GetSideConstraints(this);
+                    var cnvS = Z3Printer.ConvertZ3ExprPrefixToInfix(sideConstraints);
                     EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
-                             .AddFlatConstraint(t.Symbol.Id, sideConstraints.ToString());
+                             .AddFlatConstraint(t.Symbol.Id, RemoveSymGenVar(cnvS));
                 }
             }
         }
@@ -260,17 +262,19 @@ namespace Microsoft.Formula.Solver
             var rules = new Dictionary<int, List<string>>();
             foreach (var coreRule in Rules.Rules)
             {
-                var tw = new StringWriter();
-                var ct = new CancellationToken();
-                var ep = new EnvParams();
                 var t = coreRule.Head;
+                if (!rules.ContainsKey(t.Symbol.Id))
+                {
+                    rules.Add(t.Symbol.Id, new List<string>());
+                }
+                
                 switch (t.Symbol.Kind)
                 {
                     case SymbolKind.ConSymb:
                         if (t.Symbol is ConSymb conSymb &&
                             !conSymb.IsAutoGen)
                         {
-                            t.PrintTerm(tw,ct,ep);
+                            rules[t.Symbol.Id].Add(t.ToString());
                         }
                         break;
                     case SymbolKind.UserCnstSymb:
@@ -281,32 +285,20 @@ namespace Microsoft.Formula.Solver
                                 if (userCnstSymb.IsDerivedConstant &&
                                     userCnstSymb.IsNonVarConstant)
                                 {
-                                    tw.WriteLine(userCnstSymb.Name);
+                                    rules[t.Symbol.Id].Add(userCnstSymb.Name);
                                     break;
                                 }
                                 
                                 var newTerm = Index.SymbCnstToVar(userCnstSymb, out var wasAdded);
                                 if (wasAdded)
                                 {
-                                    newTerm.PrintTerm(tw,ct,ep);
+                                    rules[t.Symbol.Id].Add(newTerm.ToString());
                                 }
                             }
                         }
                         break;
                     default:
                         throw new NotImplementedException();
-                }
-
-                if (tw.ToString().Length > 0)
-                {
-                    if (rules.ContainsKey(t.Symbol.Id))
-                    {
-                        rules[t.Symbol.Id].Add(tw.ToString());
-                    }
-                    else
-                    {
-                        rules.Add(t.Symbol.Id, new List<string>{tw.ToString()});
-                    }
                 }
             }
 
@@ -510,11 +502,13 @@ namespace Microsoft.Formula.Solver
             KeepDerivations = true;
 
             solver.PartialModel.ConvertSymbCnstsToVars(out varFacts, out aliasMap);
+            
+            Map<ConSymb, List<Term>> cardTerms = 
+                new Map<ConSymb, List<Term>>(Symbol.Compare);
 
-            Map<ConSymb, List<Term>> cardTerms = new Map<ConSymb, List<Term>>(Symbol.Compare);
             foreach (var fact in varFacts)
             {
-                if (solver.PartialModel.CheckIfCardTerm(fact))
+                if (Solver.PartialModel.CheckIfCardTerm(fact))
                 {
                     List<Term> termList;
                     if (!cardTerms.TryFindValue((ConSymb)fact.Symbol, out termList))
@@ -525,23 +519,23 @@ namespace Microsoft.Formula.Solver
                     termList.Add(fact);
                 }
             }
-
+            
             //// Need to pre-register all aliases with the encoder.
-            bool wasAdded;
             foreach (var kv in aliasMap)
             {
-                Term vTerm = Index.SymbCnstToVar(kv.Key, out wasAdded);
+                Term vTerm = Index.SymbCnstToVar(kv.Key, out bool wasAdded);
                 Term tTerm = Solver.PartialModel.GetSymbCnstType(kv.Key);
                 if (!varToTypeMap.ContainsKey(vTerm))
                 {
                     varToTypeMap.Add(vTerm, tTerm);
                 }
-                var expr = Encoder.GetVarEnc(vTerm, tTerm);
+                Encoder.GetVarEnc(vTerm, tTerm);
             }
 
             InitializeExecuter();
 
             SetPublisherCoreRules();
+            
             SetVarFacts();
 
             // TODO: handle cardinality terms properly
@@ -568,11 +562,12 @@ namespace Microsoft.Formula.Solver
                             continue;
                         }
 
-                        Z3BoolExpr boolExpr = Solver.Context.MkNot(Solver.Context.MkEq(firstEnc.Encoding, secondEnc.Encoding));
+                        Solver.Context.MkNot(Solver.Context.MkEq(firstEnc.Encoding, secondEnc.Encoding));
                     }
                 }
             }
         }
+
         protected Z3BoolExpr ConvertToCNF(Z3Expr expr, int level)
         {
             Z3BoolExpr top;
@@ -1289,7 +1284,7 @@ namespace Microsoft.Formula.Solver
                 });
         }
 
-        private void InitializeExecuter()
+        public void InitializeExecuter()
         {
             var optRules = Rules.Optimize();
             ruleCycles = Rules.GetCycles(optRules);

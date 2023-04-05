@@ -83,7 +83,7 @@ public static class Utils
         StringBuilder sb = new StringBuilder();
         using (StreamReader sr = new StreamReader(filepath, Encoding.UTF8))
         {
-            string line;
+            string? line;
             while ((line = sr.ReadLine()) != null)
             {
                 sb.AppendLine(line);

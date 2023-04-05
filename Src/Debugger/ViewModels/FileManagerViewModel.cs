@@ -2,6 +2,7 @@ using ReactiveUI;
 using Avalonia.Threading;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
+using Avalonia.Media;
 
 using System;
 using System.Collections.Generic;
@@ -74,7 +75,7 @@ internal class FileManagerViewModel : ReactiveObject
                 
                 if (mainWindow != null)
                 {
-                    mainWindow.Get<Ellipse>("Iterator").IsVisible = true;
+                    mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Green);
                 }
 
                 var loadTask = new Task(() => ExecuteLoadCommand(uri, SelectedItems[0].Header));
@@ -140,7 +141,7 @@ internal class FileManagerViewModel : ReactiveObject
                 }
                 if (mainWindow != null)
                 {
-                    mainWindow.Get<Ellipse>("Iterator").IsVisible = false;
+                    mainWindow.Get<Ellipse>("Iterator").Fill = new SolidColorBrush(Colors.Gray);
                 }
             }, DispatcherPriority.Render);
         }

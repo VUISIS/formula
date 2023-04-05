@@ -11,26 +11,6 @@
         Title="Formula Debugger"
         ExtendClientAreaToDecorationsHint="True"
         Name="DebuggerWindow">
-    <Window.Styles>
-        <Style Selector="Ellipse.Brush">
-            <Style.Animations>
-                <Animation Duration="0:0:2"
-                           IterationCount="INFINITE"
-                           FillMode="None"
-                           Easing="LinearEasing">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="Opacity" Value="1.0"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="50%">
-                        <Setter Property="Opacity" Value="0.0"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="Opacity" Value="1.0"/>
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
-        </Style>
-    </Window.Styles>
     <DockPanel Name="TopBar"
                LastChildFill="True" >
         <v:ToolbarView Name="TopToolbarView" 
@@ -93,8 +73,8 @@
                                  Background="#222222"
                                  Watermark="Press enter key to input commands."/>
                 <Ellipse Name="Iterator"
-                         Fill="Green"
-                         IsVisible="False"
+                         Fill="Gray"
+                         IsVisible="True"
                          VerticalAlignment="Center"
                          HorizontalAlignment="Center"
                          Width="12" 
