@@ -2381,7 +2381,13 @@
                         break;
                 }
 
-                if (!typeBins.TryFindValue(bindSymb, out typeTerm))
+                if (bindSymb.IsSymAndAll)
+                {
+                    Binding = facts.Index.TrueValue;                            
+                    BindingLevel = bindingLevel;                                
+                    return true; 
+                }
+                else if (!typeBins.TryFindValue(bindSymb, out typeTerm))
                 {
                     return false;
                 }

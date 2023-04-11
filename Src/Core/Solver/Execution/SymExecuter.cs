@@ -869,12 +869,12 @@
                                 for (int i = 1; i < ch.Count(); i++)
                                 {
                                     r2 = MakeRational(ch.ElementAt(i));
-                                    if (r1 < r2)
+                                    if (r1 <= r2)
                                     {
                                         r1 = r2;
                                     }
                                 }
-                                return  r1.ToString();
+                                return r1.ToString();
                             default:
                                 throw new NotImplementedException();
                         }

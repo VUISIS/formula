@@ -342,7 +342,7 @@
         {
             Contract.Requires(n.NodeKind == NodeKind.FuncTerm);
             var ft = (FuncTerm)n;
-            Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.SymAndAll);
+            Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.SymMaxAll);
             return ValidateArity(ft, "symmaxall", UnCompr, flags);
         }
 
@@ -1755,23 +1755,21 @@
                 {
                     return values[0].Binding;
                 }
-
-                it.MoveNext();
                 var max = it.Current.Args[it.Current.Symbol.Arity - 1];
+                
                 while (it.MoveNext())
                 {
                     var temp = it.Current.Args[it.Current.Symbol.Arity - 1];
                     if (Term.IsSymbolicTerm(max) || Term.IsSymbolicTerm(temp))
                     {
                         hasSymbolics = true;
-                        break;
                     }
                     else if (facts.Index.LexicographicCompare(temp, max) > 0)
                     {
                         max = temp;
                     }
                 }
-                if (hasSymbolics)
+                if (!hasSymbolics)
                 {
                     return max;
                 }

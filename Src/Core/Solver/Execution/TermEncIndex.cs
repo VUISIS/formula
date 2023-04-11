@@ -103,6 +103,19 @@ namespace Microsoft.Formula.Solver
             return hasEncoding;
         }
 
+        protected Z3Expr CheckMaxAll(int index, List<Z3Expr> exprs, Z3Expr maxexpr)
+        {
+            if (index == exprs.Count - 1)
+            {
+                return Solver.Context.MkITE(Solver.Context.MkGt((Z3ArithExpr)exprs[index], (Z3ArithExpr)maxexpr), exprs[index], maxexpr);
+            }
+            else
+            {
+                return Solver.Context.MkITE(Solver.Context.MkGt((Z3ArithExpr)exprs[index], (Z3ArithExpr)maxexpr), CheckMaxAll(index + 1, exprs, exprs[index]),
+                    CheckMaxAll(index + 1, exprs, maxexpr));
+            }
+        }
+        
         protected Z3Expr CheckAndAll(int index, List<Z3Expr> exprs, Z3Expr tEnc, Z3Expr fEnc)
         {
             if (index == exprs.Count - 1)
@@ -256,25 +269,8 @@ namespace Microsoft.Formula.Solver
                                     ch.ElementAt(0), ch.ElementAt(1));
                                 encodings.Add(x, encp);
                                 return encp;
-                            case OpKind.SymMaxAll: ;
-                                Z3Expr maxExpr = null;
-                                for (int i = 1; i < ch.Count(); i++)
-                                {
-                                    if (maxExpr == null)
-                                    {
-                                        maxExpr = Solver.TypeEmbedder.Context.MkITE(
-                                            Solver.TypeEmbedder.Context.MkGt((Z3ArithExpr)ch.ElementAt(i), (Z3ArithExpr)ch.ElementAt(i-1)), 
-                                            ch.ElementAt(i), ch.ElementAt(i-1)
-                                            );
-                                    }
-                                    else
-                                    {
-                                        maxExpr = Solver.TypeEmbedder.Context.MkITE(
-                                            Solver.TypeEmbedder.Context.MkGt((Z3ArithExpr)ch.ElementAt(i), (Z3ArithExpr)maxExpr), 
-                                            ch.ElementAt(i), maxExpr
-                                        );
-                                    }
-                                }
+                            case OpKind.SymMaxAll:
+                                Z3Expr maxExpr = CheckMaxAll(1, ch.ToList(), ch.ElementAt(0));
                                 encodings.Add(x, maxExpr);
                                 return maxExpr;
                             case OpKind.SymMin:
