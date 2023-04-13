@@ -1163,6 +1163,7 @@
             var d = new Derivation(this, bind1, bind2);
             if (index.IfExistsThenDerive(t, d))
             {
+                index.AddDerivation(t);
                 return;
             }
 
