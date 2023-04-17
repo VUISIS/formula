@@ -856,6 +856,10 @@
                                 bool hasFalse = ch.Any(s => s.Equals("FALSE"));
                                 str = hasFalse ? "FALSE" : "TRUE";
                                 return str;
+                            case OpKind.SymOr:
+                                bool hasTrue = ch.ElementAt(0) == "TRUE" || ch.ElementAt(1) == "TRUE";
+                                str = hasTrue ? "TRUE" : "FALSE";
+                                return str;
                             case OpKind.SymMax:
                                 r1 = MakeRational(ch.ElementAt(0));
                                 r2 = MakeRational(ch.ElementAt(1));

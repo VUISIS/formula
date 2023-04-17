@@ -116,6 +116,7 @@
         StrUpper,
         SymAnd,
         SymAndAll,
+        SymOr,
         SymCount,
         SymMax,
         SymMaxAll,

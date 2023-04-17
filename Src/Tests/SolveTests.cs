@@ -47,6 +47,15 @@ namespace Tests
             _ciFixture.RunCommand("solve pm 1 SymbolicAggregation.conforms", "SolveTests: Solve command for SymbolicAggregation.4ml failed.");
             Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicAggregation.4ml.");
         }
+        [Fact]
+        public void TestSolvingSymbolicOrExample()
+        {
+            _ciFixture.RunCommand("load " + Path.GetFullPath("../../../../../../../Tst/Tests/Symbolic/SymbolicOr.4ml"), "SolveTests: Load command for SymbolicOr.4ml failed.");
+            Assert.True(_ciFixture.GetLoadResult(), "SolveTests: Loading SymbolicOr.4ml failed.");
+
+            _ciFixture.RunCommand("solve pm 1 SymbolicOr.conforms", "SolveTests: Solve command for SymbolicOr.4ml failed.");
+            Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicOr.4ml.");
+        }
 
         [Fact]
         public void TestSolvingSymbolicMaxAllExample()

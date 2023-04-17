@@ -2749,7 +2749,19 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.ValidateUse_Or,
                 OpLibrary.TypeApprox_Or_Up,
                 OpLibrary.TypeApprox_Or_Down,
-                OpLibrary.Evaluator_Or));
+                OpLibrary.Evaluator_Or,
+                null,
+                OpLibrary.SymEvaluator_Or));
+            
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymOr, 
+                2, 
+                OpLibrary.ValidateUse_Or,
+                OpLibrary.TypeApprox_Or_Up,
+                OpLibrary.TypeApprox_Or_Down,
+                OpLibrary.Evaluator_Or,
+                null,
+                OpLibrary.SymEvaluator_Or));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.OrAll,

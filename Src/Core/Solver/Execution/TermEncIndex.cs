@@ -263,6 +263,14 @@ namespace Microsoft.Formula.Solver
                                 Z3Expr currExpr = CheckAndAll(0, ch.ToList(), tEnc, fEnc);
                                 encodings.Add(x, currExpr);
                                 return currExpr;
+                            case OpKind.SymOr:
+                                Term outTerm;
+                                var trueValue = GetTerm(facts.Index.TrueValue, out outTerm);
+                                var falseValue = GetTerm(facts.Index.FalseValue, out outTerm);
+                                encp = Solver.Context.MkITE(Solver.Context.MkEq(trueValue, ch.ElementAt(0)),
+                                    trueValue, Solver.Context.MkITE(Solver.Context.MkEq(trueValue, ch.ElementAt(1)), trueValue, falseValue));
+                                encodings.Add(x, encp);
+                                return encp;
                             case OpKind.SymMax:
                                 encp = Solver.TypeEmbedder.Context.MkITE(
                                     Solver.TypeEmbedder.Context.MkGt((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1)), 

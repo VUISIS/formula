@@ -1921,6 +1921,30 @@
 
             return b1 || b2 ? facts.TermIndex.TrueValue : facts.TermIndex.FalseValue;
         }
+        
+        internal static Term SymEvaluator_Or(SymExecuter facts, Bindable[] values)
+        {
+            Contract.Requires(values.Length == 2);
+            if (Term.IsSymbolicTerm(values[0].Binding, values[1].Binding))
+            {
+                bool wasAdded;
+                Term t1 = values[0].Binding;
+                Term t2 = values[1].Binding;
+                BaseOpSymb bos = facts.Index.SymbolTable.GetOpSymbol(OpKind.SymOr);
+                return facts.Index.MkApply(bos, new Term[] { t1, t2 }, out wasAdded);
+            }
+            else
+            {
+                bool b1, b2;
+                if (!ToBooleans(values[0].Binding, values[1].Binding, out b1, out b2))
+                {
+                    return null;
+                }
+
+                return b1 || b2 ? facts.Index.TrueValue : facts.Index.FalseValue;
+            }
+        }
+        
 
         internal static Term Evaluator_OrAll(Executer facts, Bindable[] values)
         {
