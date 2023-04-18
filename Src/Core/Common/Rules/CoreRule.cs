@@ -2381,7 +2381,7 @@
                         break;
                 }
 
-                if (bindSymb.IsSymAndAll)
+                if (bindSymb.IsSymAndAll || bindSymb.IsSymMaxAll)
                 {
                     Binding = facts.Index.TrueValue;                            
                     BindingLevel = bindingLevel;                                
@@ -2391,7 +2391,7 @@
                 {
                     return false;
                 }
-                else if (!typeTerm.Owner.IsGroundMember(typeTerm, arg.Binding))
+                else if (!typeTerm.Owner.IsGroundMember(typeTerm, arg.Binding)|| !Term.IsSymbolicTerm(arg.Binding))
                 {
                     // TODO: this may be ok for symbolic terms
                     return false;

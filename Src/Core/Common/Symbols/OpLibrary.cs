@@ -1755,6 +1755,8 @@
                 {
                     return values[0].Binding;
                 }
+
+                it.MoveNext();
                 var max = it.Current.Args[it.Current.Symbol.Arity - 1];
                 
                 while (it.MoveNext())
