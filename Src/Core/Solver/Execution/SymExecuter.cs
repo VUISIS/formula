@@ -242,6 +242,11 @@
             return true;
         }
 
+        public void AddDerivation(Term t)
+        {
+            ExtendLFP(t);
+        }
+
         public void PendConstraint(Z3BoolExpr expr)
         {
             pendingConstraints.Add(expr);
@@ -468,7 +473,7 @@
             {
                 List<Z3BoolExpr> posExprs = new List<Z3BoolExpr>();
                 List<Z3BoolExpr> negExprs = new List<Z3BoolExpr>();
-                foreach (var arg in expr.Args[0].Args)
+                foreach (var arg in expr.Args)
                 {
                     subExpr = ConvertToCNF(arg, level + 1);
                     posExprs.Add(subExpr);
