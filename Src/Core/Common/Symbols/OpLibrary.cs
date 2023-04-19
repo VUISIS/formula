@@ -95,7 +95,7 @@
             Contract.Requires(n.NodeKind == NodeKind.FuncTerm);
             var ft = (FuncTerm)n;
             Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.OrAll);
-            return ValidateArity(ft, "orAll", BinNoCompr, flags);
+            return ValidateArity(ft, "orAll", BinSecCompr, flags);
         }
 
         internal static bool ValidateUse_Impl(Node n, List<Flag> flags)
