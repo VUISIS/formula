@@ -2381,11 +2381,17 @@
                         break;
                 }
 
-                if (!typeBins.TryFindValue(bindSymb, out typeTerm))
+                if (bindSymb.IsSymAndAll || bindSymb.IsSymMaxAll || bindSymb.IsSymMinAll || bindSymb.IsSymOrAll)
+                {
+                    Binding = facts.Index.TrueValue;                            
+                    BindingLevel = bindingLevel;                                
+                    return true; 
+                }
+                else if (!typeBins.TryFindValue(bindSymb, out typeTerm))
                 {
                     return false;
                 }
-                else if (!typeTerm.Owner.IsGroundMember(typeTerm, arg.Binding))
+                else if (!typeTerm.Owner.IsGroundMember(typeTerm, arg.Binding) && !Term.IsSymbolicTerm(arg.Binding))
                 {
                     // TODO: this may be ok for symbolic terms
                     return false;

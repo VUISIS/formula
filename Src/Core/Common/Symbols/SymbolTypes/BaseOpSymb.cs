@@ -69,6 +69,21 @@
                 return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymAndAll;
             }
         }
+        public override bool IsSymOr
+        {
+            get
+            {
+                return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymOr;
+            }
+        }
+        
+        public override bool IsSymOrAll
+        {
+            get
+            {
+                return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymOrAll;
+            }
+        }
 
         public override bool IsSymCount
         {
@@ -83,6 +98,31 @@
             get
             {
                 return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymMax;
+            }
+        }
+        
+        public override bool IsSymMaxAll
+        {
+            get
+            {
+                return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymMaxAll;
+            }
+        }
+
+        
+        public override bool IsSymMin
+        {
+            get
+            {
+                return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymMin;
+            }
+        }
+        
+        public override bool IsSymMinAll
+        {
+            get
+            {
+                return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymMinAll;
             }
         }
 

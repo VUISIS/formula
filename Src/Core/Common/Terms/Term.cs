@@ -177,7 +177,12 @@
             if (sym.IsSymCount ||
                 sym.IsSymAnd ||
                 sym.IsSymAndAll ||
-                sym.IsSymMax)
+                sym.IsSymMax ||
+                sym.IsSymMin ||
+                sym.IsSymMaxAll ||
+                sym.IsSymMinAll ||
+                sym.IsSymOr ||
+                sym.IsSymOrAll)
             {
                 return true;
             }
@@ -211,7 +216,17 @@
                 sym1.IsSymAndAll ||
                 sym2.IsSymAndAll ||
                 sym1.IsSymMax ||
-                sym2.IsSymMax)
+                sym2.IsSymMax ||
+                sym1.IsSymMin ||
+                sym2.IsSymMin ||
+                sym1.IsSymMaxAll ||
+                sym2.IsSymMaxAll ||
+                sym1.IsSymMinAll ||
+                sym2.IsSymMinAll ||
+                sym1.IsSymOr ||
+                sym2.IsSymOr ||
+                sym1.IsSymOrAll ||
+                sym2.IsSymOrAll)
             {
                 return true;
             }

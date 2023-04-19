@@ -1089,10 +1089,44 @@
                                 bool hasFalse = ch.Any(s => s.Equals("FALSE"));
                                 str = hasFalse ? "FALSE" : "TRUE";
                                 return str;
+                            case OpKind.SymOr:
+                                bool hasTrue = ch.ElementAt(0) == "TRUE" || ch.ElementAt(1) == "TRUE";
+                                str = hasTrue ? "TRUE" : "FALSE";
+                                return str;
+                            case OpKind.SymOrAll:
+                                bool containsTrue = ch.Any(s => s.Equals("TRUE"));
+                                str = containsTrue ? "TRUE" : "FALSE";
+                                return str;
                             case OpKind.SymMax:
                                 r1 = MakeRational(ch.ElementAt(0));
                                 r2 = MakeRational(ch.ElementAt(1));
                                 return r1 > r2 ? r1.ToString() : r2.ToString();
+                            case OpKind.SymMin:
+                                r1 = MakeRational(ch.ElementAt(0));
+                                r2 = MakeRational(ch.ElementAt(1));
+                                return r1 < r2 ? r1.ToString() : r2.ToString();
+                            case OpKind.SymMaxAll:
+                                r1 = MakeRational(ch.ElementAt(0));
+                                for (int i = 1; i < ch.Count(); i++)
+                                {
+                                    r2 = MakeRational(ch.ElementAt(i));
+                                    if (r1 <= r2)
+                                    {
+                                        r1 = r2;
+                                    }
+                                }
+                                return r1.ToString();
+                            case OpKind.SymMinAll:
+                                r1 = MakeRational(ch.ElementAt(0));
+                                for (int i = 1; i < ch.Count(); i++)
+                                {
+                                    r2 = MakeRational(ch.ElementAt(i));
+                                    if (r1 >= r2)
+                                    {
+                                        r1 = r2;
+                                    }
+                                }
+                                return r1.ToString();
                             default:
                                 throw new NotImplementedException();
                         }
