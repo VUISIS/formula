@@ -1,0 +1,18 @@
+domain SymbolicOrAll
+{
+  A ::= new (x : Boolean).
+  B ::= new (x : Boolean).
+  OrValue ::= (x : Boolean).
+
+  OrValue(x) :- a is A, b is B, x = orAll(FALSE, {a.x, b.x}), x : Boolean.
+  
+  goodModel :- OrValue(x), x = TRUE.
+  conforms goodModel.
+}
+
+partial model pm of SymbolicOrAll
+{
+  a is A(x).
+  b is B(y).
+}
+

@@ -129,6 +129,19 @@ namespace Microsoft.Formula.Solver
             }
         }
         
+        protected Z3Expr CheckOrAll(int index, List<Z3Expr> exprs, Z3Expr tEnc, Z3Expr fEnc)
+        {
+            if (index == exprs.Count - 1)
+            {
+                return Solver.Context.MkITE(Solver.Context.MkEq(exprs[index], tEnc), tEnc, fEnc);
+            }
+            else
+            {
+                return Solver.Context.MkITE(Solver.Context.MkEq(exprs[index], tEnc), tEnc,
+                    CheckOrAll(index + 1, exprs, tEnc, fEnc));
+            }
+        }
+        
         protected Z3Expr CheckAndAll(int index, List<Z3Expr> exprs, Z3Expr tEnc, Z3Expr fEnc)
         {
             if (index == exprs.Count - 1)
@@ -284,6 +297,12 @@ namespace Microsoft.Formula.Solver
                                     trueValue, Solver.Context.MkITE(Solver.Context.MkEq(trueValue, ch.ElementAt(1)), trueValue, falseValue));
                                 encodings.Add(x, encp);
                                 return encp;
+                            case OpKind.SymOrAll:
+                                var trueEnc = GetTerm(facts.Index.TrueValue, out tempTerm);
+                                var falseEnc = GetTerm(facts.Index.FalseValue, out tempTerm);
+                                Z3Expr orExpr = CheckOrAll(0, ch.ToList(), trueEnc, falseEnc);
+                                encodings.Add(x, orExpr);
+                                return orExpr;
                             case OpKind.SymMax:
                                 encp = Solver.TypeEmbedder.Context.MkITE(
                                     Solver.TypeEmbedder.Context.MkGt((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1)), 

@@ -76,6 +76,14 @@
                 return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymOr;
             }
         }
+        
+        public override bool IsSymOrAll
+        {
+            get
+            {
+                return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymOrAll;
+            }
+        }
 
         public override bool IsSymCount
         {

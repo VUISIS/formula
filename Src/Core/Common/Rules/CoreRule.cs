@@ -2381,7 +2381,7 @@
                         break;
                 }
 
-                if (bindSymb.IsSymAndAll || bindSymb.IsSymMaxAll || bindSymb.IsSymMinAll)
+                if (bindSymb.IsSymAndAll || bindSymb.IsSymMaxAll || bindSymb.IsSymMinAll || bindSymb.IsSymOrAll)
                 {
                     Binding = facts.Index.TrueValue;                            
                     BindingLevel = bindingLevel;                                

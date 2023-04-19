@@ -74,6 +74,11 @@
         {
             get { return false; }
         }
+        
+        public virtual bool IsSymOrAll
+        {
+            get { return false; }
+        }
 
         public virtual bool IsSymAndAll
         {

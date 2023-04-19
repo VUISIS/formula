@@ -117,6 +117,7 @@
         SymAnd,
         SymAndAll,
         SymOr,
+        SymOrAll,
         SymCount,
         SymMax,
         SymMaxAll,

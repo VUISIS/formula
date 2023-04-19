@@ -860,6 +860,10 @@
                                 bool hasTrue = ch.ElementAt(0) == "TRUE" || ch.ElementAt(1) == "TRUE";
                                 str = hasTrue ? "TRUE" : "FALSE";
                                 return str;
+                            case OpKind.SymOrAll:
+                                bool containsTrue = ch.Any(s => s.Equals("TRUE"));
+                                str = containsTrue ? "TRUE" : "FALSE";
+                                return str;
                             case OpKind.SymMax:
                                 r1 = MakeRational(ch.ElementAt(0));
                                 r2 = MakeRational(ch.ElementAt(1));

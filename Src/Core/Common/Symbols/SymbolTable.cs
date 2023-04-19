@@ -2781,7 +2781,19 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.ValidateUse_OrAll,
                 OpLibrary.TypeApprox_OrAll_Up,
                 OpLibrary.TypeApprox_OrAll_Down,
-                OpLibrary.Evaluator_OrAll));
+                OpLibrary.Evaluator_OrAll,
+                null,
+                OpLibrary.SymEvaluator_OrAll));
+            
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymOrAll,
+                2,
+                OpLibrary.ValidateUse_OrAll,
+                OpLibrary.TypeApprox_OrAll_Up,
+                OpLibrary.TypeApprox_OrAll_Down,
+                OpLibrary.Evaluator_OrAll,
+                null,
+                OpLibrary.SymEvaluator_OrAll));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.Prod, 

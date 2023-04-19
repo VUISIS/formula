@@ -76,6 +76,7 @@ namespace Tests
             _ciFixture.RunCommand("solve pm 1 SymbolicMin.conforms", "SolveTests: Solve command for SymbolicMin.4ml failed.");
             Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicMin.4ml.");
         }
+        
         [Fact]
         public void TestSolvingSymbolicMinAllExample()
         {
@@ -94,6 +95,16 @@ namespace Tests
 
             _ciFixture.RunCommand("solve pm 1 SymbolicAndAll.conforms", "SolveTests: Solve command for SymbolicAndAll.4ml failed.");
             Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicAndAll.4ml.");
+        }
+        
+        [Fact]
+        public void TestSolvingSymbolicAndOrExample()
+        {
+            _ciFixture.RunCommand("load " + Path.GetFullPath("../../../../../../../Tst/Tests/Symbolic/SymbolicOrAll.4ml"), "SolveTests: Load command for SymbolicOrAll.4ml failed.");
+            Assert.True(_ciFixture.GetLoadResult(), "SolveTests: Loading SymbolicOrAll.4ml failed.");
+
+            _ciFixture.RunCommand("solve pm 1 SymbolicOrAll.conforms", "SolveTests: Solve command for SymbolicOrAll.4ml failed.");
+            Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicOrAll.4ml.");
         }
         
         [Fact]
