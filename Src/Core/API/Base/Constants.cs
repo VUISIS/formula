@@ -121,6 +121,7 @@
         SymMax,
         SymMaxAll,
         SymMin,
+        SymMinAll,
         Sub,
         Sum,
         ToNatural,

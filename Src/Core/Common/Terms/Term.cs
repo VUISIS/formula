@@ -180,6 +180,7 @@
                 sym.IsSymMax ||
                 sym.IsSymMin ||
                 sym.IsSymMaxAll ||
+                sym.IsSymMinAll ||
                 sym.IsSymOr)
             {
                 return true;
@@ -219,6 +220,8 @@
                 sym2.IsSymMin ||
                 sym1.IsSymMaxAll ||
                 sym2.IsSymMaxAll ||
+                sym1.IsSymMinAll ||
+                sym2.IsSymMinAll ||
                 sym1.IsSymOr ||
                 sym2.IsSymOr)
             {

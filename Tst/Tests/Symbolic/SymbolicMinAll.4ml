@@ -1,0 +1,22 @@
+domain SymbolicMinAll
+{
+  A ::= new (x : Integer).
+  B ::= new (x : Integer).
+
+  minVal ::= (x : Integer).
+
+  goodA :- a is A, a.x < 10.
+  goodB :- b is B, b.x > 20.
+
+  minVal(x) :- a is A, b is B, x = minAll(a.x,{a.x, b.x}), x : Integer.
+  
+  goodModel :- m is minVal, m.x < 5.
+
+  conforms goodModel.
+}
+
+partial model pm of SymbolicMinAll
+{
+  a is A(x).
+  b is B(y).
+}

@@ -2706,7 +2706,19 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.ValidateUse_MinAll,
                 OpLibrary.TypeApprox_Unconstrained2_Up,
                 OpLibrary.TypeApprox_Unconstrained2_Down,
-                OpLibrary.Evaluator_MinAll));
+                OpLibrary.Evaluator_MinAll,
+                null,
+                OpLibrary.SymEvaluator_MinAll));
+            
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymMinAll, 
+                2, 
+                OpLibrary.ValidateUse_MinAll,
+                OpLibrary.TypeApprox_Unconstrained2_Up,
+                OpLibrary.TypeApprox_Unconstrained2_Down,
+                OpLibrary.Evaluator_MinAll,
+                null,
+                OpLibrary.SymEvaluator_MinAll));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.Mod, 

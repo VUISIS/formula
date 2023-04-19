@@ -76,6 +76,15 @@ namespace Tests
             _ciFixture.RunCommand("solve pm 1 SymbolicMin.conforms", "SolveTests: Solve command for SymbolicMin.4ml failed.");
             Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicMin.4ml.");
         }
+        [Fact]
+        public void TestSolvingSymbolicMinAllExample()
+        {
+            _ciFixture.RunCommand("load " + Path.GetFullPath("../../../../../../../Tst/Tests/Symbolic/SymbolicMinAll.4ml"), "SolveTests: Load command for SymbolicMinAll.4ml failed.");
+            Assert.True(_ciFixture.GetLoadResult(), "SolveTests: Loading SymbolicMinAll.4ml failed.");
+
+            _ciFixture.RunCommand("solve pm 1 SymbolicMinAll.conforms", "SolveTests: Solve command for SymbolicMin.4ml failed.");
+            Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SymbolicMinAll.4ml.");
+        }
         
         [Fact]
         public void TestSolvingSymbolicAndAllExample()

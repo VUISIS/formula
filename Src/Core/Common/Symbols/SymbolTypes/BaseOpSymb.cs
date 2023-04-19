@@ -109,6 +109,14 @@
                 return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymMin;
             }
         }
+        
+        public override bool IsSymMinAll
+        {
+            get
+            {
+                return OpKind is OpKind && ((OpKind)OpKind) == API.OpKind.SymMinAll;
+            }
+        }
 
         public override bool IsReservedOperation
         {

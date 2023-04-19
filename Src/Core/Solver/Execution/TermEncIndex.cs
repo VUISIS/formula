@@ -102,6 +102,19 @@ namespace Microsoft.Formula.Solver
 
             return hasEncoding;
         }
+        
+        protected Z3Expr CheckMinAll(int index, List<Z3Expr> exprs, Z3Expr maxexpr)
+        {
+            if (index == exprs.Count - 1)
+            {
+                return Solver.Context.MkITE(Solver.Context.MkLt((Z3ArithExpr)exprs[index], (Z3ArithExpr)maxexpr), exprs[index], maxexpr);
+            }
+            else
+            {
+                return Solver.Context.MkITE(Solver.Context.MkLt((Z3ArithExpr)exprs[index], (Z3ArithExpr)maxexpr), CheckMinAll(index + 1, exprs, exprs[index]),
+                    CheckMinAll(index + 1, exprs, maxexpr));
+            }
+        }
 
         protected Z3Expr CheckMaxAll(int index, List<Z3Expr> exprs, Z3Expr maxexpr)
         {
@@ -287,6 +300,10 @@ namespace Microsoft.Formula.Solver
                                     ch.ElementAt(0), ch.ElementAt(1));
                                 encodings.Add(x, encp);
                                 return encp;
+                            case OpKind.SymMinAll:
+                                Z3Expr minExpr = CheckMinAll(1, ch.ToList(), ch.ElementAt(0));
+                                encodings.Add(x, minExpr);
+                                return minExpr;
                             default:
                                 throw new NotImplementedException();
                         }
