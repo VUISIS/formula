@@ -736,7 +736,6 @@
 
             //// Case 1. There are no finds.
             ConstraintNode headNode = nodes[Head];
-            index.AddPositiveConstraint(binding);
             if (Find1.IsNull && Find2.IsNull)
             {
                 Contract.Assert(headNode.Binding != null);
@@ -832,7 +831,6 @@
                         findNumber == 0 ? binding : tp,
                         findNumber == 1 ? binding : tp);
 
-                    index.AddPositiveConstraint(tp);
                     UndoPropagation(ConstraintNode.BLSecond);
                 }
             }
@@ -1163,7 +1161,7 @@
             var d = new Derivation(this, bind1, bind2);
             if (index.IfExistsThenDerive(t, d))
             {
-                index.AddDerivation(t);
+                index.AddDerivation(t, bind1, bind2);
                 return;
             }
 
