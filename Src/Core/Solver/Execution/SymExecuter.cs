@@ -166,16 +166,32 @@
             terms.Add(y);
         }
 
-        public void AddPositiveConstraint(Term t)
+        protected void AddPositiveConstraints(Term bind1, Term bind2)
         {
-            SymElement e;
-            if (lfp.TryFindValue(t, out e))
+            SymElement e1, e2;
+
+            if (bind1 != Index.FalseValue &&
+                lfp.TryFindValue(bind1, out e1))
             {
-                if (e.HasConstraints())
+                if (e1.HasConstraints())
                 {
-                    PositiveConstraintTerms.Add(t);
+                    PositiveConstraintTerms.Add(bind1);
                 }
             }
+
+            if (bind2 != Index.FalseValue &&
+                lfp.TryFindValue(bind2, out e2))
+            {
+                if (e2.HasConstraints())
+                {
+                    PositiveConstraintTerms.Add(bind2);
+                }
+            }
+        }
+
+        protected void RemovePositiveConstraints()
+        {
+            PositiveConstraintTerms.Clear();
         }
 
         public bool Exists(Term t)
@@ -242,9 +258,11 @@
             return true;
         }
 
-        public void AddDerivation(Term t)
+        public void AddDerivation(Term t, Term bind1, Term bind2)
         {
+            AddPositiveConstraints(bind1, bind2);
             ExtendLFP(t);
+            RemovePositiveConstraints();
         }
 
         public void PendConstraint(Z3BoolExpr expr)
@@ -808,7 +826,7 @@
                     act = pendingAct.GetSomeElement();
                     pendingAct.Remove(act);
                     int ruleId = act.Rule.RuleId;
-                    PositiveConstraintTerms.Clear();
+                    RemovePositiveConstraints();
                     NegativeConstraintTerms.Clear();
 
                     act.Rule.Execute(act.Binding1.Term, act.FindNumber, this, KeepDerivations, pendingFacts);
@@ -825,16 +843,21 @@
 
                     foreach (var kv in pendingFacts)
                     {
-                        if (copyConstraints)
+                        foreach (var derv in kv.Value)
                         {
-                            if (IsConstraintSatisfiable(kv.Key))
+                            AddPositiveConstraints(derv.Binding1, derv.Binding2);
+                            if (copyConstraints)
                             {
-                                IndexFact(ExtendLFP(kv.Key), kv.Value, pendingAct, i);
+                                if (IsConstraintSatisfiable(kv.Key))
+                                {
+                                    IndexFact(ExtendLFP(kv.Key), kv.Value, pendingAct, i);
+                                }
                             }
-                        }
-                        else
-                        {
-                            AddRecursionConstraint(ruleId);
+                            else
+                            {
+                                AddRecursionConstraint(ruleId);
+                            }
+                            RemovePositiveConstraints();
                         }
                     }
 
