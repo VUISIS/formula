@@ -69,6 +69,16 @@
         {
             get { return false; }
         }
+        
+        public virtual bool IsSymOr
+        {
+            get { return false; }
+        }
+        
+        public virtual bool IsSymOrAll
+        {
+            get { return false; }
+        }
 
         public virtual bool IsSymAndAll
         {
@@ -79,7 +89,21 @@
         {
             get { return false; }
         }
+        public virtual bool IsSymMaxAll
+        {
+            get { return false; }
+        }
+        
+        public virtual bool IsSymMin
+        {
+            get { return false; }
+        }
 
+        public virtual bool IsSymMinAll
+        {
+            get { return false; }
+        }
+        
         public bool IsDataConstructor
         {
             get { return Kind == SymbolKind.ConSymb || Kind == SymbolKind.MapSymb; }

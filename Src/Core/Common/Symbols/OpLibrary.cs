@@ -95,7 +95,7 @@
             Contract.Requires(n.NodeKind == NodeKind.FuncTerm);
             var ft = (FuncTerm)n;
             Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.OrAll);
-            return ValidateArity(ft, "orAll", BinNoCompr, flags);
+            return ValidateArity(ft, "orAll", BinSecCompr, flags);
         }
 
         internal static bool ValidateUse_Impl(Node n, List<Flag> flags)
@@ -168,6 +168,14 @@
             var ft = (FuncTerm)n;
             Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.SymAndAll);
             return ValidateArity(ft, "symandall", UnCompr, flags);
+        }
+        
+        internal static bool ValidateUse_SymOrAll(Node n, List<Flag> flags)
+        {
+            Contract.Requires(n.NodeKind == NodeKind.FuncTerm);
+            var ft = (FuncTerm)n;
+            Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.SymOrAll);
+            return ValidateArity(ft, "symorall", UnCompr, flags);
         }
 
         internal static bool ValidateUse_SymCount(Node n, List<Flag> flags)
@@ -337,6 +345,22 @@
             Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.MaxAll);
             return ValidateArity(ft, "maxAll", BinSecCompr, flags);
         }
+        
+        internal static bool ValidateUse_SymMaxAll(Node n, List<Flag> flags)
+        {
+            Contract.Requires(n.NodeKind == NodeKind.FuncTerm);
+            var ft = (FuncTerm)n;
+            Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.SymMaxAll);
+            return ValidateArity(ft, "symmaxall", UnCompr, flags);
+        }
+        
+        internal static bool ValidateUse_SymMinAll(Node n, List<Flag> flags)
+        {
+            Contract.Requires(n.NodeKind == NodeKind.FuncTerm);
+            var ft = (FuncTerm)n;
+            Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.SymMinAll);
+            return ValidateArity(ft, "symminall", UnCompr, flags);
+        }
 
         internal static bool ValidateUse_Min(Node n, List<Flag> flags)
         {
@@ -345,7 +369,7 @@
             Contract.Assert(ft.Function is OpKind && ((OpKind)ft.Function) == OpKind.Min);
             return ValidateArity(ft, "min", BinNoCompr, flags);
         }
-
+        
         internal static bool ValidateUse_MinAll(Node n, List<Flag> flags)
         {
             Contract.Requires(n.NodeKind == NodeKind.FuncTerm);
@@ -1736,6 +1760,104 @@
             }
         }
 
+        internal static Term SymEvaluator_MaxAll(SymExecuter facts, Bindable[] values)
+        {
+            Contract.Requires(values.Length == 2);
+            int nResults;
+            bool hasSymbolics = false;
+            using (var it = facts.Query(values[1].Binding, out nResults).GetEnumerator())
+            {
+                if (nResults == 0)
+                {
+                    return values[0].Binding;
+                }
+
+                it.MoveNext();
+                var max = it.Current.Args[it.Current.Symbol.Arity - 1];
+                
+                while (it.MoveNext())
+                {
+                    var temp = it.Current.Args[it.Current.Symbol.Arity - 1];
+                    if (Term.IsSymbolicTerm(max) || Term.IsSymbolicTerm(temp))
+                    {
+                        hasSymbolics = true;
+                    }
+                    else if (facts.Index.LexicographicCompare(temp, max) > 0)
+                    {
+                        max = temp;
+                    }
+                }
+                if (!hasSymbolics)
+                {
+                    return max;
+                }
+            }
+            
+            BaseOpSymb bos = facts.Index.SymbolTable.GetOpSymbol(OpKind.SymMaxAll);
+            Term[] terms = facts.Query(values[1].Binding, out nResults).Select(t => t.Args[t.Symbol.Arity - 1]).ToArray();
+            bool wasAdded;
+            return facts.Index.MkApply(bos, terms, out wasAdded);
+        }
+
+        internal static Term SymEvaluator_Min(SymExecuter facts, Bindable[] values)
+        {
+            Contract.Requires(values.Length == 2);
+            Term x = values[0].Binding;
+            Term y = values[1].Binding;
+
+            if (Term.IsSymbolicTerm(x, y))
+            {
+                bool wasAdded;
+                BaseOpSymb bos = facts.Index.SymbolTable.GetOpSymbol(OpKind.SymMin);
+                return facts.Index.MkApply(bos, new Term[] { x, y }, out wasAdded);
+            }
+            else
+            {
+                var cmp = facts.Index.LexicographicCompare(x, y);
+                return cmp <= 0 ? x : y;
+            }
+        }
+        
+        internal static Term SymEvaluator_MinAll(SymExecuter facts, Bindable[] values)
+        {
+            Contract.Requires(values.Length == 2);
+            int nResults;
+            bool hasSymbolics = false;
+            using (var it = facts.Query(values[1].Binding, out nResults).GetEnumerator())
+            {
+                if (nResults == 0)
+                {
+                    return values[0].Binding;
+                }
+
+                it.MoveNext();
+                var min = it.Current.Args[it.Current.Symbol.Arity - 1];
+                
+                while (it.MoveNext())
+                {
+                    var temp = it.Current.Args[it.Current.Symbol.Arity - 1];
+                    if (Term.IsSymbolicTerm(min) || Term.IsSymbolicTerm(temp))
+                    {
+                        hasSymbolics = true;
+                    }
+                    else if (facts.Index.LexicographicCompare(temp, min) < 0)
+                    {
+                        min = temp;
+                    }
+                }
+                if (!hasSymbolics)
+                {
+                    return min;
+                }
+            }
+            
+            BaseOpSymb bos = facts.Index.SymbolTable.GetOpSymbol(OpKind.SymMinAll);
+            Term[] terms = facts.Query(values[1].Binding, out nResults).Select(t => t.Args[t.Symbol.Arity - 1]).ToArray();
+            bool wasAdded;
+            return facts.Index.MkApply(bos, terms, out wasAdded);
+        }
+        
+        
         internal static Term Evaluator_And(Executer facts, Bindable[] values)
         {
             Contract.Requires(values.Length == 2);
@@ -1823,7 +1945,6 @@
                     if (Term.IsSymbolicTerm(t))
                     {
                         hasSymbolics = true;
-                        break;
                     }
                     if (t == facts.Index.FalseValue)
                     {
@@ -1858,6 +1979,74 @@
 
             return b1 || b2 ? facts.TermIndex.TrueValue : facts.TermIndex.FalseValue;
         }
+        
+        internal static Term SymEvaluator_Or(SymExecuter facts, Bindable[] values)
+        {
+            Contract.Requires(values.Length == 2);
+            if (Term.IsSymbolicTerm(values[0].Binding, values[1].Binding))
+            {
+                bool wasAdded;
+                Term t1 = values[0].Binding;
+                Term t2 = values[1].Binding;
+                BaseOpSymb bos = facts.Index.SymbolTable.GetOpSymbol(OpKind.SymOr);
+                return facts.Index.MkApply(bos, new Term[] { t1, t2 }, out wasAdded);
+            }
+            else
+            {
+                bool b1, b2;
+                if (!ToBooleans(values[0].Binding, values[1].Binding, out b1, out b2))
+                {
+                    return null;
+                }
+
+                return b1 || b2 ? facts.Index.TrueValue : facts.Index.FalseValue;
+            }
+        }
+        
+        internal static Term SymEvaluator_OrAll(SymExecuter facts, Bindable[] values)
+        {
+            Contract.Requires(values.Length == 2);
+            int nResults;
+            var acc = BigInteger.Zero;
+            bool hasBool = false;
+            Term t;
+            bool hasSymbolics = false;
+            using (var it = facts.Query(values[1].Binding, out nResults).GetEnumerator())
+            {
+                if (nResults == 0)
+                {
+                    return values[0].Binding;
+                }
+
+                while (it.MoveNext())
+                {
+                    t = it.Current.Args[it.Current.Symbol.Arity - 1];
+                    if (Term.IsSymbolicTerm(t))
+                    {
+                        hasSymbolics = true;
+                    }
+                    if (t == facts.Index.TrueValue)
+                    {
+                        return facts.Index.TrueValue;
+                    }
+                    else if (t == facts.Index.FalseValue)
+                    {
+                        hasBool = true;
+                    }
+                }
+            }
+
+            if (!hasSymbolics)
+            {
+                return hasBool ? facts.Index.FalseValue : values[0].Binding;
+            }
+
+            BaseOpSymb bos = facts.Index.SymbolTable.GetOpSymbol(OpKind.SymOrAll);
+            Term[] terms = facts.Query(values[1].Binding, out nResults).Select(t => t.Args[t.Symbol.Arity - 1]).ToArray();
+            bool wasAdded;
+            return facts.Index.MkApply(bos, terms, out wasAdded);
+        }
+        
 
         internal static Term Evaluator_OrAll(Executer facts, Bindable[] values)
         {

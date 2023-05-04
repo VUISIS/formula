@@ -2648,8 +2648,7 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.TypeApprox_Max_Down,
                 OpLibrary.Evaluator_Max,
                 null,
-                OpLibrary.SymEvaluator_Max
-                ));
+                OpLibrary.SymEvaluator_Max));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.SymMax,
@@ -2667,7 +2666,19 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.ValidateUse_MaxAll,
                 OpLibrary.TypeApprox_Unconstrained2_Up,
                 OpLibrary.TypeApprox_Unconstrained2_Down,
-                OpLibrary.Evaluator_MaxAll));
+                OpLibrary.Evaluator_MaxAll,
+                null,
+                OpLibrary.SymEvaluator_MaxAll));
+            
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymMaxAll,
+                2,
+                OpLibrary.ValidateUse_MaxAll,
+                OpLibrary.TypeApprox_Max_Up,
+                OpLibrary.TypeApprox_Max_Down,
+                OpLibrary.Evaluator_MaxAll,
+                null,
+                OpLibrary.SymEvaluator_MaxAll));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.Min,
@@ -2675,15 +2686,39 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.ValidateUse_Min,
                 OpLibrary.TypeApprox_Min_Up,
                 OpLibrary.TypeApprox_Min_Down,
-                OpLibrary.Evaluator_Min));
+                OpLibrary.Evaluator_Min,
+                null,
+                OpLibrary.SymEvaluator_Min));
 
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymMin,
+                2,
+                OpLibrary.ValidateUse_Min,
+                OpLibrary.TypeApprox_Min_Up,
+                OpLibrary.TypeApprox_Min_Down,
+                OpLibrary.Evaluator_Min,
+                null,
+                OpLibrary.SymEvaluator_Min));
+            
             AddBaseOp(new BaseOpSymb(
                 OpKind.MinAll, 
                 2, 
                 OpLibrary.ValidateUse_MinAll,
                 OpLibrary.TypeApprox_Unconstrained2_Up,
                 OpLibrary.TypeApprox_Unconstrained2_Down,
-                OpLibrary.Evaluator_MinAll));
+                OpLibrary.Evaluator_MinAll,
+                null,
+                OpLibrary.SymEvaluator_MinAll));
+            
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymMinAll, 
+                2, 
+                OpLibrary.ValidateUse_MinAll,
+                OpLibrary.TypeApprox_Unconstrained2_Up,
+                OpLibrary.TypeApprox_Unconstrained2_Down,
+                OpLibrary.Evaluator_MinAll,
+                null,
+                OpLibrary.SymEvaluator_MinAll));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.Mod, 
@@ -2726,7 +2761,19 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.ValidateUse_Or,
                 OpLibrary.TypeApprox_Or_Up,
                 OpLibrary.TypeApprox_Or_Down,
-                OpLibrary.Evaluator_Or));
+                OpLibrary.Evaluator_Or,
+                null,
+                OpLibrary.SymEvaluator_Or));
+            
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymOr, 
+                2, 
+                OpLibrary.ValidateUse_Or,
+                OpLibrary.TypeApprox_Or_Up,
+                OpLibrary.TypeApprox_Or_Down,
+                OpLibrary.Evaluator_Or,
+                null,
+                OpLibrary.SymEvaluator_Or));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.OrAll,
@@ -2734,7 +2781,19 @@ namespace Microsoft.Formula.Common.Terms
                 OpLibrary.ValidateUse_OrAll,
                 OpLibrary.TypeApprox_OrAll_Up,
                 OpLibrary.TypeApprox_OrAll_Down,
-                OpLibrary.Evaluator_OrAll));
+                OpLibrary.Evaluator_OrAll,
+                null,
+                OpLibrary.SymEvaluator_OrAll));
+            
+            AddBaseOp(new BaseOpSymb(
+                OpKind.SymOrAll,
+                2,
+                OpLibrary.ValidateUse_OrAll,
+                OpLibrary.TypeApprox_OrAll_Up,
+                OpLibrary.TypeApprox_OrAll_Down,
+                OpLibrary.Evaluator_OrAll,
+                null,
+                OpLibrary.SymEvaluator_OrAll));
 
             AddBaseOp(new BaseOpSymb(
                 OpKind.Prod, 

@@ -1191,6 +1191,7 @@ namespace Microsoft.Formula.API.ASTQueries
             Register(OpKind.Neg, "-", OpStyleKind.Prefix);
             Register(OpKind.Not, "not", OpStyleKind.Apply);
             Register(OpKind.Or, "or", OpStyleKind.Apply);
+            Register (OpKind.OrAll, "orAll", OpStyleKind.Apply);
             Register(OpKind.Prod, "prod", OpStyleKind.Apply);
             Register(OpKind.Qtnt, "qtnt", OpStyleKind.Apply);
             Register(OpKind.Sub, "-", OpStyleKind.Infix);

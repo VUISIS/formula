@@ -1207,6 +1207,14 @@ namespace Microsoft.Formula.CommandLine
         private void DoSolve(string s)
         {
             var cmdParts = s.Split(cmdSplitChars, 3, StringSplitOptions.RemoveEmptyEntries);
+
+            // default solve
+            if (cmdParts.Length == 0)
+            {
+                var res = DefaultSolve();
+                cmdParts = res.Split(cmdSplitChars, 3, StringSplitOptions.RemoveEmptyEntries);
+            }
+
             if (cmdParts.Length != 3)
             {
                 sink.WriteMessageLine(SolveMsg, SeverityKind.Warning);
@@ -1300,6 +1308,60 @@ namespace Microsoft.Formula.CommandLine
                     sink.WriteMessageLine("Failed to start solved task.", SeverityKind.Warning);
                 }
             }
+        }
+
+        private string DefaultSolve()
+        {
+
+            int index = 0;
+            Dictionary<int, Model> models = new Dictionary<int, Model>();
+
+
+            foreach (Program program in env.GetProgramsEnumerable())
+            {
+                foreach (var module in program.Modules)
+                {
+                    if (module is Model)
+                    {
+                        var model = (Model)module;
+
+                        if (model.IsPartial)
+                        {
+                            models.Add(index++, model);
+                        }
+                    }
+                }
+            }
+
+            Model selected;
+            if (models.Count() == 1)
+            {
+                selected = models[0];
+            } else
+            {
+                sink.WriteMessageLine("Which partial model do you want to solve?", SeverityKind.Info);
+
+                foreach (KeyValuePair<int, Model> kvp in models)
+                {
+                    var model = kvp.Value;
+                    var indx = kvp.Key;
+
+                    sink.WriteMessageLine(indx + ": " + model.Name + " model of " + model.Domain.Name + " domain", SeverityKind.Info);
+                }
+
+                DigitChoiceKind choice;
+
+                while (!chooser.GetChoice(out choice) ||
+                ((int)choice) < 0 ||
+                ((int)choice) >= models.Count)
+                {
+                    sink.WriteMessageLine("Invalid index, please provide a valid index", SeverityKind.Warning);
+                }
+
+                selected = models[(int)choice];
+            }
+
+            return selected.Name + " 1 " + selected.Domain.Name + ".conforms";
         }
 
         private void DoSolveOld(string s)

@@ -147,16 +147,32 @@
             terms.Add(y);
         }
 
-        public void AddPositiveConstraint(Term t)
+        protected void AddPositiveConstraints(Term bind1, Term bind2)
         {
-            SymElement e;
-            if (lfp.TryFindValue(t, out e))
+            SymElement e1, e2;
+
+            if (bind1 != Index.FalseValue &&
+                lfp.TryFindValue(bind1, out e1))
             {
-                if (e.HasConstraints())
+                if (e1.HasConstraints())
                 {
-                    PositiveConstraintTerms.Add(t);
+                    PositiveConstraintTerms.Add(bind1);
                 }
             }
+
+            if (bind2 != Index.FalseValue &&
+                lfp.TryFindValue(bind2, out e2))
+            {
+                if (e2.HasConstraints())
+                {
+                    PositiveConstraintTerms.Add(bind2);
+                }
+            }
+        }
+
+        protected void RemovePositiveConstraints()
+        {
+            PositiveConstraintTerms.Clear();
         }
 
         private string RemoveSymGenVar(string b)
@@ -368,6 +384,13 @@
             dervs.Add(d);
             AddFlattenedDerivations(t, d);
             return true;
+        }
+
+        public void AddDerivation(Term t, Term bind1, Term bind2)
+        {
+            AddPositiveConstraints(bind1, bind2);
+            ExtendLFP(t);
+            RemovePositiveConstraints();
         }
 
         public void PendConstraint(Z3BoolExpr expr)
@@ -602,7 +625,7 @@
             {
                 List<Z3BoolExpr> posExprs = new List<Z3BoolExpr>();
                 List<Z3BoolExpr> negExprs = new List<Z3BoolExpr>();
-                foreach (var arg in expr.Args[0].Args)
+                foreach (var arg in expr.Args)
                 {
                     subExpr = ConvertToCNF(arg, level + 1);
                     posExprs.Add(subExpr);
@@ -973,7 +996,7 @@
                     act = pendingAct.GetSomeElement();
                     pendingAct.Remove(act);
                     int ruleId = act.Rule.RuleId;
-                    PositiveConstraintTerms.Clear();
+                    RemovePositiveConstraints();
                     NegativeConstraintTerms.Clear();
 
                     act.Rule.Execute(act.Binding1.Term, act.FindNumber, this, KeepDerivations, pendingFacts);
@@ -990,16 +1013,21 @@
 
                     foreach (var kv in pendingFacts)
                     {
-                        if (copyConstraints)
+                        foreach (var derv in kv.Value)
                         {
-                            if (IsConstraintSatisfiable(kv.Key))
+                            AddPositiveConstraints(derv.Binding1, derv.Binding2);
+                            if (copyConstraints)
                             {
-                                IndexFact(ExtendLFP(kv.Key), kv.Value, pendingAct, i);
+                                if (IsConstraintSatisfiable(kv.Key))
+                                {
+                                    IndexFact(ExtendLFP(kv.Key), kv.Value, pendingAct, i);
+                                }
                             }
-                        }
-                        else
-                        {
-                            AddRecursionConstraint(ruleId);
+                            else
+                            {
+                                AddRecursionConstraint(ruleId);
+                            }
+                            RemovePositiveConstraints();
                         }
                     }
 
@@ -1257,10 +1285,44 @@
                                 bool hasFalse = ch.Any(s => s.Equals("FALSE"));
                                 str = hasFalse ? "FALSE" : "TRUE";
                                 return str;
+                            case OpKind.SymOr:
+                                bool hasTrue = ch.ElementAt(0) == "TRUE" || ch.ElementAt(1) == "TRUE";
+                                str = hasTrue ? "TRUE" : "FALSE";
+                                return str;
+                            case OpKind.SymOrAll:
+                                bool containsTrue = ch.Any(s => s.Equals("TRUE"));
+                                str = containsTrue ? "TRUE" : "FALSE";
+                                return str;
                             case OpKind.SymMax:
                                 r1 = MakeRational(ch.ElementAt(0));
                                 r2 = MakeRational(ch.ElementAt(1));
                                 return r1 > r2 ? r1.ToString() : r2.ToString();
+                            case OpKind.SymMin:
+                                r1 = MakeRational(ch.ElementAt(0));
+                                r2 = MakeRational(ch.ElementAt(1));
+                                return r1 < r2 ? r1.ToString() : r2.ToString();
+                            case OpKind.SymMaxAll:
+                                r1 = MakeRational(ch.ElementAt(0));
+                                for (int i = 1; i < ch.Count(); i++)
+                                {
+                                    r2 = MakeRational(ch.ElementAt(i));
+                                    if (r1 <= r2)
+                                    {
+                                        r1 = r2;
+                                    }
+                                }
+                                return r1.ToString();
+                            case OpKind.SymMinAll:
+                                r1 = MakeRational(ch.ElementAt(0));
+                                for (int i = 1; i < ch.Count(); i++)
+                                {
+                                    r2 = MakeRational(ch.ElementAt(i));
+                                    if (r1 >= r2)
+                                    {
+                                        r1 = r2;
+                                    }
+                                }
+                                return r1.ToString();
                             default:
                                 throw new NotImplementedException();
                         }

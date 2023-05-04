@@ -98,7 +98,6 @@
         {
             bool wasAdded;
             Term[] args;
-            index.AddPositiveConstraint(binding);
             // TODO: Check the matching for the symbolic case
             foreach (var match in Matcher.EnumerateMatches(binding))
             {

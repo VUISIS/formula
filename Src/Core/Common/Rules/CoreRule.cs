@@ -736,7 +736,6 @@
 
             //// Case 1. There are no finds.
             ConstraintNode headNode = nodes[Head];
-            index.AddPositiveConstraint(binding);
             if (Find1.IsNull && Find2.IsNull)
             {
                 Contract.Assert(headNode.Binding != null);
@@ -832,7 +831,6 @@
                         findNumber == 0 ? binding : tp,
                         findNumber == 1 ? binding : tp);
 
-                    index.AddPositiveConstraint(tp);
                     UndoPropagation(ConstraintNode.BLSecond);
                 }
             }
@@ -1163,6 +1161,7 @@
             var d = new Derivation(this, bind1, bind2);
             if (index.IfExistsThenDerive(t, d))
             {
+                index.AddDerivation(t, bind1, bind2);
                 return;
             }
 
@@ -2381,11 +2380,17 @@
                         break;
                 }
 
-                if (!typeBins.TryFindValue(bindSymb, out typeTerm))
+                if (bindSymb.IsSymAndAll || bindSymb.IsSymMaxAll || bindSymb.IsSymMinAll || bindSymb.IsSymOrAll)
+                {
+                    Binding = facts.Index.TrueValue;                            
+                    BindingLevel = bindingLevel;                                
+                    return true; 
+                }
+                else if (!typeBins.TryFindValue(bindSymb, out typeTerm))
                 {
                     return false;
                 }
-                else if (!typeTerm.Owner.IsGroundMember(typeTerm, arg.Binding))
+                else if (!typeTerm.Owner.IsGroundMember(typeTerm, arg.Binding) && !Term.IsSymbolicTerm(arg.Binding))
                 {
                     // TODO: this may be ok for symbolic terms
                     return false;

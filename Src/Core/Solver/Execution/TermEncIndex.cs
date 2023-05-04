@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Formula.Solver
+﻿using Microsoft.Z3;
+
+namespace Microsoft.Formula.Solver
 {
     using System;
     using System.Collections.Generic;
@@ -99,6 +101,58 @@
                 );
 
             return hasEncoding;
+        }
+        
+        protected Z3Expr CheckMinAll(int index, List<Z3Expr> exprs, Z3Expr maxexpr)
+        {
+            if (index == exprs.Count - 1)
+            {
+                return Solver.Context.MkITE(Solver.Context.MkLt((Z3ArithExpr)exprs[index], (Z3ArithExpr)maxexpr), exprs[index], maxexpr);
+            }
+            else
+            {
+                return Solver.Context.MkITE(Solver.Context.MkLt((Z3ArithExpr)exprs[index], (Z3ArithExpr)maxexpr), CheckMinAll(index + 1, exprs, exprs[index]),
+                    CheckMinAll(index + 1, exprs, maxexpr));
+            }
+        }
+
+        protected Z3Expr CheckMaxAll(int index, List<Z3Expr> exprs, Z3Expr maxexpr)
+        {
+            if (index == exprs.Count - 1)
+            {
+                return Solver.Context.MkITE(Solver.Context.MkGt((Z3ArithExpr)exprs[index], (Z3ArithExpr)maxexpr), exprs[index], maxexpr);
+            }
+            else
+            {
+                return Solver.Context.MkITE(Solver.Context.MkGt((Z3ArithExpr)exprs[index], (Z3ArithExpr)maxexpr), CheckMaxAll(index + 1, exprs, exprs[index]),
+                    CheckMaxAll(index + 1, exprs, maxexpr));
+            }
+        }
+        
+        protected Z3Expr CheckOrAll(int index, List<Z3Expr> exprs, Z3Expr tEnc, Z3Expr fEnc)
+        {
+            if (index == exprs.Count - 1)
+            {
+                return Solver.Context.MkITE(Solver.Context.MkEq(exprs[index], tEnc), tEnc, fEnc);
+            }
+            else
+            {
+                return Solver.Context.MkITE(Solver.Context.MkEq(exprs[index], tEnc), tEnc,
+                    CheckOrAll(index + 1, exprs, tEnc, fEnc));
+            }
+        }
+        
+        protected Z3Expr CheckAndAll(int index, List<Z3Expr> exprs, Z3Expr tEnc, Z3Expr fEnc)
+        {
+            if (index == exprs.Count - 1)
+            {
+                return Solver.Context.MkITE(Solver.Context.MkEq(exprs[index], tEnc), tEnc, fEnc);
+            }
+            else
+            {
+                return Solver.Context.MkITE(Solver.Context.MkEq(exprs[index], tEnc), CheckAndAll(index + 1, exprs, tEnc, fEnc),
+                    fEnc);
+            }
         }
 
         /// <summary>
@@ -232,31 +286,43 @@
                             case OpKind.SymAndAll:
                                 var tEnc = GetTerm(facts.Index.TrueValue, out tempTerm);
                                 var fEnc = GetTerm(facts.Index.FalseValue, out tempTerm);
-                                Z3BoolExpr[] boolExprs = new Z3BoolExpr[ch.Count()];
-                                for (int i = 0; i < ch.Count(); i++)
-                                {
-                                    boolExprs[i] = Solver.Context.MkEq(tEnc, ch.ElementAt(i));
-                                }
-                                Z3Expr currExpr = null;
-                                for (int i = 0; i < ch.Count(); i++)
-                                {
-                                    if (currExpr == null)
-                                    {
-                                        currExpr = Solver.Context.MkITE(boolExprs[i], tEnc, fEnc);
-                                    }
-                                    else
-                                    {
-                                        currExpr = Solver.Context.MkITE(boolExprs[i], currExpr, fEnc);
-                                    }
-                                }
+                                Z3Expr currExpr = CheckAndAll(0, ch.ToList(), tEnc, fEnc);
                                 encodings.Add(x, currExpr);
                                 return currExpr;
+                            case OpKind.SymOr:
+                                Term outTerm;
+                                var trueValue = GetTerm(facts.Index.TrueValue, out outTerm);
+                                var falseValue = GetTerm(facts.Index.FalseValue, out outTerm);
+                                encp = Solver.Context.MkITE(Solver.Context.MkEq(trueValue, ch.ElementAt(0)),
+                                    trueValue, Solver.Context.MkITE(Solver.Context.MkEq(trueValue, ch.ElementAt(1)), trueValue, falseValue));
+                                encodings.Add(x, encp);
+                                return encp;
+                            case OpKind.SymOrAll:
+                                var trueEnc = GetTerm(facts.Index.TrueValue, out tempTerm);
+                                var falseEnc = GetTerm(facts.Index.FalseValue, out tempTerm);
+                                Z3Expr orExpr = CheckOrAll(0, ch.ToList(), trueEnc, falseEnc);
+                                encodings.Add(x, orExpr);
+                                return orExpr;
                             case OpKind.SymMax:
                                 encp = Solver.TypeEmbedder.Context.MkITE(
                                     Solver.TypeEmbedder.Context.MkGt((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1)), 
                                     ch.ElementAt(0), ch.ElementAt(1));
                                 encodings.Add(x, encp);
                                 return encp;
+                            case OpKind.SymMaxAll:
+                                Z3Expr maxExpr = CheckMaxAll(1, ch.ToList(), ch.ElementAt(0));
+                                encodings.Add(x, maxExpr);
+                                return maxExpr;
+                            case OpKind.SymMin:
+                                encp = Solver.TypeEmbedder.Context.MkITE(
+                                    Solver.TypeEmbedder.Context.MkLt((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1)), 
+                                    ch.ElementAt(0), ch.ElementAt(1));
+                                encodings.Add(x, encp);
+                                return encp;
+                            case OpKind.SymMinAll:
+                                Z3Expr minExpr = CheckMinAll(1, ch.ToList(), ch.ElementAt(0));
+                                encodings.Add(x, minExpr);
+                                return minExpr;
                             default:
                                 throw new NotImplementedException();
                         }

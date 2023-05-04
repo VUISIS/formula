@@ -1,0 +1,17 @@
+domain SymbolicOr
+{
+  A ::= new (x : Boolean).
+  B ::= new (x : Boolean).
+  OrValue ::= (x : Boolean).
+
+  OrValue(x) :- a is A, b is B, x = or(a.x, b.x).
+  
+  goodModel :- OrValue(x), x = FALSE.
+  conforms goodModel.
+}
+
+partial model pm of SymbolicOr
+{
+  a is A(x).
+  b is B(y).
+}
