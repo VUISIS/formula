@@ -1,4 +1,7 @@
-﻿namespace Microsoft.Formula.Common.Terms
+﻿using System.Text;
+using System.Text.RegularExpressions;
+
+namespace Microsoft.Formula.Common.Terms
 {
     using System;
     using System.Collections.Generic;

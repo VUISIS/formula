@@ -77,15 +77,23 @@
             this.srcPartialModel = srcPartialModel;
             this.Env = env;
         }
-
-        internal void Start()
+        
+        public void Init()
         {
             solver = new Solver(partialModel, srcPartialModel, Env, cancel);
             if (cancel.IsCancellationRequested)
             {
                 WasCancelled = true;
             }
+        }
 
+        public void Execute()
+        {
+            solver.Execute();
+        }
+
+        public void Start()
+        {
             Solvable = solver.Solve();
             StopTime = DateTime.Now;
         }

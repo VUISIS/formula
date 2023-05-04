@@ -1,0 +1,47 @@
+ <UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:material="using:Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="using:Debugger.ViewModels"
+             x:DataType="vm:InferenceRulesViewModel"
+             x:Class="Debugger.Views.InferenceRulesView">
+    <DockPanel>
+        <StackPanel Spacing="4"
+                    Margin="0,0,4,0"
+                    Orientation="Vertical"
+					DockPanel.Dock="Left">
+            <Button Width="25"
+                    Height="25"
+                    ToolTip.Tip="Debug Play">
+                <material:MaterialIcon Kind="BugPlay"/>
+            </Button>
+            <Button Width="25"
+                    Height="25"
+                    ToolTip.Tip="Debug Pause">
+                <material:MaterialIcon Kind="BugPause"/>
+            </Button>
+            <Button Width="25"
+                    Height="25"
+                    ToolTip.Tip="Debug Stop">
+                <material:MaterialIcon Kind="BugStop"/>
+            </Button>
+        </StackPanel>
+        <ItemsRepeater Items="{Binding Items}" 
+                       Background="#222222">
+            <ItemsRepeater.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Auto">
+                            <TextBlock Text="{Binding Header}"
+                                       Margin="0,8,0,0"/>
+                        </ScrollViewer>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
+    </DockPanel>
+</UserControl>

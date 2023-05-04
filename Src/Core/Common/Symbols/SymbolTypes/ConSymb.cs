@@ -4,12 +4,10 @@
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
-    using System.Text;
     using System.Threading;
 
     using API;
     using API.Nodes;
-    using Compiler;
     using Common.Extras;
 
     public sealed class ConSymb : UserSymbol

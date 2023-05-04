@@ -1,0 +1,232 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:material="using:Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="using:Debugger.ViewModels"
+             x:DataType="vm:SolverViewModel"
+             x:Class="Debugger.Views.SolverView">
+	<Grid Name="SolverGrid">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="51"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="75"/>
+			<ColumnDefinition Width="10"/>
+			<ColumnDefinition Width="75"/>
+			<ColumnDefinition Width="10"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<TextBlock Grid.Row="0" 
+		           Grid.Column="0"
+		           Grid.ColumnSpan="5"
+		           TextAlignment="Center"
+		           HorizontalAlignment="Center"
+		           VerticalAlignment="Center"
+		           Text="Symbolic Variables"/>
+		<Border Grid.Row="2" 
+		        Grid.Column="0"
+		        BorderBrush="White"
+		        CornerRadius="1"
+		        BorderThickness="0.5">
+			<ComboBox Name="VariableSelection"
+			          Height="50"
+			          IsEnabled="False"
+			          BorderBrush="White"
+			          BorderThickness="0"
+			          PlaceholderText="Vars"
+			          PlaceholderForeground="Gray"
+			          SelectedItem="{Binding Path=SelectedVariable}"
+			          Items="{Binding VariableItems}">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock TextAlignment="Center"
+						           HorizontalAlignment="Center"
+						           VerticalAlignment="Center"
+						           Width="50" 
+						           Foreground="White" 
+						           Text="{Binding Header}"/>
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+		</Border>
+		<Border Grid.Row="2" 
+		        Grid.Column="2"
+		        BorderBrush="White"
+		        CornerRadius="1"
+		        BorderThickness="0.5">
+			<ComboBox Name="ConstraintSelection"
+			          IsEnabled="False"
+			          Height="50"
+			          BorderBrush="White"
+			          BorderThickness="0"
+			          PlaceholderText="Ops"
+			          PlaceholderForeground="Gray"
+			          SelectedItem="{Binding Path=SelectedConstraint}"
+			          Items="{Binding ConstraintItems}">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock TextAlignment="Center"
+						           HorizontalAlignment="Center"
+						           VerticalAlignment="Center"
+								   Width="50" 
+						           Foreground="White" 
+						           Text="{Binding Header}"/>
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+		</Border>
+		<TextBox Grid.Row="2" 
+		         Grid.Column="4"
+		         Name="InputExpression"
+		         IsEnabled="False"
+		         Height="50"
+		         Background="Black"
+		         BorderBrush="White"
+		         BorderThickness="0.5"
+		         CornerRadius="1"
+		         AcceptsReturn="False" 
+		         TextAlignment="Left"
+		         VerticalAlignment="Center"
+		         VerticalContentAlignment="Center"
+		         Watermark="Digit/Real"
+		         TextWrapping="NoWrap"/>
+		<Button Grid.Row="4" 
+		        Grid.Column="0"
+		        Grid.ColumnSpan="5"
+		        Name="AddConstraintButton"
+				Command="{Binding AddConstraint}"
+		        IsEnabled="False"
+		        HorizontalAlignment="Right"
+		        ToolTip.Tip="Add Constraint">
+			<StackPanel Orientation="Horizontal"
+			            Spacing="5">
+				<material:MaterialIcon Kind="Plus"/>
+				<TextBlock Text="Constraint"/>
+			</StackPanel>
+		</Button>
+		<TextBlock Grid.Row="6" 
+		           Grid.Column="0"
+		           Grid.ColumnSpan="5"
+		           TextAlignment="Center"
+		           HorizontalAlignment="Center"
+		           VerticalAlignment="Center"
+		           Text="All Constraints"/>
+		<ListBox Grid.Row="8" 
+		         Grid.Column="0"
+		         Grid.ColumnSpan="5"
+		         Background="#222222"
+		         Items="{Binding AllConstraintsItems}"
+		         SelectionMode="Single">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<ScrollViewer VerticalScrollBarVisibility="Auto"
+					              HorizontalScrollBarVisibility="Auto">
+						<TextBlock TextAlignment="Center"
+						           Text="{Binding Display}"/>
+					</ScrollViewer>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+		<StackPanel Grid.Row="10" 
+		            Grid.Column="0"
+		            Grid.ColumnSpan="5"
+		            Orientation="Horizontal"
+		            HorizontalAlignment="Right"
+		            Spacing="10">
+			<Button Name="InitButton"
+			        HorizontalAlignment="Center"
+			        VerticalAlignment="Center"
+			        IsEnabled="False"
+			        ToolTip.Tip="Init Constraints">
+				<material:MaterialIcon Kind="HeadCheck"/>
+			</Button>
+			<Button Name="ExecuteButton"
+			        HorizontalAlignment="Center"
+			        VerticalAlignment="Center"
+			        IsEnabled="False"
+			        ToolTip.Tip="Execute Constraints">
+				<material:MaterialIcon Kind="HeadSync"/>
+			</Button>
+			<Button Name="SolveButton"
+			        HorizontalAlignment="Center"
+			        VerticalAlignment="Center"
+			        IsEnabled="False"
+			        ToolTip.Tip="Solve Constraints">
+				<material:MaterialIcon Kind="HeadLightbulb"/>
+			</Button>
+			<Button Name="SolutionButton"
+			        HorizontalAlignment="Center"
+			        VerticalAlignment="Center"
+			        IsEnabled="False"
+			        ToolTip.Tip="Constraints Solution">
+				<material:MaterialIcon Kind="HeadCheck"/>
+			</Button>
+			<Button Name="GenSolButton"
+					HorizontalAlignment="Center"
+			        VerticalAlignment="Center"
+			        IsEnabled="False"
+			        ToolTip.Tip="Generate Next Solution">
+				<material:MaterialIcon Kind="Cog"/>
+			</Button>
+		</StackPanel>
+		<TextBlock Grid.Row="12"
+		           Grid.Column="0"
+		           Grid.ColumnSpan="5"
+		           TextAlignment="Center"
+		           HorizontalAlignment="Center"
+		           VerticalAlignment="Center"
+		           Text="Solution/Unsat Core"/>
+		<ScrollViewer Grid.Row="14"
+		              Grid.Column="0"
+		              Grid.ColumnSpan="5"
+		              VerticalScrollBarVisibility="Auto"
+		              HorizontalScrollBarVisibility="Auto">
+			<TextBlock Name="SolutionOutput" 
+			           Padding="20"
+			           Background="#222222"/>
+		</ScrollViewer>
+		<TextBlock Grid.Row="16"
+		           Grid.Column="0"
+		           Grid.ColumnSpan="5"
+		           TextAlignment="Center"
+		           HorizontalAlignment="Center"
+		           VerticalAlignment="Center"
+		           Text="Counter Example"/>
+		<ListBox Grid.Row="18"
+		         Grid.Column="0"
+		         Grid.ColumnSpan="5" 
+		         Background="#222222"
+		         Items="{Binding CounterExampleItems}"
+		         SelectionMode="Single">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<ScrollViewer VerticalScrollBarVisibility="Auto"
+					              HorizontalScrollBarVisibility="Auto">
+						<TextBlock TextAlignment="Center"
+						           Text="{Binding Display}"/>
+					</ScrollViewer>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+	</Grid>
+</UserControl>

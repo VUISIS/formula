@@ -1,0 +1,18 @@
+domain Simple
+{
+  A ::= new (id: Integer).
+  B ::= (id : Integer).
+  C ::= (id : Integer).
+
+  B(y) :- A(x), x > 0, y = x - 1.
+  C(y) :- A(x), x < 0, y = x - 1.
+  goodModel :- B(x).
+  badModel :- C(x).
+ 
+  conforms goodModel, badModel.
+}
+
+partial model pm of Simple
+{
+  A(x).
+}

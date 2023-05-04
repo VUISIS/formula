@@ -114,6 +114,13 @@
             return data.Id;
         }
 
+        public void AddTask(Task task, ExecuterStatistics stats, CancellationTokenSource canceller)
+        {
+            Contract.Requires(task != null && stats != null && canceller != null);
+            var data = new TaskData(tasks.Count, TaskKind.Solve, task, stats, canceller);
+            tasks.Add(data.Id, data);
+        }
+
         public int StartTask(Task<SolveResult> task, ExecuterStatistics stats, CancellationTokenSource canceller)
         {
             Contract.Requires(task != null && stats != null && canceller != null);
