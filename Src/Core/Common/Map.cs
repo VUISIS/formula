@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Formula.Common
+﻿using System.Collections.Specialized;
+
+namespace Microsoft.Formula.Common
 {
     using System;
     using System.Collections;

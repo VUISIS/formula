@@ -61,6 +61,11 @@
             IsDirectlyProvable = true;
         }
 
+        public List<ConstraintData> GetConstraintData()
+        {
+            return constraintData;
+        }
+
         private List<ConstraintData> constraintData = new List<ConstraintData>();
 
         private HashSet<Z3BoolExpr> cachedConstraints = new HashSet<Z3BoolExpr>();

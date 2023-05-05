@@ -5,19 +5,17 @@
     using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Text;
-    using System.Threading;
 
     using API;
-    using API.ASTQueries;
     using API.Nodes;
     using Common;
     using Common.Extras;
     using Common.Rules;
     using Common.Terms;
-    using Compiler;
+    using API.Base;
 
-    using Z3Expr = Microsoft.Z3.Expr;
-    using Z3BoolExpr = Microsoft.Z3.BoolExpr;
+    using Z3Expr = Z3.Expr;
+    using Z3BoolExpr = Z3.BoolExpr;
     using System.Numerics;
     using System.Text.RegularExpressions;
 
@@ -25,6 +23,9 @@
     {
         private static char PatternVarBoundPrefix = '^';
         private static char PatternVarUnboundPrefix = '*';
+
+        private static string termSymbGen = 
+            "(\\(|\\s)?[\\w\\d]+@~SC2VAR~([\\w\\d]+)(\\s|\\))?";
 
         /// <summary>
         /// Facts where symbolic constants have been replaced by variables
@@ -54,7 +55,8 @@
         /// <summary>
         /// Maps a symbol to a set of indices with patterns beginning with this symbol. 
         /// </summary>
-        private Map<Symbol, LinkedList<SymSubIndex>> symbToIndexMap = new Map<Symbol, LinkedList<SymSubIndex>>(Symbol.Compare);
+        private Map<Symbol, LinkedList<SymSubIndex>> symbToIndexMap =
+            new Map<Symbol, LinkedList<SymSubIndex>>(Symbol.Compare);
 
         /// <summary>
         /// A map from strata to rules that are not triggered.
@@ -65,8 +67,7 @@
         /// <summary>
         /// The current least fixed point.
         /// </summary>
-        private Map<Term, SymElement> lfp = 
-            new Map<Term, SymElement>(Term.Compare);
+        private Map<Term, SymElement> lfp = new Map<Term, SymElement>(Term.Compare);
 
         private Map<Term, Set<Derivation>> facts = new Map<Term, Set<Derivation>>(Term.Compare);
 
@@ -80,41 +81,21 @@
             new Dictionary<int, int>();
 
         private bool hasCycles = false;
-
+        
         private List<Dictionary<Z3Expr, Z3Expr>> prevSolutions =
             new List<Dictionary<Z3Expr, Z3Expr>>();
 
         private List<List<string>> solutionStrings = new List<List<string>>();
 
-        public RuleTable Rules
-        {
-            get;
-            private set;
-        }
+        public RuleTable Rules { get; private set; }
 
-        public Solver Solver
-        {
-            get;
-            private set;
-        }
+        public Solver Solver { get; private set; }
 
-        public bool KeepDerivations
-        {
-            get;
-            private set;
-        }
+        public bool KeepDerivations { get; private set; }
 
-        public TermIndex Index
-        {
-            get;
-            private set;
-        }
+        public TermIndex Index { get; private set; }
 
-        public TermEncIndex Encoder
-        {
-            get;
-            private set;
-        }
+        public TermEncIndex Encoder { get; private set; }
 
         public Map<Term, Term> varToTypeMap =
             new Map<Term, Term>(Term.Compare);
@@ -192,6 +173,153 @@
         protected void RemovePositiveConstraints()
         {
             PositiveConstraintTerms.Clear();
+        }
+
+        private string RemoveSymGenVar(string b)
+        {
+            var matchEval = new MatchEvaluator((m) =>
+            { 
+                return m.Groups[1].Value + m.Groups[2].Value + m.Groups[3].Value;
+            });
+            var newStr = Regex.Replace(b, termSymbGen, matchEval);
+            if (newStr.Length < 1)
+            {
+                return b;
+            }
+            else
+            {
+                return newStr;
+            }
+        }
+
+        public void SetVarFacts()
+        {
+            if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
+            {
+                foreach (var fact in aliasMap)
+                {
+                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                             .AddVariableFact(fact.Key.Id, fact.Key.Name.Replace("%",""));
+                }
+            }
+        }
+
+        private void LFPChanged(Term t, SymElement s)
+        {
+            if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
+            {
+                if (t.Symbol.Kind == SymbolKind.ConSymb)
+                {
+                    if (!((ConSymb)t.Symbol).IsAutoGen)
+                    {
+                        var temp = PrefixToInfix(t);
+                        var n = RemoveSymGenVar(temp);
+                        EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                            .AddCurrentTerm(t.Symbol.Id, n);
+                    }
+                }
+                else 
+                {
+                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                        .AddCurrentTerm(t.Symbol.Id, t.ToString());
+                }
+                
+                foreach (var data in s.GetConstraintData())
+                {
+                    foreach (var dirConst in data.DirConstraints)
+                    {
+                        var cnvStr = Z3Printer.ConvertZ3ExprPrefixToInfix(dirConst);
+                        EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                                 .AddDirConstraint(t.Symbol.Id, RemoveSymGenVar(cnvStr));
+                    }
+
+                    foreach (var posConst in data.PosConstraints)
+                    {
+                        if (posConst.Symbol is UserSymbol userSym &&
+                            !userSym.IsAutoGen)
+                        {
+                            var temp = PrefixToInfix(posConst);
+                            if (temp.Length > 0)
+                            {
+                                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                                    .AddPosConstraint(t.Symbol.Id, RemoveSymGenVar(temp));
+                            }
+                        }
+                    }
+            
+                    foreach (var negConst in data.NegConstraints)
+                    {
+                        if (negConst.Symbol is UserSymbol userSym &&
+                            !userSym.IsAutoGen)
+                        {
+                            var temp = PrefixToInfix(negConst);
+                            if (temp.Length > 0)
+                            {
+                                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters,
+                                        EnvParamKind.Debug_SolverPublisher)
+                                    .AddNegConstraint(t.Symbol.Id, RemoveSymGenVar(temp));
+                            }
+                        }
+                    }
+                    
+                    var sideConstraints = s.GetSideConstraints(this);
+                    var cnvS = Z3Printer.ConvertZ3ExprPrefixToInfix(sideConstraints);
+                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                             .AddFlatConstraint(t.Symbol.Id, RemoveSymGenVar(cnvS));
+                }
+            }
+        }
+
+        public void SetPublisherCoreRules()
+        {
+            if (!EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
+                return;
+            
+            var rules = new Dictionary<int, List<string>>();
+            foreach (var coreRule in Rules.Rules)
+            {
+                var t = coreRule.Head;
+                if (!rules.ContainsKey(t.Symbol.Id))
+                {
+                    rules.Add(t.Symbol.Id, new List<string>());
+                }
+                
+                switch (t.Symbol.Kind)
+                {
+                    case SymbolKind.ConSymb:
+                        if (t.Symbol is ConSymb conSymb &&
+                            !conSymb.IsAutoGen)
+                        {
+                            rules[t.Symbol.Id].Add(t.ToString());
+                        }
+                        break;
+                    case SymbolKind.UserCnstSymb:
+                        if (t.Symbol is UserCnstSymb userCnstSymb)
+                        {
+                            if (!userCnstSymb.IsAutoGen)
+                            {
+                                if (userCnstSymb.IsDerivedConstant &&
+                                    userCnstSymb.IsNonVarConstant)
+                                {
+                                    rules[t.Symbol.Id].Add(userCnstSymb.Name);
+                                    break;
+                                }
+                                
+                                var newTerm = Index.SymbCnstToVar(userCnstSymb, out var wasAdded);
+                                if (wasAdded)
+                                {
+                                    rules[t.Symbol.Id].Add(newTerm.ToString());
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+
+            EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                     .SetCoreRules(rules);
         }
 
         public bool Exists(Term t)
@@ -338,9 +466,9 @@
         public void PendEqualityConstraint(Term t1, Term t2)
         {
             Term normalized;
-            var expr1 = this.Encoder.GetTerm(t1, out normalized);
-            var expr2 = this.Encoder.GetTerm(t2, out normalized);
-            this.PendEqualityConstraint(expr1, expr2);
+            var expr1 = Encoder.GetTerm(t1, out normalized);
+            var expr2 = Encoder.GetTerm(t2, out normalized);
+            PendEqualityConstraint(expr1, expr2);
         }
 
         public void PendEqualityConstraint(Z3Expr expr1, Z3Expr expr2)
@@ -383,7 +511,7 @@
 
         public void PrintRecursionConflict(Z3BoolExpr expr)
         {
-            Console.WriteLine("Conflict detected in recursion constraint: " + expr.ToString() + "\n\n");
+            Console.WriteLine("Conflict detected in recursion constraint: " + expr + "\n\n");
         }
 
         public SymExecuter(Solver solver)
@@ -393,14 +521,17 @@
             Rules = solver.PartialModel.Rules;
             Index = solver.PartialModel.Index;
             Encoder = new TermEncIndex(solver);
+
             KeepDerivations = true;
 
             solver.PartialModel.ConvertSymbCnstsToVars(out varFacts, out aliasMap);
+            
+            Map<ConSymb, List<Term>> cardTerms = 
+                new Map<ConSymb, List<Term>>(Symbol.Compare);
 
-            Map<ConSymb, List<Term>> cardTerms = new Map<ConSymb, List<Term>>(ConSymb.Compare);
             foreach (var fact in varFacts)
             {
-                if (solver.PartialModel.CheckIfCardTerm(fact))
+                if (Solver.PartialModel.CheckIfCardTerm(fact))
                 {
                     List<Term> termList;
                     if (!cardTerms.TryFindValue((ConSymb)fact.Symbol, out termList))
@@ -411,21 +542,24 @@
                     termList.Add(fact);
                 }
             }
-
+            
             //// Need to pre-register all aliases with the encoder.
-            bool wasAdded;
             foreach (var kv in aliasMap)
             {
-                Term vTerm = Index.SymbCnstToVar(kv.Key, out wasAdded);
+                Term vTerm = Index.SymbCnstToVar(kv.Key, out bool wasAdded);
                 Term tTerm = Solver.PartialModel.GetSymbCnstType(kv.Key);
                 if (!varToTypeMap.ContainsKey(vTerm))
                 {
                     varToTypeMap.Add(vTerm, tTerm);
                 }
-                var expr = Encoder.GetVarEnc(vTerm, tTerm);
+                Encoder.GetVarEnc(vTerm, tTerm);
             }
 
             InitializeExecuter();
+
+            SetPublisherCoreRules();
+            
+            SetVarFacts();
 
             // TODO: handle cardinality terms properly
             foreach (var kvp in cardTerms)
@@ -451,7 +585,7 @@
                             continue;
                         }
 
-                        Z3BoolExpr boolExpr = Solver.Context.MkNot(Solver.Context.MkEq(firstEnc.Encoding, secondEnc.Encoding));
+                        Solver.Context.MkNot(Solver.Context.MkEq(firstEnc.Encoding, secondEnc.Encoding));
                     }
                 }
             }
@@ -532,6 +666,7 @@
 
         protected void MapCoreToTerms(IEnumerable<Z3BoolExpr> coreExprs)
         {
+            StringBuilder sb = new StringBuilder();
             Dictionary<Z3BoolExpr, List<Term>> lookupMap = new Dictionary<Z3BoolExpr, List<Term>>();
             foreach (var curr in lfp)
             {
@@ -569,17 +704,26 @@
                         }
                         if (conflictCount > 0)
                         {
-                            Console.WriteLine(currConflict.ToString());
+                            currConflict.Append("\n");
+                            sb.Append(currConflict);
                         }
                     }
                 }
+            }
+
+            if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
+            {
+                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                    .SetUnsatOutput(sb.ToString());
+            }
+            else
+            {
+                Console.WriteLine(sb.ToString());
             }
         }
 
         public bool Solve()
         {
-            Execute();
-
             bool solvable = false;
             bool hasConforms = false;
             bool hasRequires = false;
@@ -661,9 +805,14 @@
                 {
                     hasCore = true;
                     coreExprs = Solver.Z3Solver.UnsatCore;
+
+                    if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
+                    {
+                        EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                            .SetUnsatOutput("Model not solvable.");
+                    }
                 }
             }
-
             return solvable;
         }
 
@@ -676,14 +825,24 @@
                 return;
             }
 
+            StringBuilder sb = new StringBuilder();
             if (num < solutionStrings.Count)
             {
-                System.Console.WriteLine("Solution number " + num);
+                sb.AppendLine("Solution number " + num);
                 foreach (var str in solutionStrings[num])
                 {
-                    System.Console.WriteLine(str);
+                    sb.AppendLine(str);
                 }
-                System.Console.WriteLine();
+                sb.AppendLine();
+                if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
+                {
+                    EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                             .SetExtractOutput(sb.ToString());
+                }
+                else
+                {
+                    Console.WriteLine(sb.ToString());
+                }
                 return;
             }
 
@@ -732,16 +891,27 @@
 
             if (num < solutionStrings.Count)
             {
-                System.Console.WriteLine("Solution number " + num);
+                sb.AppendLine("Solution number " + num);
                 foreach (var str in solutionStrings[num])
                 {
-                    System.Console.WriteLine(str);
+                    sb.AppendLine(str);
                 }
-                System.Console.WriteLine();
+
+                sb.AppendLine();
             }
             else
             {
-                System.Console.WriteLine("Could not find solution " + num);
+                sb.AppendLine("Could not find solution " + num);
+            }
+
+            if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
+            {
+                EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters, EnvParamKind.Debug_SolverPublisher)
+                         .SetExtractOutput(sb.ToString());
+            }
+            else
+            {
+                Console.WriteLine(sb.ToString());
             }
         }
 
@@ -997,8 +1167,6 @@
                     }
                     else if (x.Symbol.Kind == SymbolKind.BaseOpSymb)
                     {
-                        Rational r1, r2;
-                        string str;
                         switch (((BaseOpSymb)x.Symbol).OpKind)
                         {
                             case OpKind.Add:
@@ -1178,7 +1346,7 @@
                 });
         }
 
-        private void InitializeExecuter()
+        public void InitializeExecuter()
         {
             var optRules = Rules.Optimize();
             ruleCycles = Rules.GetCycles(optRules);
@@ -1260,6 +1428,8 @@
             {
                 e.SetDirectlyProvable();
             }
+            
+            LFPChanged(t, e);
 
             return e;
         }

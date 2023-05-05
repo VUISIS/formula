@@ -3,15 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
-    using System.Linq;
-    using System.Text;
-    using System.Threading;
 
-    using API;
-    using API.Nodes;
-    using API.ASTQueries;
-    using Compiler;
-    using Extras;
     using Terms;
 
     /// <summary>

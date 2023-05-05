@@ -131,5 +131,25 @@ namespace Tests
             _ciFixture.RunCommand("solve pm2 1 SimpleOLP2.conforms", "SolveTests: Solve command for SimpleOLP2.4ml failed.");
             Assert.False(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm2 in SimpleOLP2.4ml.");
         }
+        
+        [Fact]
+        public void TestSimpleUnsatExample()
+        {
+            _ciFixture.RunCommand("load " + Path.GetFullPath("../../../../../../../Tst/Tests/Symbolic/SimpleUnsat.4ml"), "SolveTests: Load command for SimpleUnsat.4ml failed.");
+            Assert.True(_ciFixture.GetLoadResult(), "SolveTests: Loading SimpleUnsat.4ml failed.");
+
+            _ciFixture.RunCommand("solve pm 1 Simple.conforms", "SolveTests: Solve command for SimpleUnsat.4ml failed.");
+            Assert.False(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SimpleUnsat.4ml.");
+        }
+
+        [Fact]
+        public void TestSimpleSolvableExample()
+        {
+            _ciFixture.RunCommand("load " + Path.GetFullPath("../../../../../../../Tst/Tests/Symbolic/SimpleSolvable.4ml"), "SolveTests: Load command for SimpleSolvable.4ml failed.");
+            Assert.True(_ciFixture.GetLoadResult(), "SolveTests: Loading SimpleSolvable.4ml failed.");
+
+            _ciFixture.RunCommand("solve pm 1 Simple.conforms", "SolveTests: Solve command for SimpleSolvable.4ml failed.");
+            Assert.True(_ciFixture.GetSolveResult(), "SolveTests: No solutions found for partial model pm in SimpleSolvable.4ml.");
+        }
     }
 }

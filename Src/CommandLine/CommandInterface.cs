@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
+using Microsoft.Formula.Common.Rules;
+
 namespace Microsoft.Formula.CommandLine
 {
     using System;
@@ -576,7 +578,7 @@ namespace Microsoft.Formula.CommandLine
                 return;
             }
 
-            Common.Rules.ExecuterStatistics stats;
+            ExecuterStatistics stats;
             if (!taskManager.TryGetStatistics(taskId, out stats))
             {
                 sink.WriteMessageLine(string.Format("{0} is not a task id", cmdParts[0]), SeverityKind.Warning);
@@ -1268,7 +1270,7 @@ namespace Microsoft.Formula.CommandLine
             module.Node.TryGetStringAttribute(AttributeKind.Name, out name);
 
             List<Flag> flags;
-            System.Threading.Tasks.Task<SolveResult> task;
+            Task<SolveResult> task;
             var solveCancel = new CancellationTokenSource();
             var goals = new AST<Body>[bodies.Count];
             int i = 0;
@@ -1291,16 +1293,20 @@ namespace Microsoft.Formula.CommandLine
                 sink.WriteMessageLine("Could not start operation; environment is busy", SeverityKind.Warning);
                 return;
             }
-
-            WriteFlags(cmdLineName, flags);
-            if (task != null)
+            
+            var solverPublisher = EnvParams.GetSolverPublisherParameter(env.Parameters, EnvParamKind.Debug_SolverPublisher);
+            if (solverPublisher == null)
             {
-                var id = taskManager.StartTask(task, new Common.Rules.ExecuterStatistics(null), solveCancel);
-                sink.WriteMessageLine(string.Format("Started solve task with Id {0}.", id), SeverityKind.Info);
-            }
-            else
-            {
-                sink.WriteMessageLine("Failed to start solved task.", SeverityKind.Warning);
+                WriteFlags(cmdLineName, flags);
+                if (task != null)
+                {
+                    var id = taskManager.StartTask(task, new ExecuterStatistics(null), solveCancel);
+                    sink.WriteMessageLine(string.Format("Started solve task with Id {0}.", id), SeverityKind.Info);
+                }
+                else
+                {
+                    sink.WriteMessageLine("Failed to start solved task.", SeverityKind.Warning);
+                }
             }
         }
 
@@ -1552,6 +1558,11 @@ namespace Microsoft.Formula.CommandLine
                     WriteEnvironment(env, 0);
                 },
                 canceler.Token);
+        }
+
+        public void AddExternalTask(Task task, ExecuterStatistics stats, CancellationTokenSource src)
+        {
+            taskManager.AddTask(task, stats, src);
         }
 
         private void WriteEnvironment(TypeEnvironment env, int indent)

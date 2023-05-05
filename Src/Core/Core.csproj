@@ -14,6 +14,7 @@
       <OutputPath Condition="'$(OutputPath)' == '' and $([MSBuild]::IsOSPlatform('Windows'))">$(BaseOutputPath)$(Configuration)/Windows/$(Platform)/</OutputPath>
       <OutputPath Condition="'$(OutputPath)' == '' and $([MSBuild]::IsOSPlatform('Linux'))">$(BaseOutputPath)$(Configuration)/Linux/$(Platform)/</OutputPath>
       <OutputPath Condition="'$(OutputPath)' == '' and $([MSBuild]::IsOSPlatform('MacOS'))">$(BaseOutputPath)$(Configuration)/MacOS/$(Platform)/</OutputPath>
+      <RootNamespace>Microsoft.Formula</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

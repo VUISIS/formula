@@ -1,0 +1,107 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:v="using:Debugger.Views"
+        xmlns:vm="using:Debugger.ViewModels"
+        xmlns:material="using:Material.Icons.Avalonia"
+        x:Class="Debugger.Windows.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Formula Debugger"
+        ExtendClientAreaToDecorationsHint="True"
+        Name="DebuggerWindow">
+    <DockPanel Name="TopBar"
+               LastChildFill="True" >
+        <v:ToolbarView Name="TopToolbarView" 
+                       DockPanel.Dock="Top"
+                       Margin="0.0,0.0,0.0,10.0"/>
+        <Grid Name="MainGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="10"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" 
+                       Grid.Column="1"
+                       TextAlignment="Center" 
+                       VerticalAlignment="Bottom"
+                       Text="File Manager"/>
+            <TextBlock Grid.Row="0" 
+                       Grid.Column="7"
+                       TextAlignment="Center" 
+                       VerticalAlignment="Bottom"
+                       Text="Solver"/>
+            <TextBlock Grid.Row="4" 
+                       Grid.Column="1"
+                       TextAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Text="Inference Rules"/>
+            <TextBlock Grid.Row="4" 
+                       Grid.Column="3"
+                       TextAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Text="Current Terms"/>
+            <TextBlock Grid.Row="4" 
+                       Grid.Column="5"
+                       TextAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Text="Direct Constraints"/>
+            <StackPanel Grid.Row="0"
+                        Grid.Column="3" 
+                        Orientation="Horizontal"
+                        Spacing="10">
+                <AutoCompleteBox Name="CommandInput" 
+                                 Width="350" 
+                                 Height="30" 
+                                 HorizontalAlignment="Left" 
+                                 Background="#222222"
+                                 Watermark="Press enter key to input commands."/>
+                <Ellipse Name="Iterator"
+                         Fill="Gray"
+                         IsVisible="True"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Center"
+                         Width="12" 
+                         Height="12"/>
+            </StackPanel>
+            <v:FileManagerView Name="FileTreeView"
+                               Grid.Row="2" 
+                               Grid.Column="1"/>
+            <v:InferenceRulesView Name="SolverRulesView"
+                                  Grid.Row="5" 
+                                  Grid.Column="1"/>
+            <v:CommandConsoleView Name="CommandInputView"
+                                  Grid.Row="2" 
+                                  Grid.Column="3"/>
+            <v:Domain4MLView Name="DomainView"
+                             Grid.Row="2" 
+                             Grid.Column="5"/>
+            <v:CurrentTermsView Name="TermsView"
+                               Grid.Row="5" 
+                               Grid.Column="3"/>
+            <v:ConstraintsView Name="ConstrView"
+                               Grid.Row="5" 
+                               Grid.Column="5"/>
+            <v:SolverView Name="SolverCommandView"
+                          Grid.Row="2" 
+                          Grid.RowSpan="4"
+                          Grid.Column="7"/>
+        </Grid>
+    </DockPanel>
+</Window>

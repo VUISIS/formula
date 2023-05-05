@@ -1,10 +1,11 @@
-﻿namespace Microsoft.Formula.API
+﻿using Microsoft.Formula.API.Plugins;
+
+namespace Microsoft.Formula.API
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -44,7 +45,7 @@
         {
             return Programs.Values.AsEnumerable();
         }
-
+        
         public EnvParams Parameters
         {
             get;
@@ -1055,7 +1056,7 @@
             },
             TaskCreationOptions.LongRunning);
             */
-
+            
             var sr = new SolveResult(
                         redModel,
                         (FactSet)modData.FinalOutput,
@@ -1186,9 +1187,9 @@
                 task = null;
                 goto Unlock;
             }
-
+            
             modData = queryModel.Node.CompilerData as ModuleData;
-            task = new Task<SolveResult>(() =>
+            if (EnvParams.IsSolverPublisherSet(Parameters))
             {
                 var sr = new SolveResult(
                     redModel,
@@ -1196,10 +1197,27 @@
                     maxSols,
                     this,
                     cancel);
-                sr.Start();
-                return sr;
-            },
-            TaskCreationOptions.LongRunning);
+                EnvParams.GetSolverPublisherParameter(Parameters, EnvParamKind.Debug_SolverPublisher)
+                         .SetSolverResult(sr);
+                task = null;
+            }
+            else
+            {
+                task = new Task<SolveResult>(() =>
+                {
+                    var sr = new SolveResult(
+                        redModel,
+                        (FactSet)modData.FinalOutput,
+                        maxSols,
+                        this,
+                        cancel);
+                    sr.Init();
+                    sr.Execute();
+                    sr.Start();
+                    return sr;
+                },
+                TaskCreationOptions.LongRunning);
+            }
 
         Unlock:
             ReleaseEnvLock();

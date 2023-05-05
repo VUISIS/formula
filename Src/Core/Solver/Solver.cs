@@ -5,16 +5,13 @@
     using System.Diagnostics.Contracts;
     using System.Numerics;
     using System.Threading;
-    using System.Threading.Tasks;
 
     using API;
     using API.Nodes;
     using API.Plugins;
     using Compiler;
     using Common;
-    using Common.Rules;
     using Common.Terms;
-    using Common.Extras;
 
     //// Aliases for Z3 types to avoid clashes
     using Z3Context = Microsoft.Z3.Context;
@@ -125,7 +122,7 @@
             get;
             set;
         }
-
+        
         private BuilderRef MkModelDecl(string modelName, string modelRefName, string modelLocName, Builder bldr)
         {
             BuilderRef result;
@@ -272,7 +269,7 @@
             Source = source;
             PartialModel = partialModel;
             Env = env;
-
+            
             // TODO: reintroduce cardinality system with search heuristics
             //// Step 0. Create cardinality system.
             //Cardinalities = new CardSystem(partialModel);
@@ -300,8 +297,13 @@
             //}
 
             SetRecursionBound();
-
+            
             executer = new SymExecuter(this);
+        }
+        
+        public void Execute()
+        {
+            executer.Execute();
         }
 
         public bool Solve()
