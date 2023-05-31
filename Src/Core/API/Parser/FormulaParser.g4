@@ -2,10 +2,10 @@ parser grammar FormulaParser;
 options { tokenVocab=FormulaLexer; }
 
 program				:	EOF
-					|	config
-					|	moduleList
-					|	config
-						moduleList
+					|	config EOF
+					|	moduleList EOF
+					|	config 
+						moduleList EOF
 					;
 
 moduleList			:	module+

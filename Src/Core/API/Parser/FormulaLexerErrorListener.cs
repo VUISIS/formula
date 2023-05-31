@@ -19,7 +19,8 @@ namespace Core.API.Parser
             {
                 System.Console.Write(FormulaLexer.DefaultVocabulary. GetSymbolicName(item) + ", ");
             }
-            base.SyntaxError(output, recognizer, offendingSymbol, line, charPositionInLine, msg, e);
+
+            throw new Exception("Syntax error in 4ml file.");
         }
     }
 }
