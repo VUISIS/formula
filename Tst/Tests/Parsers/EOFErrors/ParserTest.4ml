@@ -1,0 +1,35 @@
+domain Mapping
+{
+    Component ::= new (id: Integer, utilization: Real).
+    Processor ::= new (id: Integer).
+    Mapping ::= new (c: Component, p: Processor).
+    Alien ::= new (id: Integer).
+    
+    badMapping :- p is Processor,
+                  s = sum(0.0, { c.utilization |
+                  c is Component, Mapping(c, p) }), s > 100.
+    
+    conforms no badMapping.
+}
+
+model m of Mapping
+{
+    c1 is Component(0, 30).
+    c2 is Component(1, 40).
+    p1 is Processor(0).
+    Mapping(c1, p1).
+    Mapping(c2, p1).
+}
+
+partial model pm of Mapping
+{
+    c1 is Component(0, x).
+    c2 is Component(1, y).
+    c3 is Component(1, z).
+    p1 is Processor(0).
+    Mapping(c1, p1).
+    Mapping(c2, p1).
+    Mapping(c3, p1).
+}
+
+Alien(x) :- Component(x, y). 
