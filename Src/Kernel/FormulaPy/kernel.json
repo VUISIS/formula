@@ -1,0 +1,8 @@
+{
+    "argv": ["python", "-m",
+             "formula", "-f",
+             "{connection_file}"],
+    "display_name": "FormulaPy",
+    "name": "FormulaPy",
+    "language": "python"
+}
