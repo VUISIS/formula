@@ -1,0 +1,5 @@
+__pycache__
+.ipynb_checkpoints
+data_kernelspec
+formula_kernel/__pycache__
+formula_kernel/.ipynb_checkpoints

@@ -2,7 +2,7 @@
 
 ### Requirements
 ```bash
-python 3.10
+python >= 3.10
 dotnet 6.0
 ```
 
@@ -16,16 +16,16 @@ pythonnet
 ```bash
 $ cd Src/CommandLine
 $ dotnet build CommandLine.sln /p:Configuration=Release /p:Platform=x64|ARM64
-$ dotnet ./bin/Release/<OS>/<PLATFORM>/net6.0/CommandLine.dll
 ```
 
 ### Copy CommandLine build files into the CommandLine folder.
 ```bash
-$ cp -r ./bin/Release/<OS>/<PLATFORM>/net6.0/* ../Kernel/FormulaPy/CommandLine
+$ cp -r Src/CommandLine/bin/Release/<OS>/<PLATFORM>/net6.0/* Src/Kernel/FormulaPy/CommandLine
 ```
 
 ### Install FormulaPy kernel
 ```bash
-$ cd Src/Kernel
-$ jupyter kernelspec install --user FormulaPy
+$ cd Src/Kernel/FormulaPy
+$ pip install .
+$ python -m formula_kernel.install
 ```

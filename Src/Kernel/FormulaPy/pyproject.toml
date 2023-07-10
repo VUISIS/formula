@@ -1,0 +1,51 @@
+[build-system]
+requires = [
+    "hatchling>=1.10.0", "ipykernel", "pythonnet"
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "formula-kernel"
+dynamic = [
+    "version",
+]
+description = "Formula kernel for Jupyter"
+readme = "README.rst"
+license = { file = "LICENSE" }
+authors = [
+    { name = "VUISIS", email = "stephen.johnson@vanderbilt.edu" },
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pythonnet",
+    "ipykernel",
+    "jupyter_client",
+]
+
+[project.optional-dependencies]
+test = [
+  "jupyter_kernel_test",
+]
+
+[project.urls]
+Homepage = "https://github.com/VUISIS/formula/tree/python-kernel/Src/Kernel/FormulaPy"
+
+[tool.hatch.version]
+path = "formula_kernel/__init__.py"
+
+# Used to call hatch_build.py
+[tool.hatch.build.hooks.custom]
+
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/formula_kernel",
+]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"data_kernelspec/share" = "share"
