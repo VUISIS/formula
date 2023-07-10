@@ -45,6 +45,7 @@ path = "formula_kernel/__init__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/formula_kernel",
+    "/CommandLine",
 ]
 
 [tool.hatch.build.targets.wheel.shared-data]

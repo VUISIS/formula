@@ -1,3 +1,3 @@
-commands = ["load", "help"]
+commands = ["loadf", "helpf"]
 
-cmd_regex = "(" + "|".join(commands) + ")\((\w(\,\w)*)?\)"
+cmd_regex = "(" + "|".join(commands) + ")\(([\"\w\/\.\,]+)?\)"
