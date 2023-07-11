@@ -633,9 +633,12 @@
                 }
 
                 posExprs.Add(Solver.Context.MkNot(top));
-                negExprs.Add(top);
                 topExprs.Add(Solver.Context.MkOr(posExprs));
-                topExprs.Add(Solver.Context.MkOr(negExprs));
+
+                foreach (var negExpr in negExprs)
+                {
+                    topExprs.Add(Solver.Context.MkOr(negExpr, top));
+                }
             }
             else if (expr.IsNot)
             {
