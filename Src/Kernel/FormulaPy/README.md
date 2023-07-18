@@ -6,12 +6,6 @@ python >= 3.10
 dotnet 6.0
 ```
 
-### Pip Requirements
-```bash
-jupyter
-pythonnet
-```
-
 ### With .NET on x64 or Apple Silicon ARM64
 ```bash
 $ cd Src/CommandLine
@@ -27,5 +21,4 @@ $ cp -r Src/CommandLine/bin/Release/<OS>/<PLATFORM>/net6.0/* Src/Kernel/FormulaP
 ```bash
 $ cd Src/Kernel/FormulaPy
 $ pip install .
-$ python -m formula_kernel.install
 ```
