@@ -109,6 +109,7 @@
         protected int coreCounter = 0;
         protected int exprCounter = 0;
 
+        protected bool isSolvable = false;
         protected bool hasCore = false;
         protected Z3BoolExpr[] coreExprs;
 
@@ -698,7 +699,7 @@
                             if (term.Symbol is UserSymbol &&
                                (!((UserSymbol)term.Symbol).IsAutoGen))
                             {
-                                currConflict.Append(term.ToString() + " ");
+                                currConflict.Append(Index.ConvertConSymbAll(term) + " ");
                                 ++conflictCount;
                             }
                         }
@@ -724,7 +725,7 @@
 
         public bool Solve()
         {
-            bool solvable = false;
+            isSolvable = false;
             bool hasConforms = false;
             bool hasRequires = false;
             string requiresPattern = @"_Query_\d+.requires$";
@@ -782,7 +783,7 @@
                 var status = Solver.Z3Solver.Check();
                 if (status == Z3.Status.SATISFIABLE)
                 {
-                    solvable = true;
+                    isSolvable = true;
                     var model = Solver.Z3Solver.Model;
                     Dictionary<Z3Expr, Z3Expr> solutionMap = new Dictionary<Z3Expr, Z3Expr>();
 
@@ -813,7 +814,7 @@
                     }
                 }
             }
-            return solvable;
+            return isSolvable;
         }
 
         public void GetSolution(int num)
@@ -822,6 +823,11 @@
             {
                 Console.WriteLine("Model not solvable. Unsat core terms below.");
                 MapCoreToTerms(coreExprs);
+                return;
+            }
+            else if (!isSolvable)
+            {
+                Console.WriteLine("Model not solvable.");
                 return;
             }
 
