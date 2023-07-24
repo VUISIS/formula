@@ -22,3 +22,9 @@ $ cp -r Src/CommandLine/bin/Release/<OS>/<PLATFORM>/net6.0/* Src/Kernel/FormulaP
 $ cd Src/Kernel/FormulaPy
 $ pip install .
 ```
+
+### Ubuntu 22.04 libhostfxr Issue
+```bash
+$ sudo ln -s /usr/lib/dotnet/host/fxr/<version>/libhostfxr.so /usr/lib/dotnet
+$ conda install -c conda-forge libstdcxx-ng=12
+```

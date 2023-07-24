@@ -7,5 +7,5 @@ setup(
    author='VUISIS',
    author_email='stephen.johnson@vandeerbilt.edu',
    packages=['formula'],  
-   install_requires=['pythonnet','jupyter']
+   install_requires=['pythonnet','jupyter','xturing','langchain']
 )
