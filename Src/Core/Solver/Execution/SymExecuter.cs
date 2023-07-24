@@ -807,8 +807,11 @@
                 }
                 else if (status == Z3.Status.UNSATISFIABLE)
                 {
-                    hasCore = true;
                     coreExprs = Solver.Z3Solver.UnsatCore;
+                    if (!coreExprs.IsEmpty())
+                    {
+                        hasCore = true;
+                    }
 
                     if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
                     {
@@ -830,7 +833,7 @@
             }
             else if (!isSolvable)
             {
-                Console.WriteLine("Model not solvable.");
+                Console.WriteLine("Model not solvable. No unsat core terms generated.");
                 return;
             }
 
@@ -1066,10 +1069,13 @@
             }
 
             bool shouldCheckConstraints = true;
-            string pattern = @"conforms\d+$";
+            string conformsPattern = @"conforms\d+$";
+            string requiresPattern = @"requires\d+$";
 
             if (t.Symbol.PrintableName.EndsWith("conforms") ||
-                Regex.IsMatch(t.Symbol.PrintableName, pattern))
+                t.Symbol.PrintableName.EndsWith("requires") ||
+                Regex.IsMatch(t.Symbol.PrintableName, conformsPattern) ||
+                Regex.IsMatch(t.Symbol.PrintableName, requiresPattern))
             {
                 shouldCheckConstraints = false;
             }

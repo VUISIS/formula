@@ -433,7 +433,6 @@
 
             Context = new Z3Context(settings);
             Z3Solver = Context.MkSolver();
-            Z3Solver.Set("core.minimize", true);
             Z3Solver.Set("core.minimize_partial", true);
         }
 
