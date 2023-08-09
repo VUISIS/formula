@@ -28,3 +28,12 @@ $ pip install .
 $ sudo ln -s /usr/lib/dotnet/host/fxr/<version>/libhostfxr.so /usr/lib/dotnet
 $ conda install -c conda-forge libstdcxx-ng=12
 ```
+
+### Add to config.py with OpenAI API key in SelfRepairLLM/src
+```bash
+$ cfg = {
+	"OPENAI_API_KEY" : "",
+	"ACTIVELOOP_TOKEN" : "(OPTIONAL)",
+	"LANGCHAIN_API_KEY" : "(OPTIONAL)"
+}
+```

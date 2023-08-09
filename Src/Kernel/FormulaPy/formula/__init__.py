@@ -1,13 +1,12 @@
 __version__ = '0.0.1'
 
 import os
+os.environ["FORMULA_KERNEL"] = "0"
 from pythonnet import load
-# TODO: Make sure to fix the coreclr path
-# fix the double coreclr loading from formula_tools in SelfRepairLLM 
-# load("coreclr", runtime_config=os.path.abspath('./formula/Src/Kernel/FormulaPy/formula/CommandLine/runtimeconfig.json'))
 load("coreclr")
 import clr
-clr.AddReference(os.path.abspath('./formula_new/formula/Src/Kernel/FormulaPy/formula/CommandLine/CommandLine.dll'))
+d = __file__.replace("__init__.py","")
+clr.AddReference(d + "CommandLine/CommandLine.dll")
 
 from .formula_magic import FormulaMagics
 

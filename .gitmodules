@@ -4,4 +4,5 @@
 	branch = arm
 [submodule "Src/Kernel/FormulaPy/formula/SelfRepairLLM"]
 	path = Src/Kernel/FormulaPy/formula/SelfRepairLLM
-	url = https://github.com/VUISIS/FormulaSelfRepairLLM
+	url = git@github.com:saj122/FormulaSelfRepairLLM.git
+	branch = main
