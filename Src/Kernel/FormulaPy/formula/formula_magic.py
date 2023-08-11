@@ -10,8 +10,9 @@ from .SelfRepairLLM.src.main import run_agent_executor
 @magics_class
 class FormulaMagics(Magics):
 
-    def __init__(self, **kwargs):
-        super(kwargs).__init__()
+    def __init__(self, shell, data):
+        super(FormulaMagics, self).__init__(shell)
+        self.data = data
         self.states = {
             "uninit": 0,
             "init": 1,
