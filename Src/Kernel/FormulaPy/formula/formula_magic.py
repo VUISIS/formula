@@ -10,22 +10,9 @@ from .SelfRepairLLM.src.main import run_agent_executor
 @magics_class
 class FormulaMagics(Magics):
 
-    def __init__(self, shell, data):
+    def __init__(self, shell, data=None):
         super(FormulaMagics, self).__init__(shell)
-        self.data = data
-        self.states = {
-            "uninit": 0,
-            "init": 1,
-            "load": 2,
-            "solve": 3
-        }
-        self.state = 0
-
-    @line_magic
-    def init(self, line):
-        if self.state > 0:
-            print("Already initialized.")
-            return
+        self.loaded = False
         self.sw = StringWriter()
         self.total_sw_output = ""
         Console.SetOut(self.sw)
@@ -37,12 +24,10 @@ class FormulaMagics(Magics):
         self.ci.DoCommand("wait on")
         self.sw.GetStringBuilder().Clear()
         print("Successfully initialized formula.")
-        self.state = 1
 
     @line_magic
     def help(self, line):
         print("Formula magic commands:")
-        print("\t%init          - Initializes the formula command interface.")
         print("\t%load filepath - Loads and compiles a file that is not yet loaded. Use: load filepath.")
         print("\t%help          - Prints this message.")
         print("\t%list          - Lists environment objects. Use: ls [vars | progs | tasks]")
@@ -74,9 +59,6 @@ class FormulaMagics(Magics):
 
     @line_magic
     def load(self, line):
-        if self.state < 1:
-            print("Has not been initialized. Use %init")
-            return
         self.file = line
         self.ci.DoCommand("load " + line)
         self.total_sw_output += "load " + line + "\n"
@@ -85,7 +67,7 @@ class FormulaMagics(Magics):
         self.sw.GetStringBuilder().Clear()
         print(temp_str)
         print('hello world')
-        self.state = 2
+        self.loaded = True
 
 
     @line_magic
@@ -108,34 +90,27 @@ class FormulaMagics(Magics):
 
     @line_magic
     def query(self, line):
-        if self.state < 3:
-            print("Please initialize and load a file before running query.")
-            return
         self.ci.DoCommand("query " + line)
         self.total_sw_output += "query " + line + "\n"
         temp_str = self.sw.ToString()
         self.total_sw_output += temp_str
         self.sw.GetStringBuilder().Clear()
-        print(temp_str)
 
     @line_magic
     def solve(self, line):
-        if self.state < 3:
-            print("Please initialize and load a file before running solve.")
-            return
+        if not self.loaded:
+            print("Load 4ml file to proceed.")
         self.ci.DoCommand("solve " + line)
         self.total_sw_output += "solve " + line + "\n"
         temp_str = self.sw.ToString()
         self.total_sw_output += temp_str
         self.sw.GetStringBuilder().Clear()
         print(temp_str)
-        self.state = 3
 
     @line_magic
     def explain(self, line):
-        if self.state < 3:
-            print("Please run a solve command before running explain.")
-            return
+        if not self.loaded:
+            print("Load 4ml file to proceed.")
         f = open(self.file, 'r')
         txt = ""
         try:
@@ -172,7 +147,7 @@ class FormulaMagics(Magics):
         self.total_sw_output += temp_str
         self.sw.GetStringBuilder().Clear()
         print(temp_str)
-        self.state = 1
+        self.loaded = False
         print("Remember to load a file before proceeding.")
 
     @line_magic
