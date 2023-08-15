@@ -2,3 +2,7 @@
 	path = Src/Kernel/jupyter-core
 	url = git@github.com:VUISIS/jupyter-core.git
 	branch = arm
+[submodule "Src/Kernel/FormulaPy/formula/SelfRepairLLM"]
+	path = Src/Kernel/FormulaPy/formula/SelfRepairLLM
+	url = git@github.com:saj122/FormulaSelfRepairLLM.git
+	branch = main
