@@ -5,7 +5,7 @@ from Microsoft.Formula.CommandLine import CommandInterface, CommandLineProgram
 from System.IO import StringWriter
 from System import Console
 
-from .SelfRepairLLM.src.main import run_agent_executor
+from .formula_agent import run_agent_executor
 
 @magics_class
 class FormulaMagics(Magics):

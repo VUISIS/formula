@@ -3,5 +3,6 @@ __pycache__
 data_kernelspec
 formula/__pycache__
 formula/.ipynb_checkpoints
+formula/config.py
 formula.egg-info
 Untitled.ipynb

@@ -1,7 +1,5 @@
 __version__ = '0.0.1'
 
-import os
-os.environ["FORMULA_KERNEL"] = "0"
 from pythonnet import load
 load("coreclr")
 import clr
