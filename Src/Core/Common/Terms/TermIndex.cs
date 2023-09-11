@@ -8,6 +8,7 @@ namespace Microsoft.Formula.Common.Terms
     using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Numerics;
+    using System.Text.RegularExpressions;
 
     using API;
     using API.Nodes;
@@ -391,6 +392,66 @@ namespace Microsoft.Formula.Common.Terms
             Contract.Assert(symbCnst != null && other == null);
             Contract.Assert(symbCnst.Kind == SymbolKind.UserCnstSymb && ((UserCnstSymb)symbCnst).IsSymbolicConstant);
             return (UserCnstSymb)symbCnst;
+        }
+
+        /// <summary>
+        /// Converts a variable arg to symbolic constant string.
+        /// </summary>
+        public string VarToSymbCnstString(Term v)
+        {
+            if (v != null && v.Symbol.IsVariable)
+            {
+                var matchEval = new MatchEvaluator((m) =>
+                {
+                    return m.Groups[1].Value;
+                });
+                return Regex.Replace(v.ToString(), "^.+@~SC2VAR~(.+)", matchEval);
+            }
+
+            return "";
+        }
+
+        /// <summary>
+        /// Recursively loops through ConSymb Args and converts to symbolic constant string.
+        /// </summary>
+        public string ConvertConSymbAll(Term v)
+        {
+            var convertedStr = v.Symbol.PrintableName;
+            if (v.Args.Count() > 0)
+            {
+                convertedStr += "(";
+            }
+
+            var count = 1;
+            foreach (var arg in v.Args)
+            {
+
+                if (arg.Symbol is BaseCnstSymb baseSymb)
+                {
+                    convertedStr += baseSymb.PrintableName;
+                }
+                else if (arg.Symbol.Kind == SymbolKind.ConSymb)
+                {
+                    convertedStr += ((ConSymb)arg.Symbol).FullName + "(" + ConvertConSymbAll(arg) + ")";
+                }
+                else if (arg.Symbol.IsVariable)
+                {
+                    convertedStr += VarToSymbCnstString(arg);
+                }
+
+                if (count < v.Args.Length)
+                {
+                    convertedStr += ", ";
+                }
+
+                count++;
+            }
+
+            if (v.Args.Count() > 0)
+            {
+                convertedStr += ")";
+            }
+            return convertedStr;
         }
 
         public Term MkVar(string name, bool isAutoGen, out bool wasAdded)

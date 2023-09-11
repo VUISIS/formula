@@ -1,0 +1,88 @@
+domain Mission {
+  // (x,y) location of the drone
+  Loc ::= new (x : Real, y : Real).
+  // each mission item involves moving from source to destination locs at given velocity
+  MissionItem ::= new (label : String, src : Loc, dest : Loc, dist : Real, vel : Real).
+  // each mission is a list of mission items
+  Mission ::= new (m : MissionItem, remainder : any Mission + {NIL}).
+  // duration to complete the task with the given name 
+  itemDuration ::= (String, Real).
+
+  itemDuration(name, t) :- MissionItem(name, _, _, dist, vel), t = dist/vel.
+}
+
+domain Hardware {
+  Component ::= new (label : String, weight : Real).  
+}
+
+domain Battery includes Hardware {
+  Battery ::= new (label : String, weight : Real, capacity : Real).
+  // energy consumption rate	   
+  rate ::= (Real).  
+  // total battery capacity
+  batteryCapacity ::= (Real).
+
+  rate(r) :- x = sum(0, {cw | cw = w*(9.8), Component(_, w)}),
+	     r = (x + bw*9.8)/(3*0.7), Battery(_, bw, _).
+  batteryCapacity(c) :- c = sum(0, {bc | Battery(_, _, bc)}).
+}
+
+domain BatteryChecker includes Battery, Mission {
+  // amount of energy consumed to carry out the mission with given name
+  missionConsumption ::= (String, Real).
+  batteryExceeded ::= (String, Real, Real).
+  
+  missionConsumption(name, c) :- Mission(MissionItem(name, _, _, _, _),
+  			      		Mission(MissionItem(name2, _, _, _, _), _)),
+  		     		itemDuration(name, t1),
+				missionConsumption(name2, c2),
+				rate(r), 
+				c = t1*r + c2.
+  missionConsumption(name, c) :- Mission(MissionItem(name, _, _, _, _), NIL),
+  			      itemDuration(name, t),
+			      rate(r),
+			      c = t*r.
+  batteryExceeded(missionName, consumed, available) :-
+  			       missionConsumption(missionName, consumed),
+			       batteryCapacity(available),
+			       consumed > available.
+
+  invalidBattery :- Battery(_, _, c), c > 6200.
+
+  conforms no batteryExceeded(n, c, a).
+  conforms no invalidBattery.
+}
+
+model d1 of BatteryChecker {
+  Component("payload1", 5).
+  Component("payload2", 3).
+  Component("body", 10).
+  Battery("battery1", 5, 200).
+
+  Loc(40.00, 5.00).
+  Loc(47.00, 8.00).
+  Loc(52.00, 2.00).
+
+  t1 is MissionItem("task1", Loc(40.00, 5.00), Loc(47.00, 8.00), 7.62, 0.4).
+  t2 is MissionItem("task2", Loc(47.00, 8.00), Loc(52.00, 2.00), 7.81, 0.2).	
+
+  m2 is Mission(t2, NIL).
+  m1 is Mission(t1, m2).
+}
+
+partial model pm of BatteryChecker {
+  Component("payload1", 5).
+  Component("payload2", 3).
+  Component("body", 10).
+  Battery("battery1", 5, x).
+
+  Loc(40.00, 5.00).
+  Loc(47.00, 8.00).
+  Loc(52.00, 2.00).
+
+  t1 is MissionItem("task1", Loc(40.00, 5.00), Loc(47.00, 8.00), 7.62, 0.4).
+  t2 is MissionItem("task2", Loc(47.00, 8.00), Loc(52.00, 2.00), 7.81, 0.2).	
+
+  m2 is Mission(t2, NIL).
+  m1 is Mission(t1, m2).
+}

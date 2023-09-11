@@ -109,6 +109,7 @@
         protected int coreCounter = 0;
         protected int exprCounter = 0;
 
+        protected bool isSolvable = false;
         protected bool hasCore = false;
         protected Z3BoolExpr[] coreExprs;
 
@@ -633,9 +634,12 @@
                 }
 
                 posExprs.Add(Solver.Context.MkNot(top));
-                negExprs.Add(top);
                 topExprs.Add(Solver.Context.MkOr(posExprs));
-                topExprs.Add(Solver.Context.MkOr(negExprs));
+
+                foreach (var negExpr in negExprs)
+                {
+                    topExprs.Add(Solver.Context.MkOr(negExpr, top));
+                }
             }
             else if (expr.IsNot)
             {
@@ -698,7 +702,7 @@
                             if (term.Symbol is UserSymbol &&
                                (!((UserSymbol)term.Symbol).IsAutoGen))
                             {
-                                currConflict.Append(term.ToString() + " ");
+                                currConflict.Append(Index.ConvertConSymbAll(term) + " ");
                                 ++conflictCount;
                             }
                         }
@@ -724,7 +728,7 @@
 
         public bool Solve()
         {
-            bool solvable = false;
+            isSolvable = false;
             bool hasConforms = false;
             bool hasRequires = false;
             string requiresPattern = @"_Query_\d+.requires$";
@@ -782,7 +786,7 @@
                 var status = Solver.Z3Solver.Check();
                 if (status == Z3.Status.SATISFIABLE)
                 {
-                    solvable = true;
+                    isSolvable = true;
                     var model = Solver.Z3Solver.Model;
                     Dictionary<Z3Expr, Z3Expr> solutionMap = new Dictionary<Z3Expr, Z3Expr>();
 
@@ -803,8 +807,11 @@
                 }
                 else if (status == Z3.Status.UNSATISFIABLE)
                 {
-                    hasCore = true;
                     coreExprs = Solver.Z3Solver.UnsatCore;
+                    if (!coreExprs.IsEmpty())
+                    {
+                        hasCore = true;
+                    }
 
                     if (EnvParams.IsSolverPublisherSet(Solver.Env.Parameters))
                     {
@@ -813,7 +820,7 @@
                     }
                 }
             }
-            return solvable;
+            return isSolvable;
         }
 
         public void GetSolution(int num)
@@ -822,6 +829,11 @@
             {
                 Console.WriteLine("Model not solvable. Unsat core terms below.");
                 MapCoreToTerms(coreExprs);
+                return;
+            }
+            else if (!isSolvable)
+            {
+                Console.WriteLine("Model not solvable. No unsat core terms generated.");
                 return;
             }
 
@@ -1057,10 +1069,13 @@
             }
 
             bool shouldCheckConstraints = true;
-            string pattern = @"conforms\d+$";
+            string conformsPattern = @"conforms\d+$";
+            string requiresPattern = @"requires\d+$";
 
             if (t.Symbol.PrintableName.EndsWith("conforms") ||
-                Regex.IsMatch(t.Symbol.PrintableName, pattern))
+                t.Symbol.PrintableName.EndsWith("requires") ||
+                Regex.IsMatch(t.Symbol.PrintableName, conformsPattern) ||
+                Regex.IsMatch(t.Symbol.PrintableName, requiresPattern))
             {
                 shouldCheckConstraints = false;
             }
