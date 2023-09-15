@@ -15,10 +15,10 @@ buildDotnetModule rec {
   dotnet-runtime = dotnetCorePackages.runtime_6_0;
   dotnet-sdk = dotnetCorePackages.sdk_6_0;
   postFixup = if stdenv.isLinux then ''
-    mv $out/bin/CommandLine $out/bin/formula
+    mv $out/bin/VUISIS.Formula.x64 $out/bin/formula
   '' else lib.optionalString stdenv.isDarwin ''
     makeWrapper ${dotnetCorePackages.runtime_6_0}/bin/dotnet $out/bin/formula \
-      --add-flags "$out/lib/formula-dotnet/CommandLine.dll" \
+      --add-flags "$out/lib/formula-dotnet/VUISIS.Formula.x64.dll" \
       --prefix DYLD_LIBRARY_PATH : $out/lib/formula-dotnet/runtimes/macos/native
   '';
 
