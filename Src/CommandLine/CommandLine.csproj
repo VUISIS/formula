@@ -30,7 +30,6 @@
         </ItemGroup>
         <PropertyGroup>
           <AssemblyName>VUISIS.Formula.x64</AssemblyName>
-          <Version>1.0</Version>
           <PackAsTool>True</PackAsTool>
           <ToolCommandName>formula</ToolCommandName>
           <PackageType>DotnetCliTool</PackageType>
@@ -46,7 +45,6 @@
         </ItemGroup>
         <PropertyGroup>
           <AssemblyName>VUISIS.Formula.ARM64</AssemblyName>
-          <Version>1.0</Version>
           <PackAsTool>True</PackAsTool>
           <ToolCommandName>formula</ToolCommandName>
           <PackageType>DotnetCliTool</PackageType>
