@@ -27,11 +27,11 @@ jobs:
     - name: Pack Nuget Package
       if: ${{ matrix.os == 'ubuntu-latest' }}
       working-directory: ./Src/CommandLine
-      run: dotnet pack CommandLine.csproj -c Release -p:PackageVersion="1.0.$GITHUB_RUN_ID" /p:Platform=x64
+      run: dotnet pack CommandLine.csproj -c Release -p:PackageVersion="1.0.${{ github.run_number }}" /p:Platform=x64
     - name: Publish Nuget Package
       if: ${{ matrix.os == 'ubuntu-latest' }}
       working-directory: ./nupkg
-      run: dotnet nuget push VUISIS.Formula.x64.1.0.$GITHUB_RUN_ID.nupkg --api-key ${{ secrets.BUILD_SECRET }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push VUISIS.Formula.x64.1.0.${{ github.run_number }}.nupkg --api-key ${{ secrets.BUILD_SECRET }} --source https://api.nuget.org/v3/index.json --skip-duplicate
     - name: Copy to Liblibz3 MacOS
       if: ${{ matrix.os == 'macOS-latest' }}
       run: cp ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/x64/net6.0/runtimes/osx-x64/native/libz3.dylib ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/x64/net6.0/runtimes/osx-x64/native/liblibz3.dylib
