@@ -2,6 +2,25 @@
 [![build](https://github.com/VUISIS/formula-dotnet/actions/workflows/build.yml/badge.svg)](https://github.com/VUISIS/formula-dotnet/actions/workflows/build.yml)
 
 ## Building and running FORMULA
+### Dotnet Tool Install
+To install Formula 2.0 as a dotnet tool, run
+
+For x64
+```bash
+$ dotnet tool install --global VUISIS.Formula.x64 --version 1.0.0
+```
+
+For arm64
+```bash
+$ dotnet tool install --global VUISIS.Formula.ARM64 --version 1.0.0
+```
+
+Tool Command
+```bash
+Note: For Linux and MacOS, you may need to add the dotnet tools path to the system path.
+$ formula
+```
+
 ### With Nix flakes (macOS/Linux)
 To build and run the command line interpreter with Nix flakes, run
 
