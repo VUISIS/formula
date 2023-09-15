@@ -7,12 +7,12 @@ To install Formula 2.0 as a dotnet tool, run
 
 For x64
 ```bash
-$ dotnet tool install --global VUISIS.Formula.x64 --version 1.0.0
+$ dotnet tool install --global VUISIS.Formula.x64 
 ```
 
 For arm64
 ```bash
-$ dotnet tool install --global VUISIS.Formula.ARM64 --version 1.0.0
+$ dotnet tool install --global VUISIS.Formula.ARM64 
 ```
 
 Tool Command
