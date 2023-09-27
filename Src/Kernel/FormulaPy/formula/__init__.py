@@ -4,7 +4,7 @@ from pythonnet import load
 load("coreclr")
 import clr
 d = __file__.replace("__init__.py","")
-clr.AddReference(d + "CommandLine/CommandLine.dll")
+clr.AddReference(d + "CommandLine/VUISIS.Formula.x64.dll")
 
 from .formula_magic import FormulaMagics
 

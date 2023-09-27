@@ -1,13 +1,15 @@
 from __future__ import print_function
+from pickle import TRUE
 from IPython.core.magic import (Magics, magics_class, line_magic)
+from IPython.core.magic_arguments import (argument, magic_arguments, parse_argstring)
 
-from pathlib import Path
+import re, os
 
 from Microsoft.Formula.CommandLine import CommandInterface, CommandLineProgram
 from System.IO import StringWriter
 from System import Console
 
-from .formula_agent import run_agent_executor
+from .formula_agent import run_agent_executor, run_agent_executor_repair
 
 @magics_class
 class FormulaMagics(Magics):
@@ -15,12 +17,14 @@ class FormulaMagics(Magics):
     def __init__(self, shell, data=None):
         super(FormulaMagics, self).__init__(shell)
         self.sw = StringWriter()
-        self.total_sw_output = ""
+        self.total_sw_output = "END"
         Console.SetOut(self.sw)
         Console.SetError(self.sw)
-        self.file = None
-        self.explain = False
-
+        self.file_txt = None
+        self.explain_ran = False
+        self.solve_ran = False
+        self.repair_ran = False
+        
         sink = CommandLineProgram.ConsoleSink()
         chooser = CommandLineProgram.ConsoleChooser()
         self.ci = CommandInterface(sink, chooser)
@@ -29,37 +33,37 @@ class FormulaMagics(Magics):
         print("Successfully initialized formula.")
 
     @line_magic
-    def help(self):
+    def help(self, line):
         print("Formula magic commands:")
-        print("%load filepath - Loads and compiles a file that is not yet loaded. Use: load filepath.")
-        print("%help          - Prints this message.")
-        print("%ls            - Lists environment objects. Use: ls [vars | progs | tasks]")
-        print("%extract       - Extract and install a result. Use: extract (app_id | solv_id n) output_name [render_class render_dll]")
-        print("%query         - Start a query task. Use: query model goals")
-        print("%solve         - Start a solve task. Use: solve partial_model max_sols goals")
-        print("%explain       - Runs an LLM to generate an explaination for the solution.")
-        print("%repair        - Runs an LLM to repair the loaded formula DSL program.")
-        print("%set           - Sets a variable. Use: set var term.")
-        print("%delete        - Deletes a variable. Use: del var.")
-        print("%save          - Saves the module modname into file.")
-        print("%unload        - Unloads an installed program and all dependent programs. Use: unload [prog | *]")
-        print("%tunload       - Unloads a task. Use: tunload [id | *]")
-        print("%reload        - Reloads an installed program and all dependent programs. Use: reload [prog | *]")
-        print("%print         - Prints the installed program with the given name. Use: print progname")
-        print("%det           - Prints details about the compiled module with the given name. Use: det modname")
-        print("%types         - Prints inferred variable types. Use: types modname")
-        print("%render        - Tries to render the module. Use: render modname")
-        print("%verbose       - Changes verbosity. Use: verbose (on | off)")
-        print("%wait          - Changes waiting behavior. Use: wait (on | off) to block until task completes")
-        print("%apply         - Start an apply task. Use: apply transformstep")
-        print("%stats         - Prints task statistics. Use: stats task_id [top_k_rule]")
-        print("%generate      - Generate C# data model. Use: generate modname")
-        print("%truth         - Test if a ground term is derivable under a model/apply. Use: truth task_id [term]")
-        print("%proof         - Enumerate proofs that a ground term is derivable under a model/apply. Use: proof task_id [term]")
-        print("%confhelp      - Provides help about module configurations and settings")
-        print("%watch         - Use: watch [off | on | prompt] to control watch behavior")
-        print("%core          - Prints reduced rule set for domains / transforms. Use: core module_name")
-        print("%downgrade     - Attempts to downgrade a (partial) model to Formula V1. Use: downgrade module_name")
+        print("%load (l)       - Loads and compiles a file that is not yet loaded. Use: load filepath.")
+        print("%help (h)       - Prints this message.")
+        print("%list (ls)      - Lists environment objects. Use: ls [vars | progs | tasks]")
+        print("%extract (ex)   - Extract and install a result. Use: extract (app_id | solv_id n) output_name [render_class render_dll]")
+        print("%query (qr)     - Start a query task. Use: query model goals")
+        print("%solve (sl)     - Start a solve task. Use: solve partial_model max_sols goals")
+        print("%explain (exp)  - Runs an LLM to generate an explaination for the solution. Use: exp solv_id prompt")
+        print("%repair (rep)   - Runs an LLM to repair the loaded formula DSL program. Use: rep solv_id")
+        print("%set (s)        - Sets a variable. Use: set var term.")
+        print("%delete (d)     - Deletes a variable. Use: del var.")
+        print("%save (sv)      - Saves the module modname into file.")
+        print("%unload (ul)    - Unloads an installed program and all dependent programs. Use: unload [prog | *]")
+        print("%tunload (tul)  - Unloads a task. Use: tunload [id | *]")
+        print("%reload (rl)    - Reloads an installed program and all dependent programs. Use: reload [prog | *]")
+        print("%print (p)      - Prints the installed program with the given name. Use: print progname")
+        print("%det (dt)       - Prints details about the compiled module with the given name. Use: det modname")
+        print("%types (typ)    - Prints inferred variable types. Use: types modname")
+        print("%render (r)     - Tries to render the module. Use: render modname")
+        print("%verbose (v)    - Changes verbosity. Use: verbose (on | off)")
+        print("%wait (w)       - Changes waiting behavior. Use: wait (on | off) to block until task completes")
+        print("%apply (ap)     - Start an apply task. Use: apply transformstep")
+        print("%stats (st)     - Prints task statistics. Use: stats task_id [top_k_rule]")
+        print("%generate (gn)  - Generate C# data model. Use: generate modname")
+        print("%truth (tr)     - Test if a ground term is derivable under a model/apply. Use: truth task_id [term]")
+        print("%proof (pr)     - Enumerate proofs that a ground term is derivable under a model/apply. Use: proof task_id [term]")
+        print("%confhelp (ch)  - Provides help about module configurations and settings")
+        print("%watch (wch)    - Use: watch [off | on | prompt] to control watch behavior")
+        print("%core (cr)      - Prints reduced rule set for domains / transforms. Use: core module_name")
+        print("%downgrade (dg) - Attempts to downgrade a (partial) model to Formula V1. Use: downgrade module_name")
 
     def run_command(self, cmd, args=None):
         line = ""
@@ -72,155 +76,280 @@ class FormulaMagics(Magics):
         
         temp_str = self.sw.ToString()
         if cmd == "extract":
-            self.total_sw_output += temp_str
-        elif cmd == "load" and self.file != None: 
-            f = open(self.file.absolute(), 'r')
-            self.total_sw_output += f.read()
-            f.close()
+            self.total_sw_output = temp_str
+                
         self.sw.GetStringBuilder().Clear()
         print(temp_str)
 
     @line_magic
-    def load(self, line=None):
-        if line == None:
-            print("No 4ml file passed to load.")
+    def load(self, line):
+        if self.file_txt != None:
+            print("A Formula DSL program is already loaded.")
             return
         
-        file = Path(line)
-        if file.is_file():
-            self.run_command("load", file.absolute())
-            self.file = file
+        file = os.path.abspath(line)
+        if os.path.isfile(file):
+            f = open(file, 'r')
+            try:
+                self.file_txt = f.read()
+            finally:
+                f.close()
+            self.run_command("load", file)
             return
         
         print("File is invalid or does not exist.")
+        
+    @line_magic
+    def l(self, line):
+        self.load(line)
 
     @line_magic
-    def ls(self):
-        self.run_command("ls")
+    def list(self, line):
+        self.run_command("list", line)
+        
+    @line_magic
+    def ls(self, line):
+        self.list(line)
 
     @line_magic
-    def extract(self, line=None):
+    def extract(self, line):
         self.run_command("extract", line)
+        
+    @line_magic
+    def ex(self, line):
+        self.extract_ran(line)
 
     @line_magic
-    def query(self, line=None):
+    def query(self, line):
         self.run_command("query", line)
+        
+    @line_magic
+    def qr(self, line):
+        self.query(line)
 
     @line_magic
-    def solve(self, line=None):
-        if self.file == None:
+    def solve(self, line):
+        if self.file_txt == None:
             print("Load 4ml file to proceed.")
             return
         self.run_command("solve", line)
-
+        self.solve_ran = True
+   
     @line_magic
-    def explain(self, line=None):
-        if self.file == None:
+    def sl(self, line):
+        self.solve(line)
+        
+    @magic_arguments()
+    @argument(
+        "--explain-prompt",
+        "-ep",
+        required=True,
+        help=("Input explain prompt."),
+    )
+    @line_magic
+    def explain(self, line):
+        if self.file_txt == None:
             print("Load 4ml file to proceed.")
             return
-        f = open(self.file, 'r')
-        txt = ""
-        try:
-            txt = f.read()
-        finally:
-            f.close()
-
+        
+        args = parse_argstring(self.explain, line)
+        
         print('Running executor...')
-        run_agent_executor(txt, self.total_sw_output, line)
-        self.explain = True
+        run_agent_executor(self.file_txt, self.total_sw_output, args.explain_prompt)
+        self.explain_ran = True
+
+    @line_magic
+    def exp(self, line):
+        self.explain(line)
+        
+    @magic_arguments()
+    @argument(
+        "--repair-prompt",
+        "-rp",
+        required=True,
+        help=("Input repair prompt."),
+    )
+    @line_magic
+    def repair(self, line):
+        if self.explain_ran:
+            print('Running repair...')
+            
+            args = parse_argstring(self.repair, line)
+        
+            run_agent_executor_repair(self.file_txt, self.total_sw_output, args.repair_prompt)
+        else:
+            print("Run explain magic function first.")
+            
+    @line_magic
+    def rep(self, line):
+        self.repair(line)
+
+    @line_magic
+    def set(self, line):
+        self.run_command("set", line)
         
     @line_magic
-    def repair(self):
-        if self.explain:
-            print("Repair")
-        else:
-            print("Run explain first")
+    def s(self, line):
+        self.set(line)
 
     @line_magic
-    def explain_and_repair(self):
-        print("Explain and repair.")
-
-    @line_magic
-    def set(self, line=None):
-        self.run_command("set", line)
-
-    @line_magic
-    def delete(self, line=None):
+    def delete(self, line):
         self.run_command("del", line)
+        
+    @line_magic
+    def d(self, line):
+        self.delete(line)
 
     @line_magic
-    def unload(self, line=None):
-        self.file = None
+    def unload(self, line):
+        self.file_txt = None
+        self.total_sw_output = "END"    
         self.run_command("unload", line)
+        
+    @line_magic
+    def ul(self, line):
+        self.unload(line)
 
     @line_magic
-    def tunload(self, line=None):
+    def tunload(self, line):
         self.run_command("tunload", line)
 
     @line_magic
-    def reload(self):
+    def tul(self, line):
+        self.tunload(line)
+
+    @line_magic
+    def reload(self, line):
         self.run_command("reload")
+        
+    @line_magic
+    def rl(self, line):
+        self.reload()
 
     @line_magic
-    def save(self, line=None):
+    def save(self, line):
         self.run_command("save", line)
+        
+    @line_magic
+    def sv(self, line):
+        self.save(line)
 
     @line_magic
-    def print(self, line=None):
+    def print(self, line):
         self.run_command("print", line)
+        
+    @line_magic
+    def p(self, line):
+        self.print(line)
 
     @line_magic
-    def det(self, line=None):
+    def det(self, line):
         self.run_command("det", line)
+        
+    @line_magic
+    def dt(self, line):
+        self.det(line)
 
     @line_magic
-    def render(self, line=None):
+    def render(self, line):
         self.run_command("render", line)
+        
+    @line_magic
+    def r(self, line):
+        self.render(line)
 
     @line_magic
-    def verbose(self, line=None):
+    def verbose(self, line):
         self.run_command("verbose", line)
+        
+    @line_magic
+    def v(self, line):
+        self.verbose(line)
 
     @line_magic
-    def wait(self, line=None):
+    def wait(self, line):
         self.run_command("wait", line)
 
     @line_magic
-    def watch(self, line=None):
+    def w(self, line):
+        self.wait(line)
+
+    @line_magic
+    def watch(self, line):
         self.run_command("watch", line)
 
     @line_magic
-    def types(self, line=None):
+    def wch(self, line):
+        self.watch(line)
+
+    @line_magic
+    def types(self, line):
         self.run_command("type", line)
 
     @line_magic
-    def truth(self, line=None):
+    def typ(self, line):
+        self.types(line)
+
+    @line_magic
+    def truth(self, line):
         self.run_command("truth", line)
+        
+    @line_magic
+    def tr(self, line):
+        self.truth(line)
 
     @line_magic
-    def proof(self, line=None):
+    def proof(self, line):
         self.run_command("proof", line)
+        
+    @line_magic
+    def pr(self, line):
+        self.proof(line)
 
     @line_magic
-    def apply(self, line=None):
+    def apply(self, line):
         self.run_command("apply", line)
+        
+    @line_magic
+    def ap(self, line):
+        self.apply(line)
     
     @line_magic
-    def stats(self, line=None):
+    def stats(self, line):
         self.run_command("stats", line)
+        
+    @line_magic
+    def st(self, line):
+        self.stats(line)
 
     @line_magic
-    def generate(self, line=None):
+    def generate(self, line):
         self.run_command("generate", line)
+        
+    @line_magic
+    def gn(self, line):
+        self.generate(line)
 
     @line_magic
-    def confhelp(self, line=None):
+    def confhelp(self, line):
         self.run_command("confhelp", line)
+        
+    @line_magic
+    def ch(self, line):
+        self.confhelp(line)
 
     @line_magic
-    def core(self, line=None):
+    def core(self, line):
         self.run_command("core", line)
+        
+    @line_magic
+    def cr(self, line):
+        self.core(line)
 
     @line_magic
-    def downgrade(self, line=None):
+    def downgrade(self, line):
         self.run_command("downgrade", line)
+        
+    @line_magic
+    def dg(self, line):
+        self.downgrade(line)
