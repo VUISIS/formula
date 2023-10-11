@@ -21,9 +21,6 @@ class FormulaMagics(Magics):
         Console.SetOut(self.sw)
         Console.SetError(self.sw)
         self.file_txt = None
-        self.explain_ran = False
-        self.solve_ran = False
-        self.repair_ran = False
         
         sink = CommandLineProgram.ConsoleSink()
         chooser = CommandLineProgram.ConsoleChooser()
@@ -83,10 +80,6 @@ class FormulaMagics(Magics):
 
     @line_magic
     def load(self, line):
-        if self.file_txt != None:
-            print("A Formula DSL program is already loaded.")
-            return
-        
         file = os.path.abspath(line)
         if os.path.isfile(file):
             f = open(file, 'r')
@@ -117,7 +110,7 @@ class FormulaMagics(Magics):
         
     @line_magic
     def ex(self, line):
-        self.extract_ran(line)
+        self.extract(line)
 
     @line_magic
     def query(self, line):
@@ -133,7 +126,6 @@ class FormulaMagics(Magics):
             print("Load 4ml file to proceed.")
             return
         self.run_command("solve", line)
-        self.solve_ran = True
    
     @line_magic
     def sl(self, line):
@@ -156,7 +148,6 @@ class FormulaMagics(Magics):
         
         print('Running executor...')
         run_agent_executor(self.file_txt, self.total_sw_output, args.explain_prompt)
-        self.explain_ran = True
 
     @line_magic
     def exp(self, line):
@@ -169,17 +160,45 @@ class FormulaMagics(Magics):
         required=True,
         help=("Input repair prompt."),
     )
+    @argument(
+        "--save",
+        "-s",
+        required=False,
+        help=("Save repair code."),
+    )
     @line_magic
     def repair(self, line):
-        if self.explain_ran:
-            print('Running repair...')
+        print('Running repair...')
             
-            args = parse_argstring(self.repair, line)
+        args = parse_argstring(self.repair, line)
         
-            run_agent_executor_repair(self.file_txt, self.total_sw_output, args.repair_prompt)
-        else:
-            print("Run explain magic function first.")
-            
+        out = run_agent_executor_repair(self.file_txt, self.total_sw_output, args.repair_prompt)
+        
+        if args.save:
+            m = re.search('\`\`\`(code|formula|python)?.+\{(.+)\}', out, re.DOTALL)        
+            if m:
+                capt = m.group(2)
+                m2 = re.findall('(.+)\s\/\/.+', capt)
+                if len(m2) > 0:
+                    new_txt = self.file_txt
+                    for l in m2:
+                        temp = re.sub(r'\s\d+', r'\\s\\d+', l)
+                        temp = temp.removesuffix('.') 
+                        temp = temp.replace("(", "\(")
+                        temp = temp.replace(")", "\)")
+                        l = l.removesuffix('.') 
+                        new_txt = re.sub(temp, l, new_txt)
+
+                    f = open(args.save, 'w')
+                    try:
+                        f.write(new_txt)
+                    finally:
+                        f.close()
+                else:
+                    print('No match found in partial model. Unable to save.')
+            else:
+                    print('No match found in GPT generated code. Unable to save.')
+
     @line_magic
     def rep(self, line):
         self.repair(line)

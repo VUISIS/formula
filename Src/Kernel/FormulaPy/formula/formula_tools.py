@@ -22,17 +22,15 @@ class FormulaCodeLLM(BaseTool):
     description = FORMULA_CODE_LLM_DESC
     llm: BaseChatModel
 
-    def _run(self, **kwargs) -> Any:
-        explain_prompt = kwargs["explain_prompt"]
+    def _run(self, arg, **kwargs) -> Any:
+        explain_prompt = kwargs["prompt"]
         code = kwargs["code"]
         output = kwargs["output"]
 
         explain_template = EXPLAIN_QUERY_PROMPT
-
-        solutions_template = SOLUTIONS_QUERY_PROMPT
         
         prompt_template = PromptTemplate(
-            input_variables=["explain_prompt", "code", "output"],
+            input_variables=["prompt", "code", "output"],
             template=explain_template,
         )
         
@@ -56,15 +54,15 @@ class RepairFormulaCodeLLM(BaseTool):
     description = REPAIR_FORMULA_CODE_LLM_DESC
     llm: BaseChatModel
 
-    def _run(self, **kwargs) -> Any:
-        repair_prompt = kwargs["repair_prompt"]
+    def _run(self, arg, **kwargs) -> Any:
+        repair_prompt = kwargs["prompt"]
         code = kwargs["code"]
         output = kwargs["output"]
         
         repair_template = REPAIR_QUERY_PROMPT
 
         prompt_template = PromptTemplate(
-            input_variables=["repair_prompt", "code", "output"],
+            input_variables=["prompt", "code", "output"],
             template=repair_template,
         )
         

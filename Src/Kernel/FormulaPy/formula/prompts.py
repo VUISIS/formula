@@ -1,31 +1,31 @@
 FIX_CODE_PREFIX =  """ \
 SYSTEM MESSAGE:
 
-You will be provided a Formula DSL program and unsat core (delimited with XML tags labelled code). You will explain why the program is broken and give solutions to fixing it.
+You will be provided a Formula DSL program and unsat core. You will explain why the program is broken and give solutions to fixing it.
 
 END OF SYSTEM MESSAGE"""
 
 REPAIR_CODE_PREFIX = """ \
 SYSTEM MESSAGE:
 
-You will be provided a Formula DSL program and unsat core (delimited with XML tags labelled code). You will give repairs of the code in the Formula DSL language enclosed in triple backticks.
+You will be provided a Formula DSL program and unsat core. You will give repairs of the code in the Formula DSL language enclosed in code labelled triple backticks. Give the line numbers of the code in the triple backticks.
 
 END OF SYSTEM MESSAGE"""
 
 EXPLAIN_QUERY_PROMPT = """ \
-{explain_prompt}
+{prompt}
 
-<code>{code}</code>
+{code}
 
-<code>{output}</code>
+{output}
 """
 
 REPAIR_QUERY_PROMPT = """ \
-{repair_prompt}
+{prompt}
 
-<code>{code}</code>
+{code}
 
-<code>{output}</code>
+{output}
 """
 
 OUTPUT_RETURN = """ \

@@ -6,7 +6,7 @@ from langchain.schema.messages import SystemMessage
 from langchain.memory import ConversationBufferMemory
 from .formula_tools import FormulaCodeLLM, RepairFormulaCodeLLM
 from .config import cfg
-from .prompts import FIX_CODE_PREFIX, REPAIR_CODE_PREFIX
+from .prompts import FIX_CODE_PREFIX, REPAIR_CODE_PREFIX, REPAIR_QUERY_PROMPT, EXPLAIN_QUERY_PROMPT
 
 os.environ["OPENAI_API_KEY"] = cfg["OPENAI_API_KEY"]
 #os.environ["OPENAI_API_TYPE"] = "azure"
@@ -22,7 +22,7 @@ if cfg["LANGCHAIN_API_KEY"] != "":
 	os.environ["LANGCHAIN_PROJECT"] ="pt-oily-sultan-99"
 
 
-llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k")
+llm = ChatOpenAI(temperature=0.0, model_name="gpt-3.5-turbo")
 
 
 system_message = SystemMessage(content=FIX_CODE_PREFIX)
@@ -58,15 +58,15 @@ agent_repair = OpenAIFunctionsAgent(
 agent_executor_repair = AgentExecutor.from_agent_and_tools(
         agent=agent_repair,
         tools=repair_tools,
-        verbose=True,
+        verbose=True
 )
 
 def run_agent_executor(code, output, explain_prompt):
-    prompts = "{explain_prompt}\n\n{code}\n\n{output}".format(code=code, output=output, explain_prompt=explain_prompt)
+    prompts = EXPLAIN_QUERY_PROMPT.format(code=code, output=output, prompt=explain_prompt)
     prompts.encode('unicode_escape')
     agent_executor.run(prompts)
     
 def run_agent_executor_repair(code, output, repair_prompt):
-    prompts = "{repair_prompt}\n\n{code}\n\n{output}".format(code=code, output=output, repair_prompt=repair_prompt)
+    prompts = REPAIR_QUERY_PROMPT.format(code=code, output=output, prompt=repair_prompt)
     prompts.encode('unicode_escape')
-    agent_executor_repair.run(prompts)
+    return agent_executor_repair.run(prompts)
