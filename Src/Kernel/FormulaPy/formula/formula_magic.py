@@ -1,32 +1,18 @@
 from __future__ import print_function
-from pickle import TRUE
 from IPython.core.magic import (Magics, magics_class, line_magic)
 from IPython.core.magic_arguments import (argument, magic_arguments, parse_argstring)
 
 import re, os
 
-from Microsoft.Formula.CommandLine import CommandInterface, CommandLineProgram
-from System.IO import StringWriter
-from System import Console
-
-from .formula_agent import run_agent_executor, run_agent_executor_repair
+from formulallm.formula_agent import run_agent_executor, run_agent_executor_repair
+from formulallm.formula_program import FormulaInterface
 
 @magics_class
 class FormulaMagics(Magics):
 
     def __init__(self, shell, data=None):
         super(FormulaMagics, self).__init__(shell)
-        self.sw = StringWriter()
-        self.total_sw_output = "END"
-        Console.SetOut(self.sw)
-        Console.SetError(self.sw)
-        self.file_txt = None
-        
-        sink = CommandLineProgram.ConsoleSink()
-        chooser = CommandLineProgram.ConsoleChooser()
-        self.ci = CommandInterface(sink, chooser)
-        self.ci.DoCommand("wait on")
-        self.sw.GetStringBuilder().Clear()
+        self.fi = FormulaInterface()
         print("Successfully initialized formula.")
 
     @line_magic
@@ -68,14 +54,11 @@ class FormulaMagics(Magics):
             line = cmd
         else:
             line = cmd + " " + args
-            
-        self.ci.DoCommand(line)
-        
-        temp_str = self.sw.ToString()
+                    
+        temp_str = self.fi.run_command(line)
         if cmd == "extract":
             self.total_sw_output = temp_str
                 
-        self.sw.GetStringBuilder().Clear()
         print(temp_str)
 
     @line_magic

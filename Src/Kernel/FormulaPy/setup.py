@@ -7,6 +7,5 @@ setup(
    author='VUISIS',
    author_email='stephen.johnson@vanderbilt.edu',
    packages=['formula'],
-   install_requires=['pythonnet','jupyter','langchain==0.0.239', "openai"],
-   package_data={'formula': ['CommandLine/*']}
+   install_requires=['jupyter','formulallm']
 )
