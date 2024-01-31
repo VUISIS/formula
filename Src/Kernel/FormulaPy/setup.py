@@ -7,5 +7,5 @@ setup(
    author='VUISIS',
    author_email='stephen.johnson@vanderbilt.edu',
    packages=['formula'],
-   install_requires=['jupyter','formulallm']
+   install_requires=['jupyter','formulallm==0.1.1']
 )
