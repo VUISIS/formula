@@ -50,6 +50,14 @@ $ dotnet ./bin/<Configuration>/MacOS/ARM64/net6.0/VUISIS.Formula.ARM64.dll
 To run unit tests with Formula, run the following command from
 Src/Tests.
 
+### Building Nuget Package & Installing Tool Locally
+To build the formula nuget package, run from the folder Src/CommandLine dotnet pack. Run dotnet tool to install the program and add the folder containing the nupkg with --add-source.
+
+```bash
+$ dotnet pack /p:Configuration=Debug|Release /p:Platform=x64|ARM64
+$ dotnet tool install --add-source ../../nupkg -g formula 
+```
+
 ```bash
 $ dotnet test Tests.csproj /p:Configuration=Debug|Release /p:Platform=x64|ARM64
 
