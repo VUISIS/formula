@@ -1191,7 +1191,7 @@ namespace Microsoft.Formula.API.ASTQueries
             Register(OpKind.Neg, "-", OpStyleKind.Prefix);
             Register(OpKind.Not, "not", OpStyleKind.Apply);
             Register(OpKind.Or, "or", OpStyleKind.Apply);
-            Register (OpKind.OrAll, "orAll", OpStyleKind.Apply);
+            Register(OpKind.OrAll, "orAll", OpStyleKind.Apply);
             Register(OpKind.Prod, "prod", OpStyleKind.Apply);
             Register(OpKind.Qtnt, "qtnt", OpStyleKind.Apply);
             Register(OpKind.Sub, "-", OpStyleKind.Infix);
@@ -1226,6 +1226,9 @@ namespace Microsoft.Formula.API.ASTQueries
             Register(OpKind.ToNatural, "toNatural", OpStyleKind.Apply);
             Register(OpKind.ToString, "toString", OpStyleKind.Apply);
             Register(OpKind.ToSymbol, "toSymbol", OpStyleKind.Apply);
+
+            Register(OpKind.SymMax, "symMax", OpStyleKind.Apply);
+            Register(OpKind.SymCount, "symCount", OpStyleKind.Apply);
 
             Register(RelKind.Eq, "=");
             Register(RelKind.Ge, ">=");
