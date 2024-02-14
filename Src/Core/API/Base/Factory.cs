@@ -17,8 +17,6 @@
 
         private static readonly char[] Whitespaces = new char[] { ' ', '\t', '\n' };
 
-        private static bool USE_ANTLR = true;
-
         public static Factory Instance
         {
             get { return instance; }
@@ -1368,17 +1366,15 @@
             return Task.Factory.StartNew<ParseResult>(() =>
             {
                 ParseResult pr;
-                if (USE_ANTLR)
-                {
-                    var parser = new FormulaVisitor();
-                    parser.ParseFile(name, null, default(Span), cancelToken, out pr);
-                }
-                else
-                {
-                    var parser = new Parser(envParams);
-                    parser.ParseFile(name, null, default(Span), cancelToken, out pr);
-                }
-                
+
+#if USE_ANTLR
+                var antlr_parser = new FormulaVisitor();
+                antlr_parser.ParseFile(name, null, default(Span), cancelToken, out pr);
+#else
+                var parser = new Parser(envParams);
+                parser.ParseFile(name, null, default(Span), cancelToken, out pr);
+#endif
+
                 return pr;
             });
         }
@@ -1393,16 +1389,14 @@
             return Task.Factory.StartNew<ParseResult>(() =>
             {
                 ParseResult pr;
-                if (USE_ANTLR)
-                {
-                    var parser = new FormulaVisitor();
-                    parser.ParseText(name, programText, default(Span), cancelToken, out pr);
-                }
-                else
-                {
-                    var parser = new Parser(envParams);
-                    parser.ParseText(name, programText, default(Span), cancelToken, out pr);
-                }
+
+#if USE_ANTLR
+                var antlr_parser = new FormulaVisitor();
+                antlr_parser.ParseText(name, programText, default(Span), cancelToken, out pr);
+#else
+                var parser = new Parser(envParams);
+                parser.ParseText(name, programText, default(Span), cancelToken, out pr);
+#endif
 
                 return pr;
             });
@@ -1418,16 +1412,15 @@
             return Task.Factory.StartNew<ParseResult>(() =>
             {
                 ParseResult pr;
-                if (USE_ANTLR)
-                {
-                    var parser = new FormulaVisitor();
-                    parser.ParseFile(name, referrer, location, cancelToken, out pr);
-                }
-                else
-                {
-                    var parser = new Parser(envParams);
-                    parser.ParseFile(name, referrer, location, cancelToken, out pr);
-                }
+
+#if USE_ANTLR
+                var antlr_parser = new FormulaVisitor();
+                antlr_parser.ParseFile(name, referrer, location, cancelToken, out pr);
+#else
+                var parser = new Parser(envParams);
+                parser.ParseFile(name, referrer, location, cancelToken, out pr);
+#endif
+
                 return pr;
             });
         }
@@ -1437,16 +1430,14 @@
             Contract.Requires(text != null);
             ParseResult pr;
             AST<Node> result = null;
-            if (USE_ANTLR)
-            {
-                var parser = new FormulaVisitor();
-                result = parser.ParseFuncTerm(text, out pr);
-            }
-            else
-            {
-                var parser = new Parser(envParams);
-                result = parser.ParseFuncTerm(text, out pr);
-            }
+
+#if USE_ANTLR
+            var parser = new FormulaVisitor();
+            result = parser.ParseFuncTerm(text, out pr);
+#else
+            var parser = new Parser(envParams);
+            result = parser.ParseFuncTerm(text, out pr);
+#endif
 
             pr.Program.Root.GetNodeHash();
             flags = pr.Flags;
