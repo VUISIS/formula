@@ -3,9 +3,7 @@
         <AssemblyName>Formula.Tests</AssemblyName>
         <IsPackable>false</IsPackable>
         <Platforms>ARM64;x64</Platforms>
-        <TargetFramework>net6.0</TargetFramework>
-        <TargetFrameworkIdentifier>.NETCOREAPP</TargetFrameworkIdentifier>
-        <TargetFrameworkVersion>6.0</TargetFrameworkVersion>
+        <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition="'$(Platform)' == ''">x64</Platform>
         <PlatformTarget Condition="'$(Platform)' == 'x64'">x64</PlatformTarget>

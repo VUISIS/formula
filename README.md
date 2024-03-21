@@ -55,7 +55,7 @@ To build the formula nuget package, run from the folder Src/CommandLine dotnet p
 
 ```bash
 $ dotnet pack /p:Configuration=Debug|Release /p:Platform=x64|ARM64
-$ dotnet tool install --add-source ../../nupkg -g formula 
+$ dotnet tool install --add-source ../../nupkg -g VUISIS.Formula.<x64|ARM64>
 ```
 
 ```bash

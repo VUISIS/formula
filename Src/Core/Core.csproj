@@ -2,9 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <TargetFrameworkIdentifier>.NETCOREAPP</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>6.0</TargetFrameworkVersion>
+    <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     <Platforms>ARM64;x64</Platforms>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">x64</Platform>
