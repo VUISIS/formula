@@ -10,7 +10,7 @@ buildDotnetModule rec {
   nugetDeps = ./nuget.nix;
   projectFile = "Src/CommandLine/CommandLine.sln";
 
-  dotnetFlags = [ "/p:Configuration=Release" "/p:Platform=x64" ];
+  dotnetFlags = [ "/p:TargetFramework=net6.0" "/p:TargetFrameworks=net6.0" "/p:Configuration=Release" "/p:Platform=x64" ];
 
   dotnet-runtime = dotnetCorePackages.runtime_6_0;
   dotnet-sdk = dotnetCorePackages.sdk_6_0;
