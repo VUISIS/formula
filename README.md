@@ -35,16 +35,16 @@ To build the command line interpreter, run the following commands from Src/Comma
 $ dotnet build CommandLine.sln /p:Configuration=Debug|Release /p:Platform=x64|ARM64
 
 For Windows x64
-$ dotnet ./bin/<Configuration>/Windows/x64/net6.0/VUISIS.Formula.x64.dll
+$ dotnet ./bin/<Configuration>/Windows/x64/<DotnetSDK>/VUISIS.Formula.x64.dll
 
 For Linux x64
-$ dotnet ./bin/<Configuration>/Linux/x64/net6.0/VUISIS.Formula.x64.dll
+$ dotnet ./bin/<Configuration>/Linux/x64/<DotnetSDK>/VUISIS.Formula.x64.dll
 
 For MacOS x64
-$ dotnet ./bin/<Configuration>/MacOS/x64/net6.0/VUISIS.Formula.x64.dll
+$ dotnet ./bin/<Configuration>/MacOS/x64/<DotnetSDK>/VUISIS.Formula.x64.dll
 
 For MacOS ARM64
-$ dotnet ./bin/<Configuration>/MacOS/ARM64/net6.0/VUISIS.Formula.ARM64.dll
+$ dotnet ./bin/<Configuration>/MacOS/ARM64/<DotnetSDK>/VUISIS.Formula.ARM64.dll
 ```
 
 To run unit tests with Formula, run the following command from
