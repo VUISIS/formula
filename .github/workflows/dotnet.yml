@@ -17,7 +17,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.x
     - name: Restore dependencies
       working-directory: ./Src/CommandLine
       run: dotnet restore CommandLine.sln
