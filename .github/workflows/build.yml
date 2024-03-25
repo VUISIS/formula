@@ -10,6 +10,14 @@ jobs:
         os: [macos-12, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: | 
+            6.x
+            7.x
+            8.x
       - name: 'Checkout codebase'
         uses: actions/checkout@v2.4.0
       - uses: cachix/install-nix-action@v22
