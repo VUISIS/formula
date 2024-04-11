@@ -70,7 +70,7 @@
 
         private HashSet<Z3BoolExpr> cachedConstraints = new HashSet<Z3BoolExpr>();
 
-        public void AddConstraintData(HashSet<Z3BoolExpr> exprs, Set<Term> posTerms, Set<Term> negTerms)
+        public void AddConstraintData(HashSet<Z3BoolExpr> exprs, Set<Term> posTerms, Set<Tuple<Term, Set<Tuple<Term, Term>>>> negTerms)
         {
             bool needToAdd = true;
 
@@ -144,10 +144,21 @@
                 localProcessed = new Set<Term>(Term.Compare, processed);
                 foreach (var negTerm in constraint.NegConstraints)
                 {
-                    if (!processed.Contains(negTerm) &&
-                        executer.GetSymbolicTerm(negTerm, out next))
+                    if (!processed.Contains(negTerm.Item1) &&
+                        executer.GetSymbolicTerm(negTerm.Item1, out next))
                     {
                         var nextConstraint = next.GetSideConstraints(executer, localProcessed);
+
+                        Z3BoolExpr expr;
+                        foreach (var item in negTerm.Item2)
+                        {
+                            Term normalized;
+                            var expr1 = executer.Encoder.GetTerm(item.Item1, out normalized);
+                            var expr2 = executer.Encoder.GetTerm(item.Item2, out normalized);
+                            expr = executer.Solver.Context.MkEq(expr1, expr2);
+                            nextConstraint = executer.Solver.Context.MkAnd(nextConstraint, expr);
+                        }
+
                         nextConstraint = executer.Solver.Context.MkNot(nextConstraint);
                         currConstraint = CreateAndCacheConstraint(executer, currConstraint, nextConstraint);
                     }
@@ -204,9 +215,19 @@
                 {
                     processed.Clear();
                     processed.Add(t);
-                    if (executer.GetSymbolicTerm(negTerm, out next))
+                    if (executer.GetSymbolicTerm(negTerm.Item1, out next))
                     {
                         var nextConstraint = next.GetSideConstraints(executer, processed);
+                        Z3BoolExpr expr;
+                        foreach (var item in negTerm.Item2)
+                        {
+                            Term normalized;
+                            var expr1 = executer.Encoder.GetTerm(item.Item1, out normalized);
+                            var expr2 = executer.Encoder.GetTerm(item.Item2, out normalized);
+                            expr = executer.Solver.Context.MkEq(expr1, expr2);
+                            nextConstraint = executer.Solver.Context.MkAnd(nextConstraint, expr);
+                        }
+
                         nextConstraint = context.MkNot(nextConstraint);
                         currConstraint = CreateAndCacheConstraint(executer, currConstraint, nextConstraint);
                     }
@@ -325,20 +346,20 @@
             private set;
         }
 
-        public Set<Term> NegConstraints
+        public Set<Tuple<Term, Set<Tuple<Term, Term>>>> NegConstraints
         {
             get;
             private set;
         }
 
-        public ConstraintData(HashSet<Z3BoolExpr> exprs, Set<Term> posTerms, Set<Term> negTerms)
+        public ConstraintData(HashSet<Z3BoolExpr> exprs, Set<Term> posTerms, Set<Tuple<Term, Set<Tuple<Term, Term>>>> negTerms)
         {
             DirConstraints = exprs;
             PosConstraints = posTerms;
             NegConstraints = negTerms;
         }
 
-        public bool IsSameConstraintData(HashSet<Z3BoolExpr> exprs, Set<Term> posTerms, Set<Term> negTerms)
+        public bool IsSameConstraintData(HashSet<Z3BoolExpr> exprs, Set<Term> posTerms, Set<Tuple<Term, Set<Tuple<Term, Term>>>> negTerms)
         {
             if (DirConstraints.SetEquals(exprs) &&
                 PosConstraints.IsSameSet(posTerms) &&

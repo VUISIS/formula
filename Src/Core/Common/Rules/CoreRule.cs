@@ -14,6 +14,7 @@
     using Compiler;
     using Extras;
     using Terms;
+    using Z3BoolExpr = Z3.BoolExpr;
 
     internal class CoreRule
     {
@@ -777,6 +778,8 @@
                 return;
             }
 
+            index.BeginJoinMatch();
+
             Term pattern;
             FindData otherFind;
             Matcher otherMatcher;
@@ -823,7 +826,7 @@
                     ApplyMatch(index, otherMatcher, tp, ConstraintNode.BLSecond))
                 {
                     Contract.Assert(headNode.Binding != null);
-                    Pend(
+                    PendJoinMatch(
                         keepDerivations,
                         index,
                         pending,
@@ -833,9 +836,13 @@
 
                     UndoPropagation(ConstraintNode.BLSecond);
                 }
+
+                index.ResetJoinConstraints();
             }
 
             UndoPropagation(ConstraintNode.BLFirst);
+
+            index.EndJoinMatch();
         }
 
         public virtual void Execute(
@@ -1162,6 +1169,42 @@
             if (index.IfExistsThenDerive(t, d))
             {
                 index.AddDerivation(t, bind1, bind2);
+                return;
+            }
+
+            Set<Derivation> dervs;
+            if (!pending.TryFindValue(t, out dervs))
+            {
+                dervs = new Set<Derivation>(Derivation.Compare);
+                pending.Add(t, dervs);
+            }
+
+            dervs.Add(d);
+        }
+
+        protected void PendJoinMatch(
+            bool keepDerivations,
+            SymExecuter index,
+            Map<Term, Set<Derivation>> pending,
+            Term t,
+            Term bind1,
+            Term bind2)
+        {
+            // TODO: handle this case
+            if (!keepDerivations)
+            {
+                if (!index.Exists(t) && !pending.ContainsKey(t))
+                {
+                    pending.Add(t, null);
+                }
+
+                return;
+            }
+
+            var d = new Derivation(this, bind1, bind2, new List<Z3BoolExpr>(index.GetPendingJoinConstraints()));
+            if (index.IfExistsThenDerive(t, d))
+            {
+                index.AddJoinDerivation(t, bind1, bind2);
                 return;
             }
 
@@ -2385,6 +2428,12 @@
                     Binding = facts.Index.TrueValue;                            
                     BindingLevel = bindingLevel;                                
                     return true; 
+                }
+                else if (bindSymb.IsVariable)
+                {
+                    Binding = facts.Index.TrueValue;
+                    BindingLevel = bindingLevel;
+                    return true;
                 }
                 else if (!typeBins.TryFindValue(bindSymb, out typeTerm))
                 {
