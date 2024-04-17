@@ -2115,7 +2115,7 @@
         {
             Contract.Requires(values.Length == 1);
             int nResults;
-            var res = facts.Query(values[0].Binding, out nResults);
+            var res = facts.QueryNo(values[0].Binding, out nResults);
             if (nResults == 0)
             {
                 return facts.Index.TrueValue;

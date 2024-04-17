@@ -74,6 +74,11 @@
         private List<Z3BoolExpr> pendingConstraints =
             new List<Z3BoolExpr>();
 
+        private List<Z3BoolExpr> pendingJoinConstraints =
+            new List<Z3BoolExpr>();
+
+        private bool isJoinMatch = false;
+
         private Dictionary<int, Z3BoolExpr> recursionConstraints =
             new Dictionary<int, Z3BoolExpr>();
 
@@ -86,6 +91,11 @@
             new List<Dictionary<Z3Expr, Z3Expr>>();
 
         private List<List<string>> solutionStrings = new List<List<string>>();
+
+        public List<Z3BoolExpr> GetPendingJoinConstraints()
+        {
+            return pendingJoinConstraints;
+        }
 
         public RuleTable Rules { get; private set; }
 
@@ -100,8 +110,48 @@
         public Map<Term, Term> varToTypeMap =
             new Map<Term, Term>(Term.Compare);
 
+        public static int CompareTupleTerms(Tuple<Term, Term> x,
+                                            Tuple<Term, Term> y)
+        {
+            bool b1 = (x.Item1 == y.Item1) && (x.Item2 == y.Item2);
+            bool b2 = (x.Item1 == y.Item2) && (x.Item2 == y.Item1);
+
+            if (b1 || b2)
+            {
+                return 0;
+            }
+
+            int res1 = Term.Compare(x.Item1, y.Item1);
+            if (res1 == 0)
+            {
+                return Term.Compare(x.Item2, y.Item2);
+            }
+            else
+            {
+                return res1;
+            }
+        }
+
+        public static int CompareNegativeConstraints(Tuple<Term, Set<Tuple<Term, Term>>> x,
+                                                     Tuple<Term, Set<Tuple<Term, Term>>> y)
+        {
+            if (x.Item1 != y.Item1)
+            {
+                return Term.Compare(x.Item1, y.Item1);
+            }
+
+            if (!x.Item2.IsSameSet(y.Item2))
+            {
+                return 1;
+            }
+
+            return 0;
+        }
+
         private Set<Term> PositiveConstraintTerms = new Set<Term>(Term.Compare);
-        private Set<Term> NegativeConstraintTerms = new Set<Term>(Term.Compare);
+        private Set<Tuple<Term, Set<Tuple<Term, Term>>>> NegativeConstraintTerms =
+            new Set<Tuple<Term, Set<Tuple<Term, Term>>>>(CompareNegativeConstraints);
+
 
         private Map<Term, List<Term>> symCountMap =
             new Map<Term, List<Term>>(Term.Compare);
@@ -250,10 +300,10 @@
             
                     foreach (var negConst in data.NegConstraints)
                     {
-                        if (negConst.Symbol is UserSymbol userSym &&
+                        if (negConst.Item1.Symbol is UserSymbol userSym &&
                             !userSym.IsAutoGen)
                         {
-                            var temp = PrefixToInfix(negConst);
+                            var temp = PrefixToInfix(negConst.Item1);
                             if (temp.Length > 0)
                             {
                                 EnvParams.GetSolverPublisherParameter(Solver.Env.Parameters,
@@ -394,9 +444,23 @@
             RemovePositiveConstraints();
         }
 
+        public void AddJoinDerivation(Term t, Term bind1, Term bind2)
+        {
+            AddPositiveConstraints(bind1, bind2);
+            ExtendLFP(t, pendingJoinConstraints);
+            RemovePositiveConstraints();
+        }
+
         public void PendConstraint(Z3BoolExpr expr)
         {
-            pendingConstraints.Add(expr);
+            if (!isJoinMatch)
+            {
+                pendingConstraints.Add(expr);
+            }
+            else
+            {
+                pendingJoinConstraints.Add(expr);
+            }
         }
 
         public bool HasSideConstraint(Term term)
@@ -444,10 +508,10 @@
             return Solver.Context.MkTrue(); // if no constraints
         }
 
-        public bool AddNegativeConstraint(Term t)
+        public bool AddNegativeConstraint(Tuple<Term, Set<Tuple<Term, Term>>> t)
         {
             SymElement e;
-            if (lfp.TryFindValue(t, out e))
+            if (lfp.TryFindValue(t.Item1, out e))
             {
                 if (e.HasConstraints())
                 {
@@ -464,6 +528,21 @@
             return lfp.TryFindValue(t, out e);
         }
 
+        public void BeginJoinMatch()
+        {
+            isJoinMatch = true;
+        }
+
+        public void EndJoinMatch()
+        {
+            isJoinMatch = false;
+        }
+
+        public void ResetJoinConstraints()
+        {
+            pendingJoinConstraints.Clear();
+        }
+
         public void PendEqualityConstraint(Term t1, Term t2)
         {
             Term normalized;
@@ -474,7 +553,7 @@
 
         public void PendEqualityConstraint(Z3Expr expr1, Z3Expr expr2)
         {
-            pendingConstraints.Add(Solver.Context.MkEq(expr1, expr2));
+            PendConstraint(Solver.Context.MkEq(expr1, expr2));
         }
 
         private void AddRecursionConstraint(int ruleId)
@@ -1032,7 +1111,7 @@
                             {
                                 if (IsConstraintSatisfiable(kv.Key))
                                 {
-                                    IndexFact(ExtendLFP(kv.Key), kv.Value, pendingAct, i);
+                                    IndexFact(ExtendLFP(kv.Key, derv.PendingJoinConstraints), kv.Value, pendingAct, i);
                                 }
                             }
                             else
@@ -1106,10 +1185,21 @@
                 currConstraint = CreateConstraint(currConstraint, nextConstraint);
             }
 
-            foreach (Term t in NegativeConstraintTerms)
+            foreach (var t in NegativeConstraintTerms)
             {
-                var e = lfp[t];
+                var e = lfp[t.Item1];
                 var nextConstraint = e.GetSideConstraints(this);
+
+                Z3BoolExpr expr;
+                foreach (var item in t.Item2)
+                {
+                    Term normalized;
+                    var expr1 = Encoder.GetTerm(item.Item1, out normalized);
+                    var expr2 = Encoder.GetTerm(item.Item2, out normalized);
+                    expr = Solver.Context.MkEq(expr1, expr2);
+                    nextConstraint = Solver.Context.MkAnd(nextConstraint, expr);
+                }
+
                 nextConstraint = Solver.Context.MkNot(nextConstraint);
                 currConstraint = CreateConstraint(currConstraint, nextConstraint);
             }
@@ -1413,7 +1503,7 @@
         /// <summary>
         /// Extends the lfp with a symbolic element equivalent to t. 
         /// </summary>
-        private SymElement ExtendLFP(Term t)
+        private SymElement ExtendLFP(Term t, List<Z3BoolExpr> joinConstraints = null)
         {
             SymElement e;
             if (!lfp.TryFindValue(t, out e))
@@ -1429,13 +1519,21 @@
                 lfp.Add(normalized, e);
             }
 
+            joinConstraints ??= new List<Z3BoolExpr>();
+
             if (!pendingConstraints.IsEmpty() ||
                 !PositiveConstraintTerms.IsEmpty() ||
-                !NegativeConstraintTerms.IsEmpty())
+                !NegativeConstraintTerms.IsEmpty() ||
+                !joinConstraints.IsEmpty())
             {
                 HashSet<Z3BoolExpr> a = new HashSet<Z3BoolExpr>(pendingConstraints);
                 Set<Term> b = new Set<Term>(Term.Compare, PositiveConstraintTerms);
-                Set<Term> c = new Set<Term>(Term.Compare, NegativeConstraintTerms);
+                var c = new Set<Tuple<Term, Set<Tuple<Term, Term>>>>(CompareNegativeConstraints, NegativeConstraintTerms);
+
+                foreach (var constraint in joinConstraints)
+                {
+                    a.Add(constraint);
+                }
 
                 e.AddConstraintData(a, b, c);
             }
@@ -1685,6 +1783,24 @@
             //// Console.WriteLine(" ]");
 
             return subIndex.Query(projection, out nResults);
+        }
+
+        public IEnumerable<Tuple<Term, Set<Tuple<Term, Term>>>> QueryNo(Term comprTerm, out int nResults)
+        {
+            Contract.Requires(comprTerm != null);
+            var subIndex = comprIndices[comprTerm.Symbol];
+            var projection = new Term[comprTerm.Symbol.Arity - 1];
+
+            //// Console.Write("Query {0}: [", subIndex.Pattern.Debug_GetSmallTermString());
+            for (int i = 0; i < comprTerm.Symbol.Arity - 1; ++i)
+            {
+                //// Console.Write(" " + comprTerm.Args[i].Debug_GetSmallTermString());
+                projection[i] = comprTerm.Args[i];
+            }
+
+            //// Console.WriteLine(" ]");
+
+            return subIndex.QueryNo(projection, out nResults);
         }
 
         public IEnumerable<Term> Query(Term pattern, Term[] projection)
@@ -1966,6 +2082,55 @@
                 }
             }
 
+            public IEnumerable<Tuple<Term, Set<Tuple<Term, Term>>>> QueryNo(Term[] projection)
+            {
+                if (projection.IsEmpty())
+                {
+                    Set<SymElement> subindex;
+                    if (!facts.TryFindValue(projection, out subindex))
+                    {
+                        yield break;
+                    }
+
+                    foreach (var t in subindex)
+                    {
+                        yield return new Tuple<Term, Set<Tuple<Term, Term>>>(t.Term, new Set<Tuple<Term, Term>>(SymExecuter.CompareTupleTerms));
+                    }
+                }
+                else
+                {
+                    Set<Tuple<Term, Set<Tuple<Term, Term>>>> allFacts = new Set<Tuple<Term, Set<Tuple<Term, Term>>>>(SymExecuter.CompareNegativeConstraints);
+                    foreach (var kvp in facts)
+                    {
+                        bool isUnifiable = true;
+                        Set<Tuple<Term, Term>> equalities = new Set<Tuple<Term, Term>>(SymExecuter.CompareTupleTerms);
+                        for (int i = 0; i < kvp.Key.Length; i++)
+                        {
+                            if (!Unifier.IsUnifiable(projection[i], kvp.Key[i]))
+                            {
+                                isUnifiable = false;
+                                break;
+                            }
+
+                            equalities.Add(new Tuple<Term, Term>(projection[i], kvp.Key[i]));
+                        }
+
+                        if (isUnifiable)
+                        {
+                            foreach (SymElement e in kvp.Value)
+                            {
+                                allFacts.Add(new Tuple<Term, Set<Tuple<Term, Term>>>(e.Term, equalities));
+                            }
+                        }
+                    }
+
+                    foreach (var t in allFacts)
+                    {
+                        yield return t;
+                    }
+                }
+            }
+
             public IEnumerable<Term> Query(Term[] projection, out int nResults)
             {
                 Set<SymElement> subindex;
@@ -1979,6 +2144,21 @@
                 }
 
                 return Query(projection);
+            }
+
+            public IEnumerable<Tuple<Term, Set<Tuple<Term, Term>>>> QueryNo(Term[] projection, out int nResults)
+            {
+                Set<SymElement> subindex;
+                if (!facts.TryFindValue(projection, out subindex))
+                {
+                    nResults = 0;
+                }
+                else
+                {
+                    nResults = subindex.Count;
+                }
+
+                return QueryNo(projection);
             }
 
             public void AddTrigger(CoreRule rule, int findNumber)

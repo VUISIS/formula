@@ -13,6 +13,7 @@
     using Compiler;
     using Extras;
     using Terms;
+    using Z3BoolExpr = Z3.BoolExpr;
 
     internal class Derivation
     {
@@ -37,6 +38,12 @@
             private set;
         }
 
+        public List<Z3BoolExpr> PendingJoinConstraints
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// Create a derivation for facts
         /// </summary>
@@ -55,6 +62,19 @@
             Rule = rule;
             Binding1 = binding1;
             Binding2 = binding2;
+            PendingJoinConstraints = new List<Z3BoolExpr>();
+        }
+
+        /// <summary>
+        /// Absent bindings should be given the value FALSE
+        /// </summary>
+        public Derivation(CoreRule rule, Term binding1, Term binding2, List<Z3BoolExpr> pendingConstraints)
+        {
+            Contract.Requires(rule != null && binding1 != null && binding2 != null);
+            Rule = rule;
+            Binding1 = binding1;
+            Binding2 = binding2;
+            PendingJoinConstraints = new List<Z3BoolExpr>(pendingConstraints);
         }
 
         public static int Compare(Derivation d1, Derivation d2)
