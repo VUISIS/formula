@@ -336,47 +336,67 @@ namespace Microsoft.Formula.Solver
 
         private Z3Expr GetSymCountExpr(SymExecuter facts, Term x, IEnumerable<Z3Expr> ch)
         {
-            // 1. Add the base count
-            List<Z3ArithExpr> exprs = new List<Z3ArithExpr>();
-            exprs.Add((Z3ArithExpr)ch.ElementAt(0));
-
-            // 2. Create an ITE for each term.
-            // If a term's constraints are satisfied, the count is incremented by 1
             int index = ((int)((Rational)((BaseCnstSymb)x.Args[1].Symbol).Raw).Numerator);
             Term comprTerms = facts.GetSymbolicCountTerm(x.Args[2], index);
-            List<Z3BoolExpr> allBoolExprs = new List<Z3BoolExpr>();
-            for (int i = 2; i < comprTerms.Args.Count(); i++)
-            {
-                Z3BoolExpr boolExpr = facts.GetSideConstraints(comprTerms.Args[i]);
-                allBoolExprs.Add(boolExpr);
-                exprs.Add((Z3ArithExpr)facts.Solver.Context.MkITE(boolExpr,
-                                                                    facts.Solver.Context.MkInt(1),
-                                                                    facts.Solver.Context.MkInt(0)));
-            }
 
-            // 3. The equality between any two terms decrements the count by 1
+            int numTerms = comprTerms.Args.Count() - 2;
+            Z3Expr[] termExprs = new Z3Expr[numTerms];
+            Z3BoolExpr[] boolExprs = new Z3BoolExpr[numTerms];
             Term normalized;
-            for (int i = 0; i < allBoolExprs.Count; i++)
+
+            for (int i = 0; i < comprTerms.Args.Count() - 2; i++)
             {
-                for (int j = i + 1; j < allBoolExprs.Count; j++)
-                {
-                    var e1Term = comprTerms.Args[i + 2].Args[0];
-                    var e2Term = comprTerms.Args[j + 2].Args[0];
-
-                    var e1Enc = GetTerm(e1Term, out normalized, facts);
-                    var e2Enc = GetTerm(e2Term, out normalized, facts);
-
-                    var e1 = facts.Solver.Context.MkEq(e1Enc, e2Enc);
-                    var e2 = allBoolExprs.ElementAt(i);
-                    var e3 = allBoolExprs.ElementAt(j);
-                    var e4 = facts.Solver.Context.MkAnd(new Z3BoolExpr[] { e1, e2, e3 });
-                    exprs.Add((Z3ArithExpr)facts.Solver.Context.MkITE(e4,
-                                                                    facts.Solver.Context.MkInt(-1),
-                                                                    facts.Solver.Context.MkInt(0)));
-                }
+                var e1Term = comprTerms.Args[i + 2].Args[0];
+                termExprs[i] = GetTerm(e1Term, out normalized, facts);
+                boolExprs[i] = facts.GetSideConstraints(comprTerms.Args[i + 2]); // TODO: check if we need comprTerms.Args[i + 2].Args[0] here
             }
 
-            return facts.Solver.Context.MkAdd(exprs);
+            int numCoeffs = (2 * numTerms) - 1;
+            int[] coeffs = new int[numCoeffs];
+            Z3BoolExpr[] args = new Z3BoolExpr[numCoeffs];
+            Z3BoolExpr[] pbTerms = new Z3BoolExpr[numTerms + 1];
+
+            for (int i = 0; i < numTerms; i++)
+            {
+                coeffs[i] = 1;
+                args[i] = boolExprs[i];
+            }
+
+            for (int i = 0; i < numTerms - 1; i++)
+            {
+                int currIndex = numTerms + i;
+                Z3BoolExpr currExpr = null;
+                List<Z3BoolExpr> currExprs = new List<Z3BoolExpr>();
+                for (int j = i + 1; j < numTerms; j++)
+                {
+                    currExpr = facts.Solver.Context.MkEq(termExprs[i], termExprs[j]);
+                    currExpr = facts.Solver.Context.MkAnd(currExpr, boolExprs[i]);
+                    currExpr = facts.Solver.Context.MkAnd(currExpr, boolExprs[j]);
+                    currExprs.Add(currExpr);
+                }
+
+                coeffs[currIndex] = -1;
+                args[currIndex] = facts.Solver.Context.MkOr(currExprs);
+            }
+
+            for (int i = 0; i < numTerms + 1; i++)
+            {
+                pbTerms[i] = facts.Solver.Context.MkPBEq(coeffs, args, i);
+            }
+
+            return MakeCardConstraint(facts, pbTerms, numTerms);
+        }
+
+        private Z3ArithExpr MakeCardConstraint(SymExecuter facts, Z3BoolExpr[] constraints, int index)
+        {
+            if (index == 0)
+            {
+                return (Z3ArithExpr)facts.Solver.Context.MkITE(constraints[index], facts.Solver.Context.MkInt(index), facts.Solver.Context.MkInt(-1));
+            }
+            else
+            {
+                return (Z3ArithExpr)facts.Solver.Context.MkITE(constraints[index], facts.Solver.Context.MkInt(index), MakeCardConstraint(facts, constraints, index - 1));
+            }
         }
 
         public void Debug_Print()
