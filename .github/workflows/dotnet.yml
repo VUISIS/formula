@@ -2,57 +2,58 @@ name: .NET
 
 on:
   push:
-    branches: [ '**' ]
+    branches: ["**"]
   pull_request:
-    branches: [ '**' ]
+    branches: ["**"]
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ubuntu-latest, windows-latest]
+        platform: [x64, arm]
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: | 
-          6.x
-          7.x
-          8.x
-    - name: Restore dependencies
-      working-directory: ./Src/CommandLine
-      run: dotnet restore CommandLine.sln
-    - name: Build
-      working-directory: ./Src/CommandLine
-      run: dotnet build CommandLine.sln /p:Configuration=Release /p:Platform=x64
-    - name: Pack Nuget Package
-      if: ${{ matrix.os == 'ubuntu-latest' && github.ref_name == 'master' }}
-      working-directory: ./Src/CommandLine
-      run: dotnet pack CommandLine.csproj -c Release -p:PackageVersion="1.0.${{ github.run_number }}" /p:Platform=x64
-    - name: Publish Nuget Package
-      if: ${{ matrix.os == 'ubuntu-latest' && github.ref_name == 'master' }}
-      working-directory: ./nupkg
-      run: dotnet nuget push VUISIS.Formula.x64.1.0.${{ github.run_number }}.nupkg --api-key ${{ secrets.BUILD_SECRET }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-    - name: Copy to Liblibz3 MacOS
-      if: ${{ matrix.os == 'macOS-latest' }}
-      run: cp ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/x64/net6.0/runtimes/osx-x64/native/libz3.dylib ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/x64/net6.0/runtimes/osx-x64/native/liblibz3.dylib
-    - name: Test Ubuntu
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      working-directory: ./Src/Tests
-      run: |
-        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/Linux/x64/net6.0/runtimes/linux-x64/native
-        dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=x64
-    - name: Test MacOS
-      if: ${{ matrix.os == 'macOS-latest' }}
-      working-directory: ./Src/Tests
-      run: |
-        export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/x64/net6.0/runtimes/osx-x64/native
-        dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=x64
-    - name: Test Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-      working-directory: ./Src/Tests
-      run: |
-        set PATH="%PATH%;${GITHUB_WORKSPACE}\Src\CommandLine\bin\Release\Windows\x64\net6.0\runtimes\win-x64\native"
-        dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=x64
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.x
+            7.x
+            8.x
+      - name: Restore dependencies
+        working-directory: ./Src/CommandLine
+        run: dotnet restore CommandLine.sln
+      - name: Build
+        working-directory: ./Src/CommandLine
+        run: dotnet build CommandLine.sln /p:Configuration=Release /p:Platform=${{ matrix.platform }}
+      - name: Pack Nuget Package
+        if: ${{ matrix.os == 'ubuntu-latest' && github.ref_name == 'master' }}
+        working-directory: ./Src/CommandLine
+        run: dotnet pack CommandLine.csproj -c Release -p:PackageVersion="1.0.${{ github.run_number }}" /p:Platform=${{ matrix.platform }}
+      - name: Publish Nuget Package
+        if: ${{ matrix.os == 'ubuntu-latest' && github.ref_name == 'master' }}
+        working-directory: ./nupkg
+        run: dotnet nuget push VUISIS.Formula.${{ matrix.platform }}.1.0.${{ github.run_number }}.nupkg --api-key ${{ secrets.BUILD_SECRET }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Copy to Liblibz3 MacOS
+        if: ${{ matrix.os == 'macOS-latest' }}
+        run: cp ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/${{ matrix.platform }}/net6.0/runtimes/osx-${{ matrix.platform }}/native/libz3.dylib ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/${{ matrix.platform }}/net6.0/runtimes/osx-${{ matrix.platform }}/native/liblibz3.dylib
+      - name: Test Ubuntu
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        working-directory: ./Src/Tests
+        run: |
+          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/Linux/${{ matrix.platform }}/net6.0/runtimes/linux-${{ matrix.platform }}/native
+          dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=${{ matrix.platform }}
+      - name: Test MacOS
+        if: ${{ matrix.os == 'macOS-latest' }}
+        working-directory: ./Src/Tests
+        run: |
+          export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/${{ matrix.platform }}/net6.0/runtimes/osx-${{ matrix.platform }}/native
+          dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=${{ matrix.platform }}
+      - name: Test Windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        working-directory: ./Src/Tests
+        run: |
+          set PATH="%PATH%;${GITHUB_WORKSPACE}\Src\CommandLine\bin\Release\Windows\${{ matrix.platform }}\net6.0\runtimes\win-${{ matrix.platform }}\native"
+          dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=${{ matrix.platform }}
