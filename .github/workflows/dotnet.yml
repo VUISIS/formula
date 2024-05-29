@@ -31,32 +31,15 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' && github.ref_name == 'master' }}
         working-directory: ./Src/CommandLine
         run: dotnet pack CommandLine.csproj -c Release -p:PackageVersion="1.0.${{ github.run_number }}" /p:Platform=x64
-      - name: Pack Nuget Package (macOS)
-        if: matrix.os == 'macOS-latest' && github.ref_name == 'master'
-        working-directory: ./Src/CommandLine
-        run: dotnet pack CommandLine.csproj -c Release -p:PackageVersion="1.0.${{ github.run_number }}" /p:Platform=ARM64
       - name: Publish Nuget Package (ubuntu)
         if: ${{ matrix.os == 'ubuntu-latest' && github.ref_name == 'master' }}
         working-directory: ./nupkg
         run: dotnet nuget push VUISIS.Formula.x64.1.0.${{ github.run_number }}.nupkg --api-key ${{ secrets.BUILD_SECRET }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-      - name: Publish Nuget Package (macOS)
-        if: matrix.os == 'macOS-latest' && github.ref_name == 'master'
-        working-directory: ./nupkg
-        run: dotnet nuget push VUISIS.Formula.ARM64.1.0.${{ github.run_number }}.nupkg --api-key ${{ secrets.BUILD_SECRET }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-      - name: Copy to Liblibz3 MacOS
-        if: ${{ matrix.os == 'macOS-latest' }}
-        run: cp ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/x64/net6.0/runtimes/osx-x64/native/libz3.dylib ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/x64/net6.0/runtimes/osx-x64/native/liblibz3.dylib
       - name: Test Ubuntu
         if: ${{ matrix.os == 'ubuntu-latest' }}
         working-directory: ./Src/Tests
         run: |
           export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/Linux/x64/net6.0/runtimes/linux-x64/native
-          dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=x64
-      - name: Test MacOS
-        if: ${{ matrix.os == 'macOS-latest' }}
-        working-directory: ./Src/Tests
-        run: |
-          export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/x64/net6.0/runtimes/osx-x64/native
           dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=x64
       - name: Test Windows
         if: ${{ matrix.os == 'windows-latest' }}
@@ -64,3 +47,36 @@ jobs:
         run: |
           set PATH="%PATH%;${GITHUB_WORKSPACE}\Src\CommandLine\bin\Release\Windows\x64\net6.0\runtimes\win-x64\native"
           dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=x64
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.x
+            7.x
+            8.x
+      - name: Restore dependencies
+        working-directory: ./Src/CommandLine
+        run: dotnet restore CommandLine.sln
+      - name: Build
+        working-directory: ./Src/CommandLine
+        run: dotnet build CommandLine.sln /p:Configuration=Release /p:Platform=ARM64
+      - name: Pack Nuget Package (macOS)
+        if: github.ref_name == 'master'
+        working-directory: ./Src/CommandLine
+        run: dotnet pack CommandLine.csproj -c Release -p:PackageVersion="1.0.${{ github.run_number }}" /p:Platform=ARM64
+      - name: Publish Nuget Package (macOS)
+        if: github.ref_name == 'master'
+        working-directory: ./nupkg
+        run: dotnet nuget push VUISIS.Formula.ARM64.1.0.${{ github.run_number }}.nupkg --api-key ${{ secrets.BUILD_SECRET }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Copy to Liblibz3 MacOS
+        run: cp ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/ARM64/net6.0/runtimes/osx-ARM64/native/libz3.dylib ${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/ARM64/net6.0/runtimes/osx-ARM64/native/liblibz3.dylib
+      - name: Test MacOS
+        working-directory: ./Src/Tests
+        run: |
+          export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${GITHUB_WORKSPACE}/Src/CommandLine/bin/Release/MacOS/ARM64/net6.0/runtimes/osx-ARM64/native
+          dotnet test Tests.csproj --logger "console;verbosity=detailed" /p:Configuration=Release /p:Platform=ARM64
