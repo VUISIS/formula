@@ -1452,6 +1452,32 @@
                 return false;
             }
 
+            foreach (var item in partitions)
+            {
+                var curr = item.Value;
+                List<Term> terms = new List<Term>();
+                if (curr.Count > 2)
+                {
+                    foreach (var term in curr)
+                    {
+                        if (term.Symbol is UserCnstSymb && term.Groundness == Groundness.Variable)
+                        {
+                            UserCnstSymb userCnstSymb = (UserCnstSymb)term.Symbol;
+                            if (userCnstSymb.IsAutoGen && userCnstSymb.Name.StartsWith("pm@"))
+                            {
+                                terms.Add(term);
+                            }
+                        }
+                    }
+
+                    for (int i = 0; i < terms.Count - 1; i++)
+                    {
+                        facts.PendEqualityConstraint(terms[i], terms[i + 1]);
+                    }
+                }
+
+            }
+
             return true;
         }
 
