@@ -2135,6 +2135,11 @@ namespace Microsoft.Formula.CommandLine
             }
         }
 
+        private void DoFetchConstraints(string s) 
+        {
+
+        } 
+
         private void DoConfigHelp(string s)
         {
             sink.WriteMessageLine("Use collections to bind plugins to names.");
