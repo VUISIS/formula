@@ -66,6 +66,7 @@ namespace Microsoft.Formula.CommandLine
         private const string CoreMsg = "Prints reduced rule set for domains / transforms. Use: core module_name";
         private const string DowngradeMsg = "Attempts to downgrade a (partial) model to Formula V1. Use: downgrade module_name";
 
+
         private SpinLock cmdLock = new SpinLock();
         private bool isCmdLocked = false;
         private CancellationTokenSource canceler = null;
