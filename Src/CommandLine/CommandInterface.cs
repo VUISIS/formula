@@ -65,7 +65,7 @@ namespace Microsoft.Formula.CommandLine
         private const string WatchMsg = "Use: watch [off | on | prompt] to control watch behavior";
         private const string CoreMsg = "Prints reduced rule set for domains / transforms. Use: core module_name";
         private const string DowngradeMsg = "Attempts to downgrade a (partial) model to Formula V1. Use: downgrade module_name";
-        private const string FetchConstraints = "Attemps to fetch the constraints in the domain";
+        private const string FetchConstraintsMsg = "Attemps to fetch the constraints in the domain";
 
         private SpinLock cmdLock = new SpinLock();
         private bool isCmdLocked = false;
@@ -325,7 +325,7 @@ namespace Microsoft.Formula.CommandLine
             cmdMap.Add(interactiveCmd.Name, interactiveCmd);
             cmdMap.Add(interactiveCmd.ShortName, interactiveCmd);
 
-            var fetchConstraintsCmd = new Command("constraints", "ct", DoFetchConstraints, FetchConstraints);
+            var fetchConstraintsCmd = new Command("constraints", "ct", DoFetchConstraints, FetchConstraintsMsg);
             cmdMap.Add(fetchConstraintsCmd.Name, fetchConstraintsCmd);
             cmdMap.Add(fetchConstraintsCmd.ShortName, fetchConstraintsCmd);
 
